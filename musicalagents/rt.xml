@@ -1,0 +1,124 @@
+<MMS NAME="Real Time Test">
+
+	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" OSC="TRUE"/>
+	
+  	<!-- ********** ENVIRONMENT AGENT ********** -->
+
+	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
+		<ARG NAME="arg_ea" VALUE="eaeaea" />
+		<WORLD CLASS_WORLD="mms.world.World" CLASS_ENTITY_STATE="mms.world.EntityState3D">
+			<LAW CLASS="mms.world.law.MovementLaw" />
+			<ARG NAME="dimensions" VALUE="3" />
+			<ARG NAME="structure" VALUE="continuous" />
+			<ARG NAME="form" VALUE="cube:200:loop" />
+			<ARG NAME="friction_coefficient" VALUE="0.25" />
+		</WORLD>
+		<!-- 
+		<EVENT_SERVER CLASS="mms.audio.AudioEventServerSimple" COMM="mms.comm.direct.CommDirect" PERIOD="500 100 400 1000">
+			<ARG NAME="SPEED_SOUND" VALUE="343.3" />
+			<ARG NAME="REFERENCE_DISTANCE" VALUE="1.0" />
+			<ARG NAME="ROLLOF_FACTOR" VALUE="1.0" />
+		</EVENT_SERVER>
+		 -->
+		<EVENT_SERVER CLASS="mms.movement.MovementEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 0">
+			<ARG NAME="friction_coefficient" VALUE="0.25" />
+			<ARG NAME="gravity" VALUE="10" />
+		</EVENT_SERVER>
+	</ENVIRONMENT_AGENT_CLASS>
+	
+  <!-- ********** MUSICAL AGENT CLASSES ********** -->
+
+	<MUSICAL_AGENT_CLASS NAME="MUSICIAN" CLASS="mms.MusicalAgent">
+		<ARG NAME="arg_ma" VALUE="mamama" />
+		<KB>
+			<FACT NAME="filename" VALUE="" PUBLIC="false" />
+		</KB>
+		<COMPONENTS>
+			<!-- 
+			<REASONING NAME="AudioReasoning" CLASS="rt.RT_Reasoning" CYCLIC="false" />
+			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
+			<SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />\
+			--> 
+			<REASONING NAME="MovementReasoning" CLASS="rt.RT_MovementReasoning" CYCLIC="true" />
+			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+		</COMPONENTS>
+	</MUSICAL_AGENT_CLASS>
+	
+	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.MusicalAgent">
+		<COMPONENTS>
+			<!-- 
+			<REASONING NAME="AudioReasoning" CLASS="rt.RT_ListenerReasoning" CYCLIC="false" />
+			<SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />\
+			 -->
+			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+		</COMPONENTS>
+	</MUSICAL_AGENT_CLASS>
+	
+	<!--
+	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="rt.RT_ListenerMusicalAgent">
+	</MUSICAL_AGENT_CLASS>
+  	-->
+  
+  <!-- ********** MUSICAL AGENT INSTANCES ********** -->
+
+	<MUSICAL_AGENT NAME="Police" CLASS="MUSICIAN">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(20;15.0;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(30;40;0) 8.0:(-40;-30;0) 7.0:(60;-80;0) 10.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
+		<ARG_COMP COMP="AudioReasoning" NAME="gain" VALUE="1.0" />
+		<FACT NAME="filename" VALUE="siren.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Thief" CLASS="MUSICIAN">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10.0;30.0;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(30;40;0) 8.0:(-40;-30;0) 7.0:(60;-80;0) 10.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
+		<FACT NAME="filename" VALUE="shifting.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Ambulance" CLASS="MUSICIAN">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(20;-50.0;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
+		<FACT NAME="filename" VALUE="siren_2.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Drummer" CLASS="MUSICIAN">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-10;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;0;0)" />
+		<ARG NAME="arg1" VALUE="bla1" />
+		<FACT NAME="filename" VALUE="Drums_44_16.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Bassist" CLASS="MUSICIAN">
+		<ARG NAME="arg1" VALUE="bla1" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;-10;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(-3;0;0)" />
+		<FACT NAME="filename" VALUE="Bass_44_16.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Guitarist" CLASS="MUSICIAN">
+		<ARG NAME="arg1" VALUE="bla1" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(50;10;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(1;-3;0)" />
+		<FACT NAME="filename" VALUE="Guitar_44_16.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;2;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;1;0)" />
+		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="LEFT" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;-2;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;3;0)" />
+		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="RIGHT" />
+	</MUSICAL_AGENT>
+
+</MMS>
