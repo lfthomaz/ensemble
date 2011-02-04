@@ -91,7 +91,7 @@ public class RT_MicReasoning extends Reasoning {
 
 	@Override
 	public void needAction(Actuator sourceActuator, double instant, double duration) {
-		System.out.println("[" + getAgent().getClock().getCurrentTime() + "] instant = " + instant + " queue size = " + queue.size());
+		System.out.println("[" + (long)getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS) + "] instant = " + instant + " queue size = " + queue.size());
 		if (!queue.isEmpty()) {
 			double[] chunk = queue.remove(0); 
 			try {

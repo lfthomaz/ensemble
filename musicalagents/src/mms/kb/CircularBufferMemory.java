@@ -127,7 +127,7 @@ public class CircularBufferMemory extends Memory {
 		
 //		long start = System.nanoTime();
 		
-		double now = (double)clock.getCurrentTime() / 1000;
+		double now = clock.getCurrentTime(TimeUnit.SECONDS);
 		double newInstantBegin = now - past;
 		int displaced_samples = (int)Math.floor((newInstantBegin-instantBegin) / period);
 //		System.out.println("instantBegin = " + instantBegi n + " - now = " + now + " - displaces = " + displaced_samples);

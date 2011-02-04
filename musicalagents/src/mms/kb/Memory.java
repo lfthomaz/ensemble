@@ -56,6 +56,14 @@ public abstract class Memory {
 		return name;
 	}
 	
+	public double getPast() {
+		return past;
+	}
+	
+	public double getFuture() {
+		return future;
+	}
+	
 	public abstract void init(Parameters parameters);
 	
 	/**

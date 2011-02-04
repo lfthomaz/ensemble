@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import sun.security.action.GetLongAction;
 
 import mms.Constants.ES_STATE;
+import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import mms.comm.Comm;
 import mms.commands.Command;
@@ -167,10 +168,10 @@ public abstract class EventServer implements Sensing, Acting {
 		// Caso seja uma troca de eventos híbrida, inicializar o processamento periódico
 		else if (eventExchange.equals(Constants.EVT_EXC_HYBRID)) {
 			
-			startTime = waitTime + clock.getCurrentTime();
-			System.out.println(clock.getCurrentTime() + "\t startTime = " + startTime);
+			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
+			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
 			try {
-				out.write("[" + clock.getCurrentTime() + "] \t startTime = " + startTime + "\n");
+				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t startTime = " + startTime + "\n");
 				out.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -195,13 +196,13 @@ public abstract class EventServer implements Sensing, Acting {
 			// waitTime = getParameter();
 			// Transforma o waitTime em nanosegundos
 			// TODO talvez seja melhor que o waitTime seja um sleep, e n�o um valor adicionado ao currentTime
-			startTime = waitTime + clock.getCurrentTime();
+			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 			
-			System.out.println(clock.getCurrentTime() + "\t waitTime = " + waitTime);
-			System.out.println(clock.getCurrentTime() + "\t startTime = " + startTime);
+			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
+			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
 			try {
-				out.write("[" + clock.getCurrentTime() + "] \t waitTime = " + waitTime + "\n");
-				out.write("[" + clock.getCurrentTime() + "] \t startTime = " + nextStateChange + "\n");
+				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t waitTime = " + waitTime + "\n");
+				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t startTime = " + nextStateChange + "\n");
 				out.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -455,7 +456,7 @@ public abstract class EventServer implements Sensing, Acting {
 			cmd.addUserParameters(extraParameters);
 		}
 		
-		System.out.println(clock.getCurrentTime() + " [" + envAgent.getLocalName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
+		System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + " [" + envAgent.getLocalName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
 		System.out.println("\t"+cmd.getParameters());
 		
 		// Send the message
@@ -522,7 +523,7 @@ public abstract class EventServer implements Sensing, Acting {
 
 		if (out != null) {
 			try {
-				out.write("[" + clock.getCurrentTime() + "] " + evt + "\n");
+				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] " + evt + "\n");
 				out.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -602,10 +603,10 @@ public abstract class EventServer implements Sensing, Acting {
 					evt.duration 		= (double)period/1000;
 				} else {
 					evt.frame 			= -1;
-					evt.instant 		= (double)clock.getCurrentTime()/1000;
+					evt.instant 		= clock.getCurrentTime(TimeUnit.SECONDS);
 					evt.duration 		= 0;
 				}
-				evt.timestamp 			= clock.getCurrentTime(); 
+				evt.timestamp 			= (long)clock.getCurrentTime(TimeUnit.MILLISECONDS); 
 		        
 				// Chama o método implementado pelo usuário
 				try {
@@ -662,9 +663,9 @@ public abstract class EventServer implements Sensing, Acting {
 		public void run() {
 
 			try {
-				long currentTime = clock.getCurrentTime(); 
+				long currentTime = (long)clock.getCurrentTime(TimeUnit.MILLISECONDS); 
 				long elapsedTime = currentTime - nextStateChange;
-				out.write("[" + clock.getCurrentTime() + "] >> PROCESSING << (" + elapsedTime + ")\n");
+				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> PROCESSING << (" + elapsedTime + ")\n");
 				process();
 				out.flush();
 			} catch (Exception e) {
@@ -702,7 +703,7 @@ public abstract class EventServer implements Sensing, Acting {
 //			System.out.println(eventServerState);
 //			System.out.println(clock.getCurrentTime() + "\t [EventServer:"+ eventType + "] \t Entrei no action() - " + num);
 			
-			long currentTime = clock.getCurrentTime(); 
+			long currentTime = (long)clock.getCurrentTime(TimeUnit.MILLISECONDS); 
 			long elapsedTime = currentTime - nextStateChange;
 //			if (currentTime - nextStateChange > 20 && eventServerState != ES_STATE.WAITING_BEGIN && eventServerState != ES_STATE.INITIALIZED && eventServerState != ES_STATE.CONFIGURED) {
 //				System.err.println(clock.getCurrentTime() + " ********* WARNING (" + (currentTime - nextStateChange) + ") - " + eventServerState + " ********** " + num );
@@ -719,7 +720,7 @@ public abstract class EventServer implements Sensing, Acting {
 //				System.out.println("--------------------------------------------------------------------------------");
 //				System.out.println(clock.getCurrentTime() + " >> 1 - WAITING_BEGIN << ");
 				try {
-					out.write("[" + clock.getCurrentTime() + "] >> 1 - WAITING_BEGIN << \n");
+					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 1 - WAITING_BEGIN << \n");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -750,7 +751,7 @@ public abstract class EventServer implements Sensing, Acting {
 //				System.out.println("--------------------------------------------------------------------------------");
 //				System.out.println(clock.getCurrentTime() + " >> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((double)(period * workingFrame)/1000) + "s)");
 				try {
-					out.write("[" + clock.getCurrentTime() + "] >> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((double)(period * workingFrame)/1000) + "s)\n");;
+					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((double)(period * workingFrame)/1000) + "s)\n");;
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -787,14 +788,14 @@ public abstract class EventServer implements Sensing, Acting {
 				// Inicia o processamento dos eventos
 //				System.out.println(clock.getCurrentTime() + " >> 3 - PROCESSING << (" + elapsedTime + ") ");
 				try {
-					out.write("[" + clock.getCurrentTime() + "] >> 3 - PROCESSING << (" + elapsedTime + ")\n");
+					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 3 - PROCESSING << (" + elapsedTime + ")\n");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
 //	    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + ">> 3 - PROCESSING << (" + elapsedTime + ") ");
 				
 //				System.out.println("Entrou no process()\t " + clock.getCurrentTime());
-				long time = clock.getCurrentTime();
+				long time = (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 				try {
 					process();
 				} catch (Exception e) {
@@ -804,7 +805,7 @@ public abstract class EventServer implements Sensing, Acting {
 //				System.out.println(clock.getCurrentTime() + "\t process() demorou " + (clock.getCurrentTime() - time));
 //				System.out.println("Saiu do process()\t " + clock.getCurrentTime());
 				try {
-					out.write("[" + clock.getCurrentTime() + "] \t process() demorou " + (clock.getCurrentTime() - time) + "\n");
+					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t process() demorou " + ((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) - time) + "\n");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -820,7 +821,7 @@ public abstract class EventServer implements Sensing, Acting {
 				frameTime = frameTime + period;
 //				System.out.println(clock.getCurrentTime() + " >> 4 - SENDING_RESPONSE << (" + elapsedTime + ") ");
 				try {
-					out.write("[" + clock.getCurrentTime() + "] >> 4 - SENDING_RESPONSE << (" + elapsedTime + ") \n");
+					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 4 - SENDING_RESPONSE << (" + elapsedTime + ") \n");
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}

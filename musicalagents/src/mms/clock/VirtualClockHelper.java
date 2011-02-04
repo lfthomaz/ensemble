@@ -10,7 +10,7 @@ public interface VirtualClockHelper extends ServiceHelper {
 
 	public void updateClock();
 	
-	public long getCurrentTime();
+	public double getCurrentTime(TimeUnit unit);
 
 	// TODO Deve ser tipo o TimerTask do Java
 //	public void schedule(Agent a, Behaviour b, long wakeupTime);

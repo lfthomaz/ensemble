@@ -2,6 +2,10 @@ package mms.audio;
 
 import jade.util.Logger;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -12,18 +16,23 @@ import mms.MusicalAgent;
 import mms.Parameters;
 import mms.clock.TimeUnit;
 import mms.kb.AudioMemory;
+import mms.kb.EventMemory;
 import mms.kb.Memory;
 import mms.kb.MemoryException;
 import mms.movement.MovementState;
 import mms.world.Vector;
 import mms.world.World;
 import mms.world.law.Law;
+import mms.world.law.MovementLaw;
 
-public class AudioEventServer_new extends EventServer {
+public class AudioEventServer extends EventServer {
 
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
+//	PrintWriter out;
+//	StringBuilder buffer;
+	
 	long time_1 = 0;
 	long time_2 = 0;
 	long time_3 = 0;
@@ -55,11 +64,12 @@ public class AudioEventServer_new extends EventServer {
 	double[] fl	 	= new double[2];
 	double[] fh 	= new double[2];
 	// States
-	MovementState rcv_state;
-	MovementState src_state;
+	MovementState 	rcv_state;
+	MovementState 	src_state;
+	Vector 			vec_aux;
 	
 	// Utilizado para comparar o tempo (ajustar de acordo com a precis‹o desejada), em segundos
-	private final double 	EPSILON 		= 1E-10;
+	private final double 	EPSILON 		= 1E-6;
 	private final int 		MAX_ITERATIONS 	= 10;
 
 	// TODO Tornar parametrizável os valores utilizados em AudioEventServer
@@ -79,7 +89,7 @@ public class AudioEventServer_new extends EventServer {
 	// Descrição do mundo
 	private World world;
 	
-	private Law movLaw;
+	private MovementLaw movLaw;
 	
 	@Override
 	public void configure() {
@@ -117,11 +127,19 @@ public class AudioEventServer_new extends EventServer {
 		
 		this.world = envAgent.getWorld();
 		
-		MovementState rcv_state = new MovementState(world.dimensions);
-		MovementState src_state = new MovementState(world.dimensions);
+		rcv_state = new MovementState(world.dimensions);
+		src_state = new MovementState(world.dimensions);
+		vec_aux = new Vector(world.dimensions);
 		
 		// Gets the Movement Law
-		this.movLaw = world.getLaw("MOVEMENT");
+		this.movLaw = (MovementLaw)world.getLaw("MOVEMENT");
+		
+//		try {
+//			out = new PrintWriter(new BufferedWriter(new FileWriter("foo.out")));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		buffer = new StringBuilder(50);
 		
 		return true;
 
@@ -195,7 +213,7 @@ public class AudioEventServer_new extends EventServer {
 //		System.out.println("SENSORS = " + sensors.size() + " - ACTUATORS = " + actuators.size());
 		for (Enumeration<String> s = sensors.keys(); s.hasMoreElements();) {
 			
-			long start = System.nanoTime();
+//			long start = System.nanoTime();
 			
 			// Cria o evento a ser enviado para o sensor
 			String s_key = s.nextElement();
@@ -209,52 +227,66 @@ public class AudioEventServer_new extends EventServer {
 			evt.instant = instant;
 			evt.duration = (double)(CHUNK_SIZE * STEP);
 			
-			time_1 = time_1 + (System.nanoTime() - start); calls_1++;
+//			time_1 = time_1 + (System.nanoTime() - start); calls_1++;
 
 //			System.out.println("ACTUATORS = " + actuators.size());
 			// Calcula a contribuição de cada fonte sonora
 			for (Enumeration<String> a = actuators.keys(); a.hasMoreElements();) {
 //
-				start = System.nanoTime();
+//				start = System.nanoTime();
 
 				String a_key = a.nextElement();
 
 				String pair = s_key + "<>" + a_key;
 //				System.out.println("pair = " + pair);
 				
-				Memory mem = memories.get(a_key);
+//				out.write(pair + "\n");
 				
-				time_3 = time_3 + (System.nanoTime() - start); calls_3++;
+				AudioMemory mem = (AudioMemory)memories.get(a_key);
+								
+//				time_3 = time_3 + (System.nanoTime() - start); calls_3++;
 
 				String[] actuator = a_key.split(":");
 				
-				// Se for o próprio agente, reproduzo o som sem modificações (ou posso não ouvir)
+				// If it's the same agente, just copy
 				if (actuator[0].equals(sensor[0])) {
-					start = System.nanoTime();
+					
+//					start = System.nanoTime();
 					System.arraycopy((double[])mem.readMemory(instant, (double)(CHUNK_SIZE * STEP), TimeUnit.SECONDS), 0, buf, 0, CHUNK_SIZE);
-					time_5 = time_5 + (System.nanoTime() - start); calls_5++;
+//					time_5 = time_5 + (System.nanoTime() - start); calls_5++;
+					
 				}
-				// Caso contrário, simulo a propagação
+				// Else, simulates the propagation of sound
 				else {
 					double t, guess;
-					// Percorrer todos os samples do chunk a ser preenchido
-					long start_2 = System.nanoTime();
+					
+					// Gets the movement memory
+					Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], "MOVEMENT");
+					Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], "MOVEMENT");
+					
+//					long start_2 = System.nanoTime();
+					// For each sample...
 					for (int j = 0; j < CHUNK_SIZE; j++) {
 						
 //						start = System.nanoTime();
 
 	//					System.out.println("sample " + j);
 						t = instant + (j * STEP);
+						
+//						out.write("t = " + t + "\n");
+						
 						if (last_deltas.containsKey(pair)) {
-							guess = Double.valueOf(last_deltas.get(pair));
+							guess = last_deltas.get(pair);
 						} else {
-							// Só roda na primeira vez!
-							world.getEntityState(src_state, actuator[0], t, TimeUnit.SECONDS);
+							// Only runs the first time
+							MovementState src_state_old = (MovementState)mem_mov_rcv.readMemory(t, TimeUnit.SECONDS);
+							movLaw.changeState(src_state_old, instant, src_state);
 //					    	System.out.println("src_state = " + src_state.position);
-							world.updateStateMovLaw(src_state, instant);
-							world.getEntityState(rcv_state, sensor[0], t, TimeUnit.SECONDS);
+							
+							MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(t, TimeUnit.SECONDS);
+							movLaw.changeState(rcv_state_old, instant, rcv_state);
 //					    	System.out.println("rcv_state = " + rcv_state.position);
-							world.updateStateMovLaw(rcv_state, instant);
+
 							double distance = src_state.position.getDistance(rcv_state.position);
 							guess = distance / SPEED_SOUND;
 //							System.out.println("initial guess for " + pair + " = " + guess);
@@ -263,36 +295,34 @@ public class AudioEventServer_new extends EventServer {
 //						time_4 = time_4 + (System.nanoTime() - start); calls_4++;
 						
 	//					System.out.println(a_key + " " + s_key + " " + t + " " + guess + " 0.0 " + (t-0.1) );
-//						try {
-//							double value = 0.0;
-//							double gain = 0.0;
+						try {
+							double value = 0.0;
+							double gain = 0.0;
 //							long time = System.currentTimeMillis();
-//							// TODO Quanto deve ser o delta máximo? Aqui deixamos 10 segundos
-//							double delta = newton_raphson(actuator[0], sensor[0], t, guess, 0.0, 10.0);
-//	//						System.out.printf("[%s-%s] t = %f - delta = %f\n", sensor[0], actuator[0], t, delta);
+							double delta = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
+	//						System.out.printf("[%s-%s] t = %f - delta = %f\n", sensor[0], actuator[0], t, delta);
 //							long elapsed_time = System.currentTimeMillis() - time;
 //							time_newton = time_newton + elapsed_time;
-////							if (elapsed_time > 1) {
-////								System.out.println("WARNING_NEWTON: " + elapsed_time + " ms at t = " + t);
-////							}
-//							// TODO decidir um jeito melhor de devolver um delta inválido do que -1.0
-//							if (delta < 0.0) {
-//									System.err.println("[ERROR] delta = " + delta);
-//									buf[j] = 0.0;
-//							} else {
-//								gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
-////								gain = 0.0;
-//								value = (Double)mem.readMemory(t-delta, TimeUnit.SECONDS);
-//	//							System.out.println("f(" + t + " / " + (t - delta)+ ") = " + value + " - gain = " + gain);
+//							if (elapsed_time > 1) {
+//								System.out.println("WARNING_NEWTON: " + elapsed_time + " ms at t = " + t);
 //							}
-//							buf[j] = buf[j] + (value * gain);
-//							last_deltas.put(pair, delta);
-//						} catch (Exception e) {
-//							e.printStackTrace();
-//							System.exit(-1);
-//						}
+							// TODO decidir um jeito melhor de devolver um delta inválido do que -1.0
+							if (delta < 0.0) {
+									System.err.println("[ERROR] delta = " + delta);
+									buf[j] = 0.0;
+							} else {
+								gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
+								value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
+	//							System.out.println("f(" + t + " / " + (t - delta)+ ") = " + value + " - gain = " + gain);
+							}
+							buf[j] = buf[j] + (value * gain);
+							last_deltas.put(pair, delta);
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.exit(-1);
+						}
 					}
-					time_6 = time_6 + (System.nanoTime() - start_2); calls_6++;
+//					time_6 = time_6 + (System.nanoTime() - start_2); calls_6++;
 				}
 			}			
 			
@@ -326,25 +356,36 @@ public class AudioEventServer_new extends EventServer {
 //		world.time_1 = 0;
 //		world.time_2 = 0;
 		
-		System.out.printf("elapsed time = %.3f\n", ((double)(System.nanoTime()-time_process)/1000000));
-		System.out.printf("time_1 = %.3f \t\tcalls_1 = %d\n", ((double)time_1/1000000), calls_1);
-		System.out.printf("time_2 = %.3f \t\tcalls_2 = %d\n", ((double)time_2/1000000), calls_2);
-		System.out.printf("time_3 = %.3f \t\tcalls_3 = %d\n", ((double)time_3/1000000), calls_3);
-		System.out.printf("time_4 = %.3f \t\tcalls_4 = %d\n", ((double)time_4/1000000), calls_4);
-		System.out.printf("time_5 = %.3f \t\tcalls_5 = %d\n", ((double)time_5/1000000), calls_5);
-		System.out.printf("time_6 = %.3f \t\tcalls_6 = %d\n", ((double)time_6/1000000), calls_6);
-		time_1 = 0; calls_1 = 0;
-		time_2 = 0; calls_2 = 0;
-		time_3 = 0; calls_3 = 0;
-		time_4 = 0; calls_4 = 0;
-		time_5 = 0; calls_5 = 0;
-		time_6 = 0; calls_6 = 0;
-		
+		System.out.printf("AS time = %.3f \t(t = %.3f)\n", ((double)(System.nanoTime()-time_process)/1000000), instant);
+//		System.out.printf("time_1 = %.3f \t\tcalls_1 = %d\n", ((double)time_1/1000000), calls_1);
+//		System.out.printf("time_1 = %.3f\n", ((double)movLaw.time_1/1000000));
+//		System.out.printf("time_2 = %.3f\n", ((double)movLaw.time_2/1000000));
+//		System.out.printf("time_3 = %.3f\n", ((double)movLaw.time_3/1000000));
+//		System.out.printf("time_4 = %.3f\n", ((double)movLaw.time_4/1000000));
+//		System.out.printf("time_5 = %.3f\n", ((double)movLaw.time_5/1000000));
+		movLaw.time_1 = 0;
+		movLaw.time_2 = 0;
+		movLaw.time_3 = 0;
+		movLaw.time_4 = 0;
+		movLaw.time_5 = 0;
+//		System.out.printf("time_1 = %.3f \t\tcalls_1 = %d\n", ((double)time_1/1000000), calls_1);
+//		System.out.printf("time_2 = %.3f \t\tcalls_2 = %d\n", ((double)time_2/1000000), calls_2);
+//		System.out.printf("time_3 = %.3f \t\tcalls_3 = %d\n", ((double)time_3/1000000), calls_3);
+//		System.out.printf("time_4 = %.3f \t\tcalls_4 = %d\n", ((double)time_4/1000000), calls_4);
+//		System.out.printf("time_5 = %.3f \t\tcalls_5 = %d\n", ((double)time_5/1000000), calls_5);
+//		System.out.printf("time_6 = %.3f \t\tcalls_6 = %d\n", ((double)time_6/1000000), calls_6);
+//		time_1 = 0; calls_1 = 0;
+//		time_2 = 0; calls_2 = 0;
+//		time_3 = 0; calls_3 = 0;
+//		time_4 = 0; calls_4 = 0;
+//		time_5 = 0; calls_5 = 0;
+//		time_6 = 0; calls_6 = 0;
+//		out.flush();
 	}
 
     public void function(MovementState src_state, MovementState rcv_state, double t, double delta) {
     	
-		calls_function++;
+//		calls_function++;
     	
 //    	System.out.println("function(" + t + "," + delta + ")");
 //
@@ -360,10 +401,15 @@ public class AudioEventServer_new extends EventServer {
     	Vector q = rcv_state.position;
     	Vector p = src_state.position;
     	Vector v = src_state.velocity;
-    	long time_elapsed = System.currentTimeMillis();
+    	
+//    	long time_elapsed = System.currentTimeMillis();
+    	
     	f_res[0] 	= (q.magnitude * q.magnitude) - 2 * q.dotProduct(p) + (p.magnitude * p.magnitude) - (delta * delta * SPEED_SOUND * SPEED_SOUND);
-    	f_res[1] 	= 2 * v.dotProduct(q.subtract(p)) - (2 * delta * SPEED_SOUND * SPEED_SOUND);
-    	time_function = time_function + (System.currentTimeMillis() - time_elapsed);
+    	v.copy(vec_aux);
+    	vec_aux.subtract(p);
+    	f_res[1] 	= 2 * v.dotProduct(vec_aux) - (2 * delta * SPEED_SOUND * SPEED_SOUND);
+
+//    	time_function = time_function + (System.currentTimeMillis() - time_elapsed);
 
 //    	System.out.println("--- t = " + t + " delta = " + delta + " ---");
 //    	System.out.println("\tq = " + q);
@@ -376,33 +422,36 @@ public class AudioEventServer_new extends EventServer {
 
     }
     
-    public double newton_raphson(String source_name, String receiver_name, double t, double initial_guess, double x1, double x2) {
-    	
+    public double newton_raphson(Memory mem_src, Memory mem_rcv, double t, double initial_guess, double x1, double x2) {
+    	    	
 //    	double[] f, fl, fh;
     	double dx, dx_old, rts, xl, xh, temp;
+    	MovementState rcv_state_old, src_state_old;
 
-    	long time_elapsed = System.currentTimeMillis();
+//    	out.write("\tnewton - guess = " + initial_guess + " x1 = " + x1 + " x2 = " + x2 + "\n");
     	
-    	world.getEntityState(rcv_state, receiver_name, t, TimeUnit.SECONDS);
-    	time_newton_1 = time_newton_1 + (System.currentTimeMillis() - time_elapsed);
-    	time_elapsed = System.currentTimeMillis();
-    	world.updateStateMovLaw(rcv_state, t);
-    	time_newton_2 = time_newton_2 + (System.currentTimeMillis() - time_elapsed);
-
+//    	long time_elapsed = System.currentTimeMillis();
+    	
+		rcv_state_old = (MovementState)mem_rcv.readMemory(t, TimeUnit.SECONDS);
+//    	time_newton_1 = time_newton_1 + (System.currentTimeMillis() - time_elapsed);
+//    	time_elapsed = System.currentTimeMillis();
+		movLaw.changeState(rcv_state_old, t, rcv_state);
+//    	time_newton_2 = time_newton_2 + (System.currentTimeMillis() - time_elapsed);
 
 //    	System.out.println("newton_raphson("+source_name+","+receiver_name+","+t+","+initial_guess+","+x1+","+x2+")");
     	
 //		long time = System.currentTimeMillis();
-    	world.getEntityState(src_state, source_name, t-x1, TimeUnit.SECONDS);
-    	world.updateStateMovLaw(src_state, t-x1);
-//    	System.out.println("2 " + source_name + " (" + (t-x1) + ") = " + src_state.position);
+		src_state_old = (MovementState)mem_src.readMemory(t-x1, TimeUnit.SECONDS);
+		movLaw.changeState(src_state_old, t-x1, src_state);
     	function(src_state, rcv_state, t, x1);
     	fl[0] = f_res[0]; fl[1] = f_res[1];
-    	world.getEntityState(src_state, source_name, t-x2, TimeUnit.SECONDS);
-    	world.updateStateMovLaw(src_state, t-x2);
+    	
+		src_state_old = (MovementState)mem_src.readMemory(t-x2, TimeUnit.SECONDS);
+		movLaw.changeState(src_state_old, t-x2, src_state);
 		function(src_state, rcv_state, t, x2);
     	fh[0] = f_res[0]; fh[1] = f_res[1];
-    	time_elapsed = System.currentTimeMillis();
+    	
+//    	time_elapsed = System.currentTimeMillis();
     	if ((fl[0] > 0.0 && fh[0] > 0.0) || (fl[0] < 0.0 && fh[0] < 0.0)) {		
     		System.err.println("Root must be bracketed in rtsafe");
     		return -1;
@@ -425,21 +474,25 @@ public class AudioEventServer_new extends EventServer {
     	rts = initial_guess;
 		dx_old = Math.abs(x2-x1);
 		dx = dx_old;
-    	time_newton_3 = time_newton_3 + (System.currentTimeMillis() - time_elapsed);
-    	time_elapsed = System.currentTimeMillis();
-    	world.getEntityState(src_state, source_name, t-rts, TimeUnit.SECONDS);
-    	world.updateStateMovLaw(src_state, t-rts);
+//    	time_newton_3 = time_newton_3 + (System.currentTimeMillis() - time_elapsed);
+//    	time_elapsed = System.currentTimeMillis();
+		src_state_old = (MovementState)mem_src.readMemory(t-rts, TimeUnit.SECONDS);
+		movLaw.changeState(src_state_old, t-rts, src_state);
 		function(src_state, rcv_state, t, rts);
     	f[0] = f_res[0]; f[1] = f_res[1];
     	if (f == null) {
     		System.err.println("WARNING: Tentou buscar amostra no futuro ou antes do início da simulação (" + (t - rts) + ")");
     		return 0.0;
     	}
-    	time_newton_4 = time_newton_4 + (System.currentTimeMillis() - time_elapsed);
-    	time_elapsed = System.currentTimeMillis();
+//    	time_newton_4 = time_newton_4 + (System.currentTimeMillis() - time_elapsed);
+//    	time_elapsed = System.currentTimeMillis();
+//		buffer.append("\rcv_state = " + rcv_state.position + "\n");
     	// Loop over allowed iterations
 		boolean found = false;
 		for (int i = 0; i < MAX_ITERATIONS; i++) {
+//			out.write("\trts = " + rts + "\n");
+//			buffer.append("\tsrc_state = " + src_state.position + "\n");
+//			buffer.append("\trts = " + rts + "\n");
 			// Bisect if Newton out of range, or not decreasing fast enough
 			if ((((rts-xh)*f[1]-f[0])*((rts-xl)*f[1]-f[0]) >= 0.0)
 				|| (Math.abs(2.0*f[0]) > Math.abs(dx_old*f[1]))) {
@@ -472,8 +525,8 @@ public class AudioEventServer_new extends EventServer {
 				break;
         	}
         	// The one new function evaluation per iteration
-        	world.getEntityState(src_state, source_name, t-rts, TimeUnit.SECONDS);
-        	world.updateStateMovLaw(src_state, t-rts);
+    		src_state_old = (MovementState)mem_src.readMemory(t-rts, TimeUnit.SECONDS);
+    		movLaw.changeState(src_state_old, t-rts, src_state);
     		function(src_state, rcv_state, t, rts);
         	f[0] = f_res[0]; f[1] = f_res[1];
     		// Maintain the bracket on the root
@@ -483,16 +536,22 @@ public class AudioEventServer_new extends EventServer {
     			xh = rts;
     		}
     	}
+//		out.write("\trts = " + rts + "\n");
+//		buffer.append("\tsrc_state = " + src_state.position + "\n");
+//		buffer.append("\trts = " + rts + "\n");
 
-    	time_newton_5 = time_newton_5 + (System.currentTimeMillis() - time_elapsed);
+//    	time_newton_5 = time_newton_5 + (System.currentTimeMillis() - time_elapsed);
 
-		if (found) {
-//			System.out.println("Newton found the root = " + rts);
-		} else {
-			// TODO Está chegando nesse ponto em alguns casos!!!
-			System.err.println("WARNING: Maximum number of iterations exceeded in rtsafe for " + source_name + "<>" + receiver_name + " (t = " + t + ") - delta = " + rts);
+		if (!found) {
+ 			// TODO Está chegando nesse ponto em alguns casos!!!
+			System.err.println("WARNING: Maximum number of iterations exceeded in rtsafe (t = " + t + ") - delta = " + rts);
+//	    	out.write("\tnewton - guess = " + initial_guess + " x1 = " + x1 + " x2 = " + x2 + "\n");
+//			out.write("\tWARNING: Maximum number of iterations exceeded in rtsafe (t = " + t + ") - delta = " + rts + "\n");
+//			out.write(buffer.toString());
 		}
     	
+//		buffer.delete(0, buffer.length()-1);
+
 		return rts;
     }
 

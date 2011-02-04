@@ -80,7 +80,7 @@ public class MovementEventServer extends EventServer {
 
 //		long start = System.nanoTime();
 
-		double t = (double)clock.getCurrentTime()/1000;
+		double t = clock.getCurrentTime(TimeUnit.SECONDS);
 //		System.out.println("Process - t = " + t + " s");
 		
 		lock.lock();
@@ -107,8 +107,8 @@ public class MovementEventServer extends EventServer {
 						if (stop_command.containsKey(entity)) {
 							double dur = stop_command.get(entity);
 							if (dur >= movState.instant && dur < t) {
-								movState.acceleration.update(0,0,0);
-								movState.angularVelocity.update(0,0,0);
+								movState.acceleration.zero();
+								movState.angularVelocity.zero();
 								stop_command.remove(entity);
 							}
 						}
@@ -168,7 +168,7 @@ public class MovementEventServer extends EventServer {
 		
 //		time_1 = time_1 + (System.nanoTime() - start);
 //		
-//		System.out.printf("time_1 = %.3f\n", ((double)time_1/1000000));
+//		System.out.printf("MS time = %.3f\n", ((double)time_1/1000000));
 //		
 //		time_1 = 0;
     	
@@ -181,7 +181,7 @@ public class MovementEventServer extends EventServer {
 		lock.lock();
 		
 		try {
-			double t = (double)clock.getCurrentTime()/1000;
+			double t = clock.getCurrentTime(TimeUnit.SECONDS);
 	
 	//		System.out.println("[MovementEventServer] processSense() = " + evt.objContent);
 			String strContent = (String)evt.objContent;
@@ -236,7 +236,7 @@ public class MovementEventServer extends EventServer {
 			String eventHandlerName, Parameters userParam) throws Exception {
 		
 		MovementState movState = new MovementState(world.dimensions);
-		movState.instant = ((double)clock.getCurrentTime() / 1000);
+		movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
 
 		// Verifies if there is an initial position for the entity
 		Vector position = (Vector)world.getEntityStateAttribute(agentName, "POSITION");
@@ -315,10 +315,10 @@ public class MovementEventServer extends EventServer {
 //		Event evt = new Event();
 //		Command cmd = new Command("INFO");
 //		Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
-//		MovementState movState = (MovementState)movMemory.readMemory(t, TimeUnit.SECONDS);
-//		cmd.addParameter("pos", state.position.toString());
-//		cmd.addParameter("vel", state.velocity.toString());
-//		cmd.addParameter("ori", state.orientation.toString());
+//		MovementState movState = (MovementState)movMemory.readMemory(clock.getCurrentTime(TimeUnit.SECONDS), TimeUnit.SECONDS);
+//		cmd.addParameter("pos", movState.position.toString());
+//		cmd.addParameter("vel", movState.velocity.toString());
+//		cmd.addParameter("ori", movState.orientation.toString());
 //		evt.objContent = cmd.toString();
 //		addOutputEvent(agentName, eventHandlerName, evt);
 //		System.err.println("Vou enviar - sensorRegistered");

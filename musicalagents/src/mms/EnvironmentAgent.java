@@ -8,6 +8,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.EA_STATE;
+import mms.clock.TimeUnit;
 import mms.commands.Command;
 import mms.commands.CommandClientInterface;
 import mms.world.World;
@@ -585,7 +586,7 @@ public class EnvironmentAgent extends MMSAgent {
 			registeredAgentsNextTurn++;
 			
 			// Enviar mensagem de ACK, indicando que o agente deve acordar no próximo turno
-			cmd.addParameter("turn", String.valueOf((getClock().getCurrentTime() + 1)));
+			cmd.addParameter("turn", String.valueOf((getClock().getCurrentTime(TimeUnit.TURNS) + 1)));
 		
 			this.addBehaviour(new CheckEndTurn(this));
 		}
@@ -709,6 +710,7 @@ public class EnvironmentAgent extends MMSAgent {
 				getClock().updateClock();
 				
 				lastUpdateTime = System.currentTimeMillis();
+				
 			}
 		}
 	

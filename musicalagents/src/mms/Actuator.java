@@ -240,7 +240,7 @@ public class Actuator extends EventHandler implements Acting {
 			
 		} else {
 			
-			double instant = (double)clock.getCurrentTime()/1000;
+			double instant = clock.getCurrentTime(TimeUnit.SECONDS);
 			content = myMemory.readMemory(instant, TimeUnit.SECONDS);
 //			System.out.println("[" + getAgent().getName() + "] Content read = " + content);
 			
@@ -261,7 +261,7 @@ public class Actuator extends EventHandler implements Acting {
 		evt.destAgentName 		= getAgent().environmentAgent;
 		evt.destAgentCompName	= eventType;
 		evt.eventType 			= eventType;
-		evt.timestamp 			= getAgent().getClock().getCurrentTime();
+		evt.timestamp 			= (long)getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS);
 		if (eventExchange.equals(Constants.EVT_EXC_PERIODIC)) {
 			evt.frame = workingFrame;
 			evt.instant = (double)(startTime + (workingFrame * period))/1000;

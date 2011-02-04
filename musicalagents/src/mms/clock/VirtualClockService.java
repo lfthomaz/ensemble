@@ -1,9 +1,9 @@
 package mms.clock;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import mms.MusicalAgent;
+import mms.clock.TimeUnit;
 
 import jade.core.Agent;
 import jade.core.BaseService;
@@ -49,16 +49,25 @@ public class VirtualClockService extends BaseService {
 		public void init(Agent a) {
 		}
 		
-		public long getCurrentTime() {
-			return (System.currentTimeMillis() - referenceStartTime);
-//			return (System.nanoTime() - referenceNanoStartTime);
+		public double getCurrentTime(TimeUnit unit) {
+			double ret = 0.0;
+			long now = System.currentTimeMillis() - referenceStartTime;
+			switch (unit) {
+			case SECONDS:
+				ret = ((double)now)/1000;
+				break;
+			case MILLISECONDS:
+				ret = (double)now;
+				break;
+			}
+			return ret;
 		}
 		
 		public void schedule(Agent a, Runnable b, long wakeupTime) {
 			long wakeupMili = wakeupTime;
-			long now = getCurrentTime();
+			long now = (long)getCurrentTime(TimeUnit.MILLISECONDS);
 			if (wakeupMili > now) {
-				scheduler.schedule(b, wakeupMili - now, TimeUnit.MILLISECONDS);
+				scheduler.schedule(b, wakeupMili - now, java.util.concurrent.TimeUnit.MILLISECONDS);
 			} else {
 				//System.out.println("ERRO!");
 				scheduler.execute(b);

@@ -103,7 +103,7 @@ public class AudioMemory extends Memory {
 		// No caso de um processamento periódico, inserir a partir do instante em que começa o próxima o frame
 		double instant;
 		if (period > 0) {
-			long now = clock.getCurrentTime();
+			long now = (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 			long nextFrame = (long)Math.floor((now - startTime) / period) + 1;
 			instant = startTime + (nextFrame * period);
 			// Transforma em segundos
@@ -111,7 +111,7 @@ public class AudioMemory extends Memory {
 		}
 		// Caso contrário, inserir a partir do instante atual
 		else {
-			instant = ((double)clock.getCurrentTime()/1000);
+			instant = clock.getCurrentTime(TimeUnit.SECONDS);
 		}
 
 		switch (unit) {
@@ -149,24 +149,7 @@ public class AudioMemory extends Memory {
 		ptrAbsolutZero = ptrAbsolutZero + displaced_samples;
 		ptrNow = (ptrNow + displaced_samples)%samples;
 		
-//		if (name.equals("AUDIO")) {
-//			System.out.printf("now = %f - instantBegin = %f\n", now, instantBegin);
-//			System.out.printf("ptrNow = %d - displaced = %d - ptrAbsolut = %d\n", ptrNow, displaced_samples, ptrAbsolutZero);
-//			try {
-//				String str1 = String.format("now = %f - instantBegin = %f\n", now, instantBegin);
-//				String str2 = String.format("ptrNow = %d - displaced = %d - ptrAbsolut = %d\n", ptrNow, displaced_samples, ptrAbsolutZero);
-//				os.write(str1);
-//				os.write(str2);
-//			} catch (IOException e) {
-//					e.printStackTrace();
-//			}
-//		}
-		
 		// Determinar a distância, em samples, entre o ptrBegin e o ptrNow
-//		double diff = round(now - instantBegin, 10);
-//		int diffSamples = (int)Math.round(diff / step);
-//		ptrNow = (ptrBegin + diffSamples) % samples;
-
 		if (displaced_samples < 0) {
 			System.err.println("ERRO!!! getNow() voltou no tempo!!!");
 		}
@@ -209,9 +192,8 @@ public class AudioMemory extends Memory {
 	}
 	
 	@Override
-	public synchronized Object readMemory(double instant, TimeUnit unit) {
+	public Object readMemory(double instant, TimeUnit unit) {
 		
-//		long start = System.nanoTime();
 		double ret = 0.0;
 
 		switch (unit) {
@@ -220,30 +202,14 @@ public class AudioMemory extends Memory {
 		
 			// TODO Ainda existe um problema com os casos limites (começo e fim)
 			if (instant >= instantBegin && instant < instantEnd) {
-//				try {
-//					os.write("ptrBegin = " + String.valueOf(ptrBegin) + " - instantBegin = " + String.valueOf(instantBegin) + " - step = " + String.valueOf(step) + "\n");
-//				} catch (IOException e1) {
-//					e1.printStackTrace();
-//				}
 				double sample = ptrBegin + (instant - instantBegin) / step;
 				int sample_low = (int)Math.floor(sample) % samples;
 				int sample_high = (int)Math.ceil(sample) % samples;
 				double fraction = (sample - sample_low) % samples;
 				double value_low = buffer[sample_low];
 				double value_high = buffer[sample_high];
-				// Interpolação linear
-//				double delta = round((instant - startTime) % step, 10);
+				// Liner Interpolation
 				ret = value_low + (fraction * (value_high - value_low));
-//				double old_ret = value_low + (delta * (value_high - value_low) / step);
-//				if (ret != 0.0) {
-//					System.out.printf("instant = %f - fraction = %f - sample_low = %f (%d) - sample_high = %f (%d) - ret = %f\n", instant, fraction, value_low, sample_low, value_high, sample_high, ret);
-//				try {
-//					os.write("instant = " + String.valueOf(instant) + " - fraction = " + String.valueOf(fraction) + " - low = " + String.valueOf(value_low) + " (" + String.valueOf(sample_low) + ") - high = " + String.valueOf(value_high) + " (" + String.valueOf(sample_high) + ") - ret = " + String.valueOf(ret) + "\n");
-//				} catch (IOException e) {
-// 					e.printStackTrace();
-//				}
-//				}
-//			System.out.println("Dentro!!! value_low = " + value_low + " - value_high = " + value_high + " - ret = " + ret);
 			}
 			
 			break;
@@ -251,27 +217,52 @@ public class AudioMemory extends Memory {
 		case MILLISECONDS:
 		case MICROSECONDS:
 		case NANOSECONDS:
-			
-			System.err.println("Not implemented yet.");
-			break;
-
 		case SAMPLES:
-			
-			// TODO Como ele pode pedir o sample absoluto? Tem que ser sempre relativo!
-			System.err.println("Not available for SAMPLE! Use readMemoryRelative() instead.");
-			break;
-
 		case EVENTS:
-			
-			System.err.println("Not available for EVENTS! Use readMemoryRelative() instead.");
+
+			System.err.println("Not implemented yet...");
 			break;
 
 		}
 
-//		System.out.println("ret = " + ret + " - ret2 = " + ret2[0]);
+//		System.out.println("[" + name + "] readMemory(" + instant + " - " + ret + ")");
 
-//		long duration = System.nanoTime() - start;
-//		System.out.println("readMemory() duration = " + duration);
+		return ret;
+
+	}
+
+	public double readMemoryDouble(double instant, TimeUnit unit) {
+		
+		double ret = 0.0;
+
+		switch (unit) {
+
+		case SECONDS:
+		
+			// TODO Ainda existe um problema com os casos limites (começo e fim)
+			if (instant >= instantBegin && instant < instantEnd) {
+				double sample = ptrBegin + (instant - instantBegin) / step;
+				int sample_low = (int)Math.floor(sample) % samples;
+				int sample_high = (int)Math.ceil(sample) % samples;
+				double fraction = (sample - sample_low) % samples;
+				double value_low = buffer[sample_low];
+				double value_high = buffer[sample_high];
+				// Liner Interpolation
+				ret = value_low + (fraction * (value_high - value_low));
+			}
+			
+			break;
+			
+		case MILLISECONDS:
+		case MICROSECONDS:
+		case NANOSECONDS:
+		case SAMPLES:
+		case EVENTS:
+
+			System.err.println("Not implemented yet...");
+			break;
+
+		}
 
 //		System.out.println("[" + name + "] readMemory(" + instant + " - " + ret + ")");
 
@@ -283,7 +274,7 @@ public class AudioMemory extends Memory {
 	// TODO Interpolar valores caso o instante inicial não coincida com a amostra
 	// TODO Considerar o caso de initialInstant < startTime
 	@Override
-	public synchronized Object readMemory(double instant, double duration, TimeUnit unit) {
+	public Object readMemory(double instant, double duration, TimeUnit unit) {
 
 //		System.out.println("[" + name + "] readMemory(" + instant + ", " + duration + ")");
 		
@@ -349,21 +340,21 @@ public class AudioMemory extends Memory {
 	}
 
 //	@Override
-//	public synchronized Object readMemoryRelative(double offset, double duration, TimeUnit unit) {
+//	public Object readMemoryRelative(double offset, double duration, TimeUnit unit) {
 //		double now = (Double)getNow(TimeUnit.SECONDS) + offset;
 //		double[] value = (double[])readMemoryAbsolut(now, duration, unit);
 //		return value;
 //	}
 //
 //	@Override
-//	public synchronized Object readMemoryRelative(double offset, TimeUnit unit) {
+//	public Object readMemoryRelative(double offset, TimeUnit unit) {
 //		double now = (Double)getNow(TimeUnit.SECONDS) + offset;
 //		double value = (Double)readMemoryAbsolut(now, unit);
 //		return value;
 //	}
 
 	@Override
-	public synchronized void resetMemory() {
+	public void resetMemory() {
 		
 		for (int i = 0; i < buffer.length; i++) {
 			buffer[i] = 0.0;
@@ -375,7 +366,7 @@ public class AudioMemory extends Memory {
 	// TODO Deixar ele sobrescrever a memória recebida? De qualquer maneira necessitamos de um método para que o sensor possa escrever
 	// TODO Ainda não estou considerando a duração (duration)
 	// TODO Se tiver muitos zeros, podemos desconsiderar o chunk para econimizar espaço
-	public synchronized void writeMemory(Object object, double instant, double duration, TimeUnit unit) throws MemoryException {
+	public void writeMemory(Object object, double instant, double duration, TimeUnit unit) throws MemoryException {
 
 //		System.out.println("[" + name + "] writeMemoryAbsolut(" + instant + ", " + duration + ")");
 
@@ -439,7 +430,7 @@ public class AudioMemory extends Memory {
 
 		if (object instanceof double[]) {
 			double[] chunk = (double[])object;
-			double instant = clock.getCurrentTime();
+			double instant = clock.getCurrentTime(TimeUnit.SECONDS);
 			double duration = (double)chunk.length * step;
 			writeMemory(object, instant, duration, TimeUnit.SECONDS);
 		}
@@ -449,7 +440,7 @@ public class AudioMemory extends Memory {
 //	@Override
 //	// TODO O que acontece se está próximo da mudança de frame?
 //	// TODO Considerar o TimeUnit no caso do offset
-//	public synchronized void writeMemoryRelative(Object object, double offset, double duration, TimeUnit unit) throws MemoryException {
+//	public void writeMemoryRelative(Object object, double offset, double duration, TimeUnit unit) throws MemoryException {
 //
 //		double now = (Double)getNow(TimeUnit.SECONDS) + offset;
 //		writeMemoryAbsolut(object, now, duration, unit);

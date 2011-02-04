@@ -11,6 +11,7 @@ import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.Constants.MA_STATE;
 import mms.Reasoning.Reason;
+import mms.clock.TimeUnit;
 import mms.clock.VirtualClockService;
 import mms.clock.VirtualClockHelper;
 import mms.commands.Command;
@@ -570,7 +571,7 @@ public class MusicalAgent extends MMSAgent {
 				if (dieNextTurn) {
 					state = MA_STATE.FINALIZED;
 					// Agenda a morte do Agente para o pr�ximo turno
-					getAgent().getClock().schedule(getAgent(), new KillAgent(), getAgent().getClock().getCurrentTime() + 1);
+					getAgent().getClock().schedule(getAgent(), new KillAgent(), (long)getAgent().getClock().getCurrentTime(TimeUnit.TURNS) + 1);
 				}
 				
 				Command cmd = new Command(Constants.CMD_BATCH_TURN);

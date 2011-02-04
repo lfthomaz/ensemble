@@ -15,13 +15,13 @@ public class MovementLaw extends Law {
 	// temporary variable
 	private Vector frictionAcceleration = new Vector(3);
 
-//	// time
-//	long time_1 = 0;
-//	long time_2 = 0;
-//	long time_3 = 0;
-//	long time_4 = 0;
-//	long time_5 = 0;
-//	long time_6 = 0;
+	// time
+	public long time_1 = 0;
+	public long time_2 = 0;
+	public long time_3 = 0;
+	public long time_4 = 0;
+	public long time_5 = 0;
+	public long time_6 = 0;
 	
 	@Override
 	public boolean configure() {
@@ -67,7 +67,7 @@ public class MovementLaw extends Law {
 	@Override
 	public void changeState(final State prevState, double instant, State newState) {
 		
-//		long start = System.currentTimeMillis();
+//		long start = System.nanoTime();
 		// If not the right kind of State, returns
 		if (!(prevState instanceof MovementState) && !(newState instanceof MovementState)) {
 			System.err.println("[MovementLaw] Not the right kind of state!");
@@ -76,13 +76,13 @@ public class MovementLaw extends Law {
 		
 		MovementState movPrevState = (MovementState)prevState;
 		MovementState movNewState = (MovementState)newState;
-//		time_1 = time_1 + (System.currentTimeMillis() - start);
+//		time_1 = time_1 + (System.nanoTime() - start);
 
-//		start = System.currentTimeMillis();
+//		start = System.nanoTime();
 		// Copies the prevState into newState
 		movPrevState.copy(movNewState);
 		movNewState.instant = instant;
-//		time_2 = time_2 + (System.currentTimeMillis() - start);
+//		time_2 = time_2 + (System.nanoTime() - start);
 
 		// Does any necessary calculation
 		double interval = instant - movPrevState.instant;
@@ -96,14 +96,14 @@ public class MovementLaw extends Law {
 			}
 			// Se o corpo está em movimento, mas sem acelerar
 			else if (acc == 0 && vel > 0) {
-//				start = System.currentTimeMillis();
+//				start = System.nanoTime();
 				// Calcular a aceleração devido ao atrito
 				movNewState.velocity.copy(frictionAcceleration);
 				frictionAcceleration.normalizeVectorInverse();
 				frictionAcceleration.product(gravity * friction_coefficient);
-//				time_3 = time_3 + (System.currentTimeMillis() - start);
+//				time_3 = time_3 + (System.nanoTime() - start);
 
-//				start = System.currentTimeMillis();
+//				start = System.nanoTime();
 				// Se velocidade chegar em zero durante esse intervalo, calcular 
 				double t_vel_zero = movPrevState.instant + (movPrevState.velocity.magnitude / frictionAcceleration.magnitude);
 	    		if (t_vel_zero < instant) {
@@ -119,7 +119,7 @@ public class MovementLaw extends Law {
 	    			// V = V0 + at
 	    			movNewState.velocity.add(frictionAcceleration, interval);
 	    		}
-//				time_4 = time_4 + (System.currentTimeMillis() - start);
+//				time_4 = time_4 + (System.nanoTime() - start);
 			}
 			// Se o corpo foi acelerado mas ainda não está em movimento
 			else if (acc > 0 && vel == 0) {
@@ -162,7 +162,7 @@ public class MovementLaw extends Law {
 				movNewState.position.updateMagnitude();
 			}
 			
-//			start = System.currentTimeMillis();
+//			start = System.nanoTime();
 			// Atualizar a orientação
 			if (movPrevState.angularVelocity.magnitude != 0) {
 				movNewState.orientation.add(movPrevState.angularVelocity, interval);
@@ -172,7 +172,7 @@ public class MovementLaw extends Law {
 				}
 				movNewState.orientation.updateMagnitude();
 			}
-//			time_5 = time_5 + (System.currentTimeMillis() - start);
+//			time_5 = time_5 + (System.nanoTime() - start);
 			
 		}
 		
@@ -192,12 +192,12 @@ public class MovementLaw extends Law {
 //		MovementState newState = new MovementState(3);
 //
 //		for (int j = 0; j < 10; j++) {
-//			long start_time = System.currentTimeMillis();
+//			long start_time = System.nanoTime();
 //			// Simulando um chunk_size de 250 ms
 //			for (int i = 0; i < 44000; i++) {
 //				law.changeState(prevState, 10.0, newState);
 //			}
-//			long elapsed_time = System.currentTimeMillis() - start_time;
+//			long elapsed_time = System.nanoTime() - start_time;
 //			System.out.println("elapsed time = " + elapsed_time);
 ////			System.out.println("time_1 = " + law.time_1);
 ////			System.out.println("time_2 = " + law.time_2);

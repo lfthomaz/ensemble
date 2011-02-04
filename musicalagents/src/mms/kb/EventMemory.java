@@ -14,6 +14,11 @@ public class EventMemory extends Memory {
 	private Lock lock = new ReentrantLock();
 	
 	EventSlot head = null;
+	
+	public int size = 0;
+	
+	double last_instant_read = 0.0;
+	EventSlot ptr_last_instant_read = null;
 
 	public void init(Parameters parameters) {
 
@@ -61,7 +66,7 @@ public class EventMemory extends Memory {
 	 */
 	public void updateMemory() {
 		
-		double horizon = ((double)clock.getCurrentTime()/1000) - past;
+		double horizon = clock.getCurrentTime(TimeUnit.SECONDS) - past;
 //		System.out.println("[" + name + "] horizon = " + horizon);
 		EventSlot ptr = head;
 		while (ptr != null) {
@@ -71,13 +76,14 @@ public class EventMemory extends Memory {
 			}
 //			System.out.println("[" + name + "] Limpei - " + ptr.instant);
 			ptr = ptr.next;
+			size--;
 		}
 		
 	}
 	
 	@Override
 	public Object readMemory(double instant, TimeUnit unit) {
-
+		
 		// TODO Sincronizar o acesso a fila!
 //		updateMemory();
 		
@@ -88,17 +94,38 @@ public class EventMemory extends Memory {
 
 		} else {
 
-			EventSlot ptr = head;
-
-			while (ptr.next != null) {
-				
-				if (ptr.next.instant > instant) {
-					break;
+			// Heuristics -> tenta o último instante procurado
+			EventSlot ptr;
+			if (ptr_last_instant_read == null) {
+				ptr = head;
+				while (ptr.next != null) {
+					if (ptr.next.instant > instant) {
+						break;
+					}
+					ptr = ptr.next;
 				}
-				ptr = ptr.next;
-
+			} else {
+				ptr = ptr_last_instant_read;
+				if (instant > last_instant_read) {
+					while (ptr.next != null) {
+						if (ptr.next.instant > instant) {
+							break;
+						}
+						ptr = ptr.next;
+					}
+				} else {
+					while (ptr.prev != null) {
+						if (ptr.prev.instant > instant) {
+							break;
+						}
+						ptr = ptr.prev;
+					}
+				}
 			}
 			
+			last_instant_read = instant;
+			ptr_last_instant_read = ptr;
+				
 			return ptr.object;
 
 		}
@@ -107,7 +134,9 @@ public class EventMemory extends Memory {
 
 	@Override
 	public Object readMemory(double instant, double duration, TimeUnit unit) {
+		
 		return readMemory(instant, unit);
+		
 	}
 
 	@Override
@@ -151,11 +180,13 @@ public class EventMemory extends Memory {
 			}
 		}
 		
+		size++;
+		
 	}
 	
 	public void writeMemory(Object object) throws MemoryException {
 		
-		double instant = (double)clock.getCurrentTime() / 1000;
+		double instant = clock.getCurrentTime(TimeUnit.SECONDS);
 		writeMemory(object, instant, 0, TimeUnit.SECONDS);
 		
 	}
@@ -163,6 +194,7 @@ public class EventMemory extends Memory {
 	class EventSlot {
 		public double 		instant;
 		public Object 		object;
+		public EventSlot 	prev;
 		public EventSlot 	next;
 	}
 

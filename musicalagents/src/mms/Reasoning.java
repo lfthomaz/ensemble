@@ -2,6 +2,7 @@ package mms;
 
 import mms.Constants.EA_STATE;
 import mms.Constants.MA_STATE;
+import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -86,7 +87,7 @@ public class Reasoning extends MusicalAgentComponent {
 				if (getAgent().getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
 					//System.out.println(getAgent().getLocalName() + " foi dormir!");
 					// TODO E se quiser dormir mais de 1 turno???
-					setWakeUp(clock.getCurrentTime() + 1);
+					setWakeUp((long)clock.getCurrentTime(TimeUnit.TURNS) + 1);
 				}
 				
 				getAgent().reasoningProcessDone(getName());
