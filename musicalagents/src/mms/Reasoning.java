@@ -140,7 +140,7 @@ public class Reasoning extends MusicalAgentComponent {
 	 * @param duration
 	 * @throws Exception
 	 */
-	public void newSense(String eventType, double instant, double duration) throws Exception {};
+	public void newSense(Sensor sourceSensor, double instant, double duration) throws Exception {};
 
 	/**
 	 * Chamado no caso de eventos frequentes, quando existe a necessidade de uma ação

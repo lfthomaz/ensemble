@@ -118,7 +118,7 @@ public class RT_Reasoning extends Reasoning {
 	}
 
 	@Override
-	public void newSense(String eventType, double instant, double duration) {
+	public void newSense(Sensor sourceSensor, double instant, double duration) {
 
 		// Reads ear's memory
 //		System.out.println("Entrei no newSense()");

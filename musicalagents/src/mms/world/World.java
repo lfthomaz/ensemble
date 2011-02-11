@@ -87,10 +87,12 @@ public class World {
     	entities = new HashMap<String, EntityState>();
     	
     	// Laws
-    	String[] laws = getParameters().get("LAW").split(" ");
-    	for (int i = 0; i < laws.length; i++) {
-			addLaw(laws[i], null); 
-		}
+    	if (getParameters().containsKey("LAW")) {
+	    	String[] laws = getParameters().get("LAW").split(" ");
+	    	for (int i = 0; i < laws.length; i++) {
+				addLaw(laws[i], null); 
+			}
+    	}
     	
     	try {
 			init();

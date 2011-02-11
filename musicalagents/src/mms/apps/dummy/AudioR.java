@@ -33,7 +33,7 @@ public class AudioR extends Reasoning {
 	}
 	
 	@Override
-	public void newSense(String eventType, double instant, double duration)
+	public void newSense(Sensor sourceSensor, double instant, double duration)
 			throws Exception {
 		double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
 	}

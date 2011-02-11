@@ -80,7 +80,7 @@ public class Sensor extends EventHandler implements Sensing {
 			// Avisar os raciocínios registrados
 			for (Reasoning reasoning : listeners) {
 				try {
-					reasoning.newSense(this.eventType, evt.instant, evt.duration);
+					reasoning.newSense(this, evt.instant, evt.duration);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

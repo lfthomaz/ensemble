@@ -461,7 +461,7 @@ public class CP_Reasoning extends Reasoning {
 			break;
 
 		}
-		
+
 	}
 	
 }

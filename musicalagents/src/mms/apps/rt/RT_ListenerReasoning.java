@@ -124,22 +124,26 @@ public class RT_ListenerReasoning extends Reasoning {
 	// TODO Não pode tocar imediatamente, tem que respeitar o tempo, senão não podemos sincronazar com outros agentes e com outros acontecimentos no ambiente
 	// TODO O JavaSound consegue fazer isso?!?!?!? No lo creo!
 	@Override
-	public void newSense(String eventType, double instant, double duration) {
+	public void newSense(Sensor sourceSensor, double instant, double duration) {
 
-		double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
-
-		byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
-//		System.out.println(System.currentTimeMillis() + " Player: recebi chunk de tamanho " + evt.chunkLength);
-//		queue.add(buffer);
-		line.write(buffer, 0, buffer.length);
-	    try {
-			out_byte_sink.write(buffer);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (sourceSensor.getEventType().equals("AUDIO")) {
+		
+			double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
+	
+			byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
+	//		System.out.println(System.currentTimeMillis() + " Player: recebi chunk de tamanho " + evt.chunkLength);
+	//		queue.add(buffer);
+			line.write(buffer, 0, buffer.length);
+		    try {
+				out_byte_sink.write(buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Inseri chunk " + instant + " na fila para tocar");
+	//		System.out.println("size = " + queue.size());
+			currentChunk++;
+			
 		}
-		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Inseri chunk " + instant + " na fila para tocar");
-//		System.out.println("size = " + queue.size());
-		currentChunk++;
 
 	}
 

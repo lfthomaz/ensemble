@@ -106,7 +106,7 @@ public class RT_MovementReasoning extends Reasoning {
 	}
 
 	@Override
-	public void newSense(String eventType, double instant, double duration) {
+	public void newSense(Sensor sourceSensor, double instant, double duration) {
 		
 		String str = (String)eyesMemory.readMemory(instant, TimeUnit.SECONDS);
 		Command cmd = Command.parse(str);
