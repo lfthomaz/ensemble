@@ -208,15 +208,17 @@ public class Loader {
 					ea_parameters.put(Constants.CLASS_WORLD, readAttribute(elem_gp, Constants.CLASS_WORLD, "mms.world.World"));
 					ea_parameters.put(Constants.CLASS_ENTITY_STATE, readAttribute(elem_gp, Constants.CLASS_WORLD, "mms.world.EntityState"));
 					nl = elem_gp.getElementsByTagName("LAW");
-					String laws = "";
-					for (int i = 0; i < nl.getLength(); i++) {
-						Element elem_law = (Element)nl.item(i);
-						laws = laws + readAttribute(elem_law, CONF_CLASS, null);
-						if (i != nl.getLength()-1) {
-							laws = laws + " ";
+					if (nl.getLength() > 0) {
+						String laws = "";
+						for (int i = 0; i < nl.getLength(); i++) {
+							Element elem_law = (Element)nl.item(i);
+							laws = laws + readAttribute(elem_law, CONF_CLASS, null);
+							if (i != nl.getLength()-1) {
+								laws = laws + " ";
+							}
 						}
+						ea_parameters.put("LAW", laws);
 					}
-					ea_parameters.put("LAW", laws);
 				}
 								
 				// Load Event Servers
