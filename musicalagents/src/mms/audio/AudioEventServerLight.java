@@ -19,11 +19,11 @@ import mms.world.Vector;
 import mms.world.World;
 import mms.world.law.MovementLaw;
 
-public class AudioEventServer extends EventServer {
+public class AudioEventServerLight extends EventServer {
 
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
-	
+
 	//---- WORK VARIABLES ----
 	// Newton function's variables 
 	double[] f_res	= new double[2];
@@ -46,6 +46,7 @@ public class AudioEventServer extends EventServer {
     private int 	SAMPLE_RATE 		= 44100;
     private double 	STEP 				= 1 / SAMPLE_RATE;
     private int 	CHUNK_SIZE 			= 4410;
+    private int 	GRANULATION 		= 1;
 	
     // TODO Ver como armazenar o last_delta de cada source
     private HashMap<String, Double> last_deltas = new HashMap<String, Double>();
@@ -100,6 +101,13 @@ public class AudioEventServer extends EventServer {
 		
 		// Gets the Movement Law
 		this.movLaw = (MovementLaw)world.getLaw("MOVEMENT");
+		
+//		try {
+//			out = new PrintWriter(new BufferedWriter(new FileWriter("foo.out")));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		buffer = new StringBuilder(50);
 		
 		return true;
 
@@ -175,7 +183,6 @@ public class AudioEventServer extends EventServer {
 			
 			// Cria o evento a ser enviado para o sensor
 			String s_key = s.nextElement();
-//			AudioEvent evt = new AudioEvent(CHUNK_SIZE);
 			Event evt = new Event();
 			String[] sensor = s_key.split(":");
 			evt.destAgentName = sensor[0];
@@ -184,17 +191,15 @@ public class AudioEventServer extends EventServer {
 			evt.objContent = buf;
 			evt.instant = instant;
 			evt.duration = (double)(CHUNK_SIZE * STEP);
-
-//			System.out.println("ACTUATORS = " + actuators.size());
-			// Calcula a contribuição de cada fonte sonora
+			
+			// Calculates the contribution of each sound source
 			for (Enumeration<String> a = actuators.keys(); a.hasMoreElements();) {
 
 				String a_key = a.nextElement();
-
 				String pair = s_key + "<>" + a_key;
 				
 				AudioMemory mem = (AudioMemory)memories.get(a_key);
-								
+
 				String[] actuator = a_key.split(":");
 				
 				// If it's the same agente, just copy
@@ -205,57 +210,71 @@ public class AudioEventServer extends EventServer {
 				}
 				// Else, simulates the propagation of sound
 				else {
+					
 					double t, guess;
 					
 					// Gets the movement memory
 					Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], "MOVEMENT");
 					Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], "MOVEMENT");
 
-					// For a new pair, gets the last delta, or calculates one
+					// Calculates the first and last deltas
 					if (last_deltas.containsKey(pair)) {
 						guess = last_deltas.get(pair);
 					} else {
 						// Only runs the first time
 						MovementState src_state_old = (MovementState)mem_mov_rcv.readMemory(instant, TimeUnit.SECONDS);
 						movLaw.changeState(src_state_old, instant, src_state);
+//				    	System.out.println("src_state = " + src_state.position);
 						
 						MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(instant, TimeUnit.SECONDS);
 						movLaw.changeState(rcv_state_old, instant, rcv_state);
+//				    	System.out.println("rcv_state = " + rcv_state.position);
 
 						double distance = src_state.position.getDistance(rcv_state.position);
 						guess = distance / SPEED_SOUND;
+//						System.out.println("initial guess for " + pair + " = " + guess);
 					}
 					
-					// For each sample...
-					for (int j = 0; j < CHUNK_SIZE; j++) {
+					double delta_i = 0.0, delta_f = 0.0;
+					int DIVISION_FACTOR = 2;
+					int samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
+					for (int i = 0; i < CHUNK_SIZE; i += samples_jump) {
 						
-						t = instant + (j * STEP);
+						t = instant + (i * STEP);
 						
-						try {
-							double value = 0.0;
-							double gain = 0.0;
-							double delta = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
-//							if (elapsed_time > 1) {
-//								System.out.println("WARNING_NEWTON: " + elapsed_time + " ms at t = " + t);
-//							}
-							// TODO decidir um jeito melhor de devolver um delta inválido do que -1.0
-							if (delta < 0.0) {
-								System.err.println("[ERROR] delta = " + delta);
-								buf[j] = 0.0;
-							} else {
-								gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
-								value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
-							}
-							buf[j] = buf[j] + (value * gain);
-							guess = delta;
-						} catch (Exception e) {
-							e.printStackTrace();
-							System.exit(-1);
+						// first delta of the chunk
+						delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
+						// last delta of the chunk (if it's the last division of the chunk, gets the last sample)
+						if (i + samples_jump >= CHUNK_SIZE) {
+							delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
+						} else {
+							delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((i+samples_jump-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
 						}
+
+						// TODO Verificar os valores de delta! Não pode ser menor que zero!!!
+						double delta_step = (delta_f - delta_i) / (samples_jump - 1);
+						
+						// For each sample in this division...
+						for (int j = 0; (i+j < CHUNK_SIZE && j < samples_jump); j++) {
+							
+							t = instant + ((i+j) * STEP);
+							
+							double delta = delta_i + (delta_step * j);
+							double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
+							double value = 0.0;
+							try {
+								value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
+							buf[i+j] = buf[i+j] + (value * gain);
+							
+						}
+						
 					}
-					
-					// Store the last delta for the next process
-					last_deltas.put(pair, guess);
+
+					last_deltas.put(pair, delta_f);
 
 				}
 			}			
@@ -271,6 +290,12 @@ public class AudioEventServer extends EventServer {
 
     public void function(MovementState src_state, MovementState rcv_state, double t, double delta) {
     	
+//		calls_function++;
+    	
+//    	System.out.println("function(" + t + "," + delta + ")");
+//
+//    	System.out.println("getSourceState("+source_name+","+(t - delta)+")");
+    	
     	if (src_state == null || rcv_state == null) {
 			// Se é null, é porque o agente não existia nesse momento
     		System.err.println("WARNING: Tentou buscar amostra no futuro ou antes do início da simulação (" + (t - delta) + ")");
@@ -282,21 +307,45 @@ public class AudioEventServer extends EventServer {
     	Vector p = src_state.position;
     	Vector v = src_state.velocity;
     	
+//    	long time_elapsed = System.currentTimeMillis();
+    	
     	f_res[0] 	= (q.magnitude * q.magnitude) - 2 * q.dotProduct(p) + (p.magnitude * p.magnitude) - (delta * delta * SPEED_SOUND * SPEED_SOUND);
     	v.copy(vec_aux);
     	vec_aux.subtract(p);
     	f_res[1] 	= 2 * v.dotProduct(vec_aux) - (2 * delta * SPEED_SOUND * SPEED_SOUND);
 
+//    	time_function = time_function + (System.currentTimeMillis() - time_elapsed);
+
+//    	System.out.println("--- t = " + t + " delta = " + delta + " ---");
+//    	System.out.println("\tq = " + q);
+//    	System.out.println("\tp = " + p);
+//    	System.out.println("\tv = " + v);
+//    	System.out.println("\trtn = " + rtn);
+    	
+    	
+//		return res; 
+
     }
     
     public double newton_raphson(Memory mem_src, Memory mem_rcv, double t, double initial_guess, double x1, double x2) {
     	    	
+//    	double[] f, fl, fh;
     	double dx, dx_old, rts, xl, xh, temp;
     	MovementState rcv_state_old, src_state_old;
+
+//    	out.write("\tnewton - guess = " + initial_guess + " x1 = " + x1 + " x2 = " + x2 + "\n");
+    	
+//    	long time_elapsed = System.currentTimeMillis();
     	
 		rcv_state_old = (MovementState)mem_rcv.readMemory(t, TimeUnit.SECONDS);
+//    	time_newton_1 = time_newton_1 + (System.currentTimeMillis() - time_elapsed);
+//    	time_elapsed = System.currentTimeMillis();
 		movLaw.changeState(rcv_state_old, t, rcv_state);
+//    	time_newton_2 = time_newton_2 + (System.currentTimeMillis() - time_elapsed);
 
+//    	System.out.println("newton_raphson("+source_name+","+receiver_name+","+t+","+initial_guess+","+x1+","+x2+")");
+    	
+//		long time = System.currentTimeMillis();
 		src_state_old = (MovementState)mem_src.readMemory(t-x1, TimeUnit.SECONDS);
 		movLaw.changeState(src_state_old, t-x1, src_state);
     	function(src_state, rcv_state, t, x1);
@@ -307,6 +356,7 @@ public class AudioEventServer extends EventServer {
 		function(src_state, rcv_state, t, x2);
     	fh[0] = f_res[0]; fh[1] = f_res[1];
     	
+//    	time_elapsed = System.currentTimeMillis();
     	if ((fl[0] > 0.0 && fh[0] > 0.0) || (fl[0] < 0.0 && fh[0] < 0.0)) {		
     		System.err.println("Root must be bracketed in rtsafe");
     		return -1;
@@ -329,6 +379,8 @@ public class AudioEventServer extends EventServer {
     	rts = initial_guess;
 		dx_old = Math.abs(x2-x1);
 		dx = dx_old;
+//    	time_newton_3 = time_newton_3 + (System.currentTimeMillis() - time_elapsed);
+//    	time_elapsed = System.currentTimeMillis();
 		src_state_old = (MovementState)mem_src.readMemory(t-rts, TimeUnit.SECONDS);
 		movLaw.changeState(src_state_old, t-rts, src_state);
 		function(src_state, rcv_state, t, rts);
@@ -337,9 +389,16 @@ public class AudioEventServer extends EventServer {
     		System.err.println("WARNING: Tentou buscar amostra no futuro ou antes do início da simulação (" + (t - rts) + ")");
     		return 0.0;
     	}
+//    	time_newton_4 = time_newton_4 + (System.currentTimeMillis() - time_elapsed);
+//    	time_elapsed = System.currentTimeMillis();
+//		buffer.append("\rcv_state = " + rcv_state.position + "\n");
     	// Loop over allowed iterations
 		boolean found = false;
 		for (int i = 0; i < MAX_ITERATIONS; i++) {
+//    		System.out.println("\trts = " + rts);
+//			out.write("\trts = " + rts + "\n");
+//			buffer.append("\tsrc_state = " + src_state.position + "\n");
+//			buffer.append("\trts = " + rts + "\n");
 			// Bisect if Newton out of range, or not decreasing fast enough
 			if ((((rts-xh)*f[1]-f[0])*((rts-xl)*f[1]-f[0]) >= 0.0)
 				|| (Math.abs(2.0*f[0]) > Math.abs(dx_old*f[1]))) {
@@ -380,14 +439,24 @@ public class AudioEventServer extends EventServer {
     			xh = rts;
     		}
     	}
+//		System.out.println("\trts = " + rts);
+
+//		out.write("\trts = " + rts + "\n");
+//		buffer.append("\tsrc_state = " + src_state.position + "\n");
+//		buffer.append("\trts = " + rts + "\n");
+
+//    	time_newton_5 = time_newton_5 + (System.currentTimeMillis() - time_elapsed);
 
 		if (!found) {
+ 			// TODO Está chegando nesse ponto em alguns casos!!!
 //			System.err.println("WARNING: Maximum number of iterations exceeded in rtsafe (t = " + t + ") - delta = " + rts);
 //			System.err.println("\tnewton - guess = " + initial_guess + " x1 = " + x1 + " x2 = " + x2 );
 //			out.write("\tWARNING: Maximum number of iterations exceeded in rtsafe (t = " + t + ") - delta = " + rts + "\n");
 //			out.write(buffer.toString());
 		}
     	
+//		buffer.delete(0, buffer.length()-1);
+
 		return rts;
     }
 
