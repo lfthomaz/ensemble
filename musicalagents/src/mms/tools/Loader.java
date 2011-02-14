@@ -25,6 +25,7 @@ import mms.EnvironmentAgent;
 import mms.MusicalAgent;
 import mms.Parameters;
 import mms.commands.Console;
+import mms.world.Vector;
 
 /**
  * Runs the system.
@@ -343,8 +344,10 @@ public class Loader {
 								args.merge(args_comp);
 								String comp_class = readAttribute(elem_sensor, CONF_CLASS, "mms.Sensor");
 								String comp_event_type = readAttribute(elem_sensor, CONF_COMP_EVENT_TYPE, "DUMMY");
+								String comp_position = readAttribute(elem_sensor, "POSITION", "(0;0;0)");
 								args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
 								args.put(Constants.PARAM_COMM_CLASS, comp_event_type);
+								args.put("POSITION", comp_position);
 								ma.addComponent(comp_name, comp_class, args);
 							}
 
@@ -359,8 +362,10 @@ public class Loader {
 								args.merge(args_comp);
 								String comp_class = readAttribute(elem_actuator, CONF_CLASS, "mms.Actuator");
 								String comp_event_type = readAttribute(elem_actuator, CONF_COMP_EVENT_TYPE, "DUMMY");
+								String comp_position = readAttribute(elem_actuator, "POSITION", "(0;0;0)");
 								args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
 								args.put(Constants.PARAM_COMM_CLASS, comp_event_type);
+								args.put("POSITION", comp_position);
 								ma.addComponent(comp_name, comp_class, args);
 							}
 							

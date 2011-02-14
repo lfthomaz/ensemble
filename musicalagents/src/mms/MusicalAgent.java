@@ -232,8 +232,8 @@ public class MusicalAgent extends MMSAgent {
 						System.out.println("[" + this.getLocalName() + "] Sensor/Actuator '" + compName + "' must have an EVT_TYPE parameter");
 						return;
 					}
-					if (arguments.containsKey("POSITION")) {
-						Vector position = Vector.parse(arguments.get("POSITION"));
+					if (arguments.containsKey(Constants.PARAM_POSITION)) {
+						Vector position = Vector.parse(arguments.get(Constants.PARAM_POSITION));
 						((EventHandler)comp).setPosition(position);
 					}
 				}

@@ -432,6 +432,7 @@ public abstract class EventServer implements Sensing, Acting {
 
 		}
 		else {
+//			MusicalAgent.logger.warning("[" + envAgent.getLocalName() + "] " + "RegisterEventHandler received an strange component!");
 			return;
 		}
 		
@@ -539,9 +540,14 @@ public abstract class EventServer implements Sensing, Acting {
 		// Verifica a que janela pertence o evento
 		if (envAgent.getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_REAL_TIME) &&
 				getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
-			if (evt.frame < workingFrame || (evt.frame == workingFrame && eventServerState != ES_STATE.WAITING_AGENTS)) {
+			if (evt.frame < workingFrame) {
 //				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame atrasado");
 				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+				return;
+			}
+			else if ((evt.frame == workingFrame && eventServerState != ES_STATE.WAITING_AGENTS)) {
+//				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame atrasado");
+				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if (evt.frame > workingFrame) {

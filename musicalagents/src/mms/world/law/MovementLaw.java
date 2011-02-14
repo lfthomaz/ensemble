@@ -13,7 +13,7 @@ public class MovementLaw extends Law {
 	private double friction_coefficient = 0.0;
 	
 	// temporary variable
-	private Vector frictionAcceleration = new Vector(3);
+	private Vector frictionAcceleration;
 
 	// time
 	public long time_1 = 0;
@@ -26,6 +26,7 @@ public class MovementLaw extends Law {
 	@Override
 	public boolean configure() {
 		setType("MOVEMENT");
+		frictionAcceleration = new Vector(world.dimensions);
 		// TODO Pegar os parâmetros de gravidade/fricção
 		warmup();
 		return true;
@@ -33,7 +34,6 @@ public class MovementLaw extends Law {
 	
 	public void warmup() {
 		
-		System.out.println("WARMUP");
 		MovementState prevState = new MovementState(world.dimensions);
 		prevState.instant = 0;
 		prevState.velocity.setValue(0, 10);
