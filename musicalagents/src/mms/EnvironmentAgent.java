@@ -17,6 +17,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -25,7 +26,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
-import jade.wrapper.StaleProxyException;
 
 /**
  * An agent that represents the environment.
@@ -45,10 +45,13 @@ public class EnvironmentAgent extends MMSAgent {
 	
 	protected DFAgentDescription dfd;
 	
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	
 	/**
 	 *  Lock
 	 */
 	private Lock lock = new ReentrantLock();
+	private Lock batchLock = new ReentrantLock();
 	
 	/**
 	 *  Descrição do Mundo Virtual
@@ -133,17 +136,17 @@ public class EnvironmentAgent extends MMSAgent {
 	 */
 	protected void start() {
 
+		logger.info("[" + this.getAID().getLocalName() + "] " + "Starting initialization...");
 //		System.out.println("EA start()");
 		
 		lock.lock();
 		try {
-		
+
 			// 1. Obtém as propriedades da simulação
-			waitTimeTurn = Long.valueOf(getProperty(Constants.WAIT_TIME_TURN, "100"));
-			waitAllAgents = Boolean.valueOf(getProperty(Constants.WAIT_ALL_AGENTS, "true"));
+			waitAllAgents = Boolean.valueOf(getParameters().get(Constants.WAIT_ALL_AGENTS, "TRUE"));
+			waitTimeTurn = Long.valueOf(getParameters().get(Constants.WAIT_TIME_TURN, "100"));
 	
-			// 2. Cria um mundo genérico (que poderá ser alterado pelo usuário)
-			// TODO Esse é o melhor lugar para colocar?
+			// 2. Cria um mundo genérico
 			Class worldClass;
 			try {
 				worldClass = Class.forName(parameters.get(Constants.CLASS_WORLD, "mms.world.World"));
@@ -155,51 +158,40 @@ public class EnvironmentAgent extends MMSAgent {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-			
-			// 3. Registra o Ambiente no DS
-			this.registerService(this.getLocalName(), Constants.EVT_ENVIRONMENT);
-			
+
 			// 4. Inicia a recepção de Mensagens de Controle 
-			this.addBehaviour(new ReceiveMessages(this));
+			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
 			
-			// 5. Inicia os EventServers
+			// 5. Executa o método de inicialização do usuário
+			init();
+			
+			// 6. Inicia os EventServers
 			Collection<EventServer> servers = eventServers.values();
 			for (Iterator<EventServer> iterator = servers.iterator(); iterator.hasNext();) {
 				EventServer eventServer = iterator.next();
 				eventServer.start(this, parameters);
 			}
 	
-			// 6. Fim da inicialização do Agente Ambiente
+			// 3. Registra o Ambiente no DS
+			this.registerService(this.getLocalName(), Constants.EVT_ENVIRONMENT);
+			
+			// 7. Fim da inicialização do Agente Ambiente
 			// TODO Deveria vir após o init()
 			state = EA_STATE.INITIALIZED;
 			logger.info("[" + this.getAID().getLocalName() + "] " + "Initialized");
-			System.out.println("[" + this.getAID().getLocalName() + "] " + "Initialized");
+//			System.out.println("[" + this.getAID().getLocalName() + "] " + "Initialized");
 		
 		} finally {
 			lock.unlock();
 		}
 
-		// Cria os agentes necessários, caso solicitado
-		// TODO Pode ser resolvido pelo Loader
-		initialAgents = 0;
-		String agentClass;
-		if (parameters != null && parameters.containsKey(Constants.INIT_NUMBER_INITIAL_AGENTS)) {
-			initialAgents 	= Integer.valueOf(parameters.get(Constants.INIT_NUMBER_INITIAL_AGENTS));	
-			agentClass 		= parameters.get(Constants.CLASS_MUSICAL_AGENT);	
-			// TODO permitir dar nome ao agente e passar parâmetros
-			for (int i = 0; i < initialAgents; i++) {
-				createMusicalAgent(null, agentClass, null);
-			}
-		}
-
 		// Inicia a simulação
 		// Caso solicitado, aguarda a criação de todos os agentes (para processamento Batch)
-		if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
+		if (isBatch) {
 			if (waitAllAgents) {
 				// TODO Timeout para o caso de algum agente travar na inicialização
 				this.addBehaviour(new CheckRegister(this));
 			} else {
-	//			this.addBehaviour(tbf.wrap(new CheckEndTurn(this)));
 				this.addBehaviour(new CheckEndTurn(this));
 			}
 		}
@@ -229,8 +221,8 @@ public class EnvironmentAgent extends MMSAgent {
 			}
 			logger.info("[" + this.getAID().getLocalName() + "] " + "Event type " + type + " registered in the DS");
 		} catch (FIPAException fe) {
+			System.out.println("ERROR: It was not possible to register the service '" + type + "'");
 			System.out.println(fe.toString());
-			System.out.println("ERRO: Não foi possível registrar o serviço!");
 		}
 
 	}
@@ -326,13 +318,10 @@ public class EnvironmentAgent extends MMSAgent {
         	processMessage(cmd.getSource(), cmd);
         } 
         else if (recipient.length == 3) {
-        	System.out.println("BLA1");
         	if (eventServers.containsKey(recipient[2])) {
-            	System.out.println("BLA2");
         		EventServer es = eventServers.get(recipient[2]);
         		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
         		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
-                	System.out.println("BLA3");
         			String param = cmd.getParameter("NAME");
         			String value = cmd.getParameter("VALUE");
         			if (param != null && value != null) {
@@ -369,31 +358,31 @@ public class EnvironmentAgent extends MMSAgent {
 	
 	protected final void processMessage(String sender, Command cmd) {
 		
-		
-		if (cmd.getCommand().equals(Constants.CMD_CREATE_AGENT)) {
+		String command = cmd.getCommand(); 
+		if (command.equals(Constants.CMD_CREATE_AGENT)) {
 			
 			String agentName = cmd.getParameter("NAME");
 			String agentClass = cmd.getParameter("CLASS");
 			Parameters parameters = cmd.getParameters();
 			createMusicalAgent(agentName, agentClass, parameters);
 			
-		} else if (cmd.getCommand().equals(Constants.CMD_DESTROY_AGENT)) {								
+		} else if (command.equals(Constants.CMD_DESTROY_AGENT)) {								
 			
 			String agentName = cmd.getParameter("NAME");
 			destroyAgent(agentName);
 			
-		} else if (cmd.getCommand().equals(Constants.CMD_ADD_EVENT_SERVER)) {								
+		} else if (command.equals(Constants.CMD_ADD_EVENT_SERVER)) {								
 		
 			String className = cmd.getParameter("NAME");
 			Parameters arguments = cmd.getParameters();
 			addEventServer(className, arguments);
 			
-		} else if (cmd.getCommand().equals(Constants.CMD_REMOVE_EVENT_SERVER)) {								
+		} else if (command.equals(Constants.CMD_REMOVE_EVENT_SERVER)) {								
 			
 			String esName = cmd.getParameter("NAME");
 			removeEventServer(esName);
 			
-		} else if (cmd.getCommand().equals(Constants.CMD_EVENT_REGISTER)) {								
+		} else if (command.equals(Constants.CMD_EVENT_REGISTER)) {								
 
 			String componentName = cmd.getParameter(Constants.PARAM_COMP_NAME);
 			String eventHandlerType = cmd.getParameter(Constants.PARAM_COMP_TYPE);
@@ -409,7 +398,7 @@ public class EnvironmentAgent extends MMSAgent {
 			}
 			
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_EVENT_DEREGISTER)) {
+		else if (command.equals(Constants.CMD_EVENT_DEREGISTER)) {
 			
 			String componentName = cmd.getParameter(Constants.PARAM_COMP_NAME);
 			String eventHandlerType = cmd.getParameter(Constants.PARAM_COMP_TYPE);
@@ -422,41 +411,41 @@ public class EnvironmentAgent extends MMSAgent {
 			}
 			
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_AGENT_REGISTER)) {
+		else if (command.equals(Constants.CMD_AGENT_REGISTER)) {
 
 			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Recebi pedido de registro de " + sender);
 			registerAgent(sender, cmd.getParameters());
 
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_AGENT_DEREGISTER)) {
+		else if (command.equals(Constants.CMD_AGENT_DEREGISTER)) {
 
 			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Recebi pedido de desregistro de " + sender);
 			deregisterAgent(sender);
 
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_AGENT_READY)) {
+		else if (command.equals(Constants.CMD_AGENT_READY)) {
 
-			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Agente " + sender + " pronto pra iniciar a simula��o");
+			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Agent " + sender + " ready for the simulation");
 			prepareAgent(sender);
 
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_BATCH_TURN)) {
+		else if (command.equals(Constants.CMD_BATCH_TURN)) {
 		
-			if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
-				MusicalAgent.logger.info("[" + getLocalName() + "] " + "Recebi mudança de turno de " + sender);
+			if (isBatch) {
+				MusicalAgent.logger.info("[" + getLocalName() + "] " + "End of turn message received from " + sender);
 				int numberEventsSent = Integer.valueOf(cmd.getParameter(Constants.PARAM_NUMBER_EVT_SENT));
 				agentProcessed(numberEventsSent);
 			}
 			
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_BATCH_EVENT_ACK)) {
+		else if (command.equals(Constants.CMD_BATCH_EVENT_ACK)) {
 
-			if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
+			if (isBatch) {
 				eventAgentProcessed();
 			}
 			
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_PUBLIC_FACT_UPDATE)) {
+		else if (command.equals(Constants.CMD_PUBLIC_FACT_UPDATE)) {
 			
 			String fact = cmd.getParameter(Constants.PARAM_FACT_NAME);
 			String value = cmd.getParameter(Constants.PARAM_FACT_VALUE);
@@ -465,7 +454,7 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else {
 			
-			System.out.println("[" + getLocalName() + "] " + "Command not recognized: " + cmd.getCommand());
+			System.out.println("[" + getLocalName() + "] " + "Command not recognized: " + command);
 			
 		}
 		
@@ -488,7 +477,7 @@ public class EnvironmentAgent extends MMSAgent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				
-//				MusicalAgent.logger.info("[" + getAID().getLocalName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
+				MusicalAgent.logger.info("[" + getAID().getLocalName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
 
 				// TODO switch com os possíveis comandos
 				String sender = msg.getSender().getLocalName();
@@ -515,7 +504,7 @@ public class EnvironmentAgent extends MMSAgent {
 	/**
 	 * Cria um novo Agente no Ambiente. Se o nome do agente é null ou vazio, cria um nome sequencial, baseado na classe.
 	 */
-	public final synchronized String createMusicalAgent(String agentName, String agentClass, Parameters parameters) {
+	public final String createMusicalAgent(String agentName, String agentClass, Parameters parameters) {
 
 		Object[] arguments = null; 
 		if (parameters != null) {
@@ -550,14 +539,14 @@ public class EnvironmentAgent extends MMSAgent {
 	 * Destrói um agente presente no Ambiente.
 	 * @param agentName nome do agente a ser destruido
 	 */
-	public final synchronized void destroyAgent(String agentName) {
+	public final void destroyAgent(String agentName) {
 		
 		// Não podemos matar o agente diretamente pelo doDelete()
 		Command cmd = new Command(Constants.CMD_KILL_AGENT);
 		sendMessage(agentName, cmd);
 		
 //		MusicalAgent.logger.info("[" + this.getAID().getLocalName() + "] Destroyed agent " + agentName);
-		System.out.println("[" + this.getAID().getLocalName() + "] Destroyed agent " + agentName);
+		System.out.println("[" + this.getAID().getLocalName() + "] Sent KILL_AGENT to " + agentName);
 
 	}
 	
@@ -565,30 +554,38 @@ public class EnvironmentAgent extends MMSAgent {
 	 * Registra um agente musical no Ambiente.
 	 * @param agentName
 	 */
-	protected final synchronized void registerAgent(String agentName, Parameters parameters) {
+	protected final void registerAgent(String agentName, Parameters parameters) {
 
 		// Adiciona o agente ao mundo virtual
 		world.addEntity(agentName, parameters);
 		
 	}
-	
+
 	/**
 	 * 
 	 * @param agentName
 	 */
-	protected final synchronized void prepareAgent(String agentName) {
+	protected final void prepareAgent(String agentName) {
 
 		Command cmd = new Command(Constants.CMD_AGENT_READY_ACK);
 		
 		// No caso de processamento BATCH
-		if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
-			// Adicionar Agente à lista de registrados 
-			registeredAgentsNextTurn++;
+		if (isBatch) {
 			
-			// Enviar mensagem de ACK, indicando que o agente deve acordar no próximo turno
-			cmd.addParameter("turn", String.valueOf((getClock().getCurrentTime(TimeUnit.TURNS) + 1)));
-		
-			this.addBehaviour(new CheckEndTurn(this));
+			batchLock.lock();
+			try {
+				// Adicionar Agente à lista de registrados para começar no próximo turno
+				registeredAgentsNextTurn++;
+				
+				// Enviar mensagem de ACK, indicando que o agente deve acordar no próximo turno
+				cmd.addParameter(Constants.PARAM_TURN, String.valueOf((getClock().getCurrentTime(TimeUnit.TURNS) + 1)));
+			
+				this.addBehaviour(new CheckEndTurn(this));
+
+			} finally {
+				batchLock.unlock();
+			}
+			
 		}
 
 		// Envia a resposta
@@ -600,14 +597,23 @@ public class EnvironmentAgent extends MMSAgent {
 	 * Retira um agente musical do registro de agentes ativos no ambiente.
 	 * @param agentName
 	 */
-	protected final synchronized void deregisterAgent(String agentName) {
+	protected final void deregisterAgent(String agentName) {
 
-		if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
-			// Retirar Agente da lista de registrados 
-			registeredAgents--;
-			registeredAgentsNextTurn--;
+		if (isBatch) {
 			
-			this.addBehaviour(new CheckEndTurn(this));
+			batchLock.lock();
+			try {
+			
+				// Retirar Agente da lista de registrados 
+				registeredAgents--;
+				registeredAgentsNextTurn--;
+				
+				this.addBehaviour(new CheckEndTurn(this));
+				
+			} finally {
+				batchLock.unlock();
+			}
+			
 		}
 		
 		world.removeEntity(agentName);
@@ -657,60 +663,63 @@ public class EnvironmentAgent extends MMSAgent {
 		
 		public void action() {
 
-			// TODO Aguardar um n�mero de agentes pr�-definidos estarem registrados 
-			// Aguarda a finaliza��o dos Agentes Musicais e o processamento de todos os eventos pelos EventServers
-			if (//registeredAgentsNextTurn > 0 && 
-				registeredAgentsReady >= registeredAgents && 
-				agentEventsProcessed >= agentEventsSent) {
-
-				// Inicia o processamento dos EventServer (para atualizar o ambiente)
-				// TODO tornar o processamento paralelo ou n�o � necessario??
-				// TODO o usu�rio pode escolher a ordem em que os EventServers ser�o processados!!!
-			     for (Enumeration<EventServer> e = eventServers.elements(); e.hasMoreElements();) {
-			    	 EventServer evtServer = e.nextElement();
-			    	 try {
-				    	 evtServer.process();
-					} catch (Exception e2) {
-						e2.printStackTrace();
+			batchLock.lock();
+			try {
+				// TODO Aguardar um n�mero de agentes pr�-definidos estarem registrados 
+				// Aguarda a finaliza��o dos Agentes Musicais e o processamento de todos os eventos pelos EventServers
+				if (//registeredAgentsNextTurn > 0 && 
+					registeredAgentsReady >= registeredAgents && 
+					agentEventsProcessed >= agentEventsSent) {
+					
+					// Inicia o processamento dos EventServer (para atualizar o ambiente)
+					// TODO tornar o processamento paralelo ou n�o � necessario??
+					// TODO o usu�rio pode escolher a ordem em que os EventServers ser�o processados!!!
+				     for (Enumeration<EventServer> e = eventServers.elements(); e.hasMoreElements();) {
+				    	 EventServer evtServer = e.nextElement();
+				    	 try {
+					    	 evtServer.process();
+						} catch (Exception e2) {
+							e2.printStackTrace();
+						}
+				     }
+	
+					// Atualizar as vari�veis de controle
+					registeredAgents 		= registeredAgentsNextTurn;
+					registeredAgentsReady 	= 0;
+					agentEventsSent 		= 0;
+					agentEventsProcessed 	= 0;
+					evtSrvEventsSent 		= 0;
+					evtSrvEventsProcessed 	= 0;
+					
+					// Chama um processo do usu�rio antes de mudar o clock (bom para atualizar o GUI)
+					preUpdateClock();
+					
+					// Deve aguardar os ACKs dos agentes, caso tenha enviado eventos
+					// TODO M�quina de estados?!!??
+					
+					// Suspende a simula��o por um tempo
+					// TODO poder� ser programado pelo usu�rio, para ter um tempo m�nimo para atualizar o turno
+					long elapsedTime = System.currentTimeMillis() - lastUpdateTime;
+					if (elapsedTime < waitTimeTurn) {
+						try {
+							Thread.sleep(waitTimeTurn - elapsedTime);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
-			     }
-
-				// Atualizar as vari�veis de controle
-				registeredAgents 		= registeredAgentsNextTurn;
-				registeredAgentsReady 	= 0;
-				agentEventsSent 		= 0;
-				agentEventsProcessed 	= 0;
-				evtSrvEventsSent 		= 0;
-				evtSrvEventsProcessed 	= 0;
-				
-				// Chama um processo do usu�rio antes de mudar o clock (bom para atualizar o GUI)
-				preUpdateClock();
-				
-				// Deve aguardar os ACKs dos agentes, caso tenha enviado eventos
-				// TODO M�quina de estados?!!??
-				//if ()
-				
-				// Suspende a simula��o por um tempo
-				// TODO poder� ser programado pelo usu�rio, para ter um tempo m�nimo para atualizar o turno
-				long elapsedTime = System.currentTimeMillis() - lastUpdateTime;
-				if (elapsedTime < waitTimeTurn) {
-					try {
-						Thread.sleep(waitTimeTurn - elapsedTime);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+									
+					// Se n�o existe nenhum agente registrado para o pr�ximo turno, j� pode agendar um novo CheckEndTurn
+					if (isBatch && registeredAgentsNextTurn == 0) {
+						addBehaviour(new CheckEndTurn(myAgent));
 					}
+					
+					// Atualiza o clock virtual
+					getClock().updateClock(1);
+	
+					lastUpdateTime = System.currentTimeMillis();
 				}
-								
-				// Se n�o existe nenhum agente registrado para o pr�ximo turno, j� pode agendar um novo CheckEndTurn
-				if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH) && registeredAgentsNextTurn == 0) {
-					addBehaviour(new CheckEndTurn(myAgent));
-				}
-
-				// Atualiza o clock virtual
-				getClock().updateClock();
-				
-				lastUpdateTime = System.currentTimeMillis();
-				
+			} finally {
+				batchLock.unlock();
 			}
 		}
 	
@@ -719,47 +728,62 @@ public class EnvironmentAgent extends MMSAgent {
 	/**
 	 * Registra a mensagem de um agente indicando que terminou o turno.
 	 */
-	private final synchronized void agentProcessed(int events) {
-		
-		// S� serve para funcionamento 
-		// Incrementar contador de agentes prontos
-		// Quando alcan�ar o total, atualizar o clock
-		registeredAgentsReady++;
-		agentEventsSent = agentEventsSent + events;
-		
-		this.addBehaviour(new CheckEndTurn(this));
+	private final void agentProcessed(int events) {
+		batchLock.lock();
+		try {
+			registeredAgentsReady++;
+			agentEventsSent = agentEventsSent + events;
+			this.addBehaviour(new CheckEndTurn(this));
+		} finally {
+			batchLock.unlock();
+		}
 
 	}
 	
 	/**
 	 * Registra a informação do EventServer que um evento foi processado
 	 */
-	public final synchronized void eventProcessed() {
+	public final void eventProcessed() {
 
-		agentEventsProcessed++;
-
-		this.addBehaviour(new CheckEndTurn(this));
+		batchLock.lock();
+		try {
+			agentEventsProcessed++;
+	
+			this.addBehaviour(new CheckEndTurn(this));
+		} finally {
+			batchLock.unlock();
+		}
 
 	}
 	
 	/**
 	 * Registra que um evento foi enviado pelo EventServer
 	 */
-	public final synchronized void eventSent() {
+	public final void eventSent() {
 		
-		// Incrementar contador de eventos enviados pelo EventServer
-		evtSrvEventsSent++;
+		batchLock.lock();
+		try {
+			// Incrementar contador de eventos enviados pelo EventServer
+			evtSrvEventsSent++;
+		} finally {
+			batchLock.unlock();
+		}
 		
 	}
 	
 	/**
 	 * Registra que um Agente terminou de processar
 	 */
-	private final synchronized void eventAgentProcessed() {
+	private final void eventAgentProcessed() {
 		
-		evtSrvEventsProcessed++;
-		
-		this.addBehaviour(new CheckEndTurn(this));
+		batchLock.lock();
+		try {
+			evtSrvEventsProcessed++;
+			
+			this.addBehaviour(new CheckEndTurn(this));
+		} finally {
+			batchLock.unlock();
+		}
 
 	}
 	
