@@ -27,9 +27,9 @@ public class LM_World extends World {
 	public final static int DIR_E 		= 6;
 	public final static int DIR_NE	 	= 7;
 	
-	class Agent {
+	class Position {
 
-		public Agent(String agentName) {
+		public Position(String agentName) {
 			this.agentName = agentName;
 		}
 		
@@ -62,7 +62,7 @@ public class LM_World extends World {
 		private int 	pos_x, pos_y;
 
 		// Informa��es sobre o Agente no local
-		Agent agent;
+		Position agent;
 
 		// Informa��es sobre o som no local 
 		Sound sound;
@@ -81,7 +81,7 @@ public class LM_World extends World {
 	protected Site[][] squareLattice;
 	
 	// Lista dos agentes no mundo virtual
-	protected HashMap<String, Agent> agents = new HashMap<String, Agent>();
+//	protected HashMap<String, Agent> agents = new HashMap<String, Agent>();
 	
 	@Override
 	protected void init() {
@@ -93,7 +93,7 @@ public class LM_World extends World {
 				squareLattice[i][j] = new Site(i, j);
 			}
 		}
-		
+	
 		setWorldGUI(new LM_BoardGUI(squareLattice));
 	}
 	

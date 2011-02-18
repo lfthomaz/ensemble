@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import mms.apps.lm.LM_World.Agent;
+import mms.apps.lm.LM_World.Position;
 import mms.apps.lm.LM_World.Direction;
 import mms.EventServer;
 import mms.Parameters;
@@ -26,9 +26,9 @@ public class LM_LifeCycleEventServer extends EventServer {
 		return true;
 	}
 
-	private Agent checkAgentPresence(int x, int y, Direction dir) {
+	private Position checkAgentPresence(int x, int y, Direction dir) {
 
-		Agent agent = null;
+		Position pos = null;
 		
 		switch (dir) {
 			case DIR_NW:
@@ -62,10 +62,10 @@ public class LM_LifeCycleEventServer extends EventServer {
 		}
 
 		if ((x >= 0 && x < LM_Constants.WorldSize) && (y >= 0 && y < LM_Constants.WorldSize)) {
-			agent = world.squareLattice[x][y].agent;
+			pos = world.squareLattice[x][y].agent;
 		}
 
-		return agent;
+		return pos;
 		
 	}
 	
@@ -95,15 +95,15 @@ public class LM_LifeCycleEventServer extends EventServer {
 		// --------------------------------------------------------------------------------------
 		// Morte de um Agente
 		
-		Set<String> e = world.agents.keySet();
+		Set<String> e = world.getEntityList();
 		for (String agent : e) {
 			int age = Integer.valueOf(envAgent.agentsPublicFacts.get(agent + ":Age"));
 			float energy = Float.valueOf(envAgent.agentsPublicFacts.get(agent + ":Energy"));
 			String proceduralGenoma = envAgent.agentsPublicFacts.get(agent + ":ProceduralGenoma");
 			String[] instr = proceduralGenoma.split(":");
 			if (age > LM_Constants.MaxAge || energy < LM_Constants.MinEnergy || instr.length > LM_Constants.DeathLength) {
+				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Agent '" + agent + "' has died");
 				envAgent.destroyAgent(agent);
-				System.out.println("Morreu o agente " + agent);
 			}
 		}
 
@@ -112,30 +112,31 @@ public class LM_LifeCycleEventServer extends EventServer {
 		
 		// tabela de agentes que j� receberam par
 		Set<String> alreadyPaired = new HashSet<String>();
-		ArrayList<Agent[]> pairs = new ArrayList<Agent[]>();
+		ArrayList<Position[]> pairs = new ArrayList<Position[]>();
 		
 		// Checar todos os pares de Agentes
-		Collection<Agent> agents = world.agents.values();
-		for (Agent agent : agents) {
+		Set<String> agents = world.getEntityList();
+		for (String agent : agents) {
+			Position pos = (Position)world.getEntityStateAttribute(agent, "POSITION");
 			// verificar se existe algum agente pr�ximo
 			for (Direction dir: Direction.values()) {
-				Agent mate = checkAgentPresence(agent.pos_x, agent.pos_y, dir);
+				Position mate = checkAgentPresence(pos.pos_x, pos.pos_y, dir);
 				if (mate != null) {
 					// S� emparelha se os dois n�o tiverem para inda
-					if (!alreadyPaired.contains(agent.agentName) && !alreadyPaired.contains(mate.agentName)) {
-						alreadyPaired.add(agent.agentName);
+					if (!alreadyPaired.contains(pos.agentName) && !alreadyPaired.contains(mate.agentName)) {
+						alreadyPaired.add(pos.agentName);
 						alreadyPaired.add(mate.agentName);
-						Agent[] pair = {agent, mate};
+						Position[] pair = {pos, mate};
 						pairs.add(pair);
 					}
 				}
 			}
 		}
 		// Para cada par, checar se eles satisfazem
-		for (Agent[] pair : pairs) {
+		for (Position[] pair : pairs) {
 			
-			Agent mate1 = pair[0];
-			Agent mate2 = pair[1];
+			Position mate1 = pair[0];
+			Position mate2 = pair[1];
 			
 			String 	name1 	= mate1.agentName;
 			int 	age1 	= Integer.valueOf(envAgent.agentsPublicFacts.get(name1+":Age"));

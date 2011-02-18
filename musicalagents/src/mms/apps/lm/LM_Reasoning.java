@@ -4,13 +4,20 @@ import mms.Actuator;
 import mms.Event;
 import mms.EventHandler;
 import mms.Reasoning;
+import mms.kb.Memory;
+import mms.kb.MemoryException;
 
 public class LM_Reasoning extends Reasoning {
 
 	private Actuator foot;
-	private Actuator mouth;
-	private Actuator evacuator;	
+	private Memory footMemory;
 	
+	private Actuator mouth;
+	private Memory mouthMemory;
+
+	private Actuator evacuator;	
+	private Memory evacuatorMemory;
+
 	private String[]	proceduralGenoma;
 	private int 		instrPointer = 0;
 
@@ -30,13 +37,16 @@ public class LM_Reasoning extends Reasoning {
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		if (evtHdl instanceof LM_MovementActuator) {
 			foot = (LM_MovementActuator)evtHdl;
+			footMemory = getAgent().getKB().getMemory(foot.getName());
 		}
 		else if (evtHdl instanceof LM_SoundActuator) {
 			mouth = (LM_SoundActuator)evtHdl;
+			mouthMemory = getAgent().getKB().getMemory(mouth.getName());
 		}
-		else if (evtHdl instanceof LM_SoundActuator) {
-			evacuator = (LM_FoodActuator)evtHdl;
-		}
+//		else if (evtHdl instanceof LM_SoundActuator) {
+//			evacuator = (LM_FoodActuator)evtHdl;
+//			evacuatorMemory = getAgent().getKB().getMemory(evacuator.getName());
+//		}
 	}
 
 	@Override
@@ -115,47 +125,58 @@ public class LM_Reasoning extends Reasoning {
 		// TODO N�o trata Loops e IFs
 		if (instr.equals("R")) {
 		
-			// Coloca a instru��o no KB para criar o evento
-			Event evt = new Event();
-			evt.objContent = getAgent().getLocalName() + " R";
-			getAgent().getKB().writeEventRepository("OUTPUT", "MOVEMENT", foot.getName(), evt);
+			String cmd = getAgent().getLocalName() + " R";
+			try {
+				footMemory.writeMemory(cmd);
+			} catch (MemoryException e) {
+				e.printStackTrace();
+			}
 			foot.act();
 			walked = 0;
 		
 		} else if (instr.equals("W")) {
 			
-			// Coloca a instru��o no KB para criar o evento
-			Event evt = new Event();
-			evt.objContent = getAgent().getLocalName() + " W";
-			getAgent().getKB().writeEventRepository("OUTPUT", "MOVEMENT", foot.getName(), evt);
+			String cmd = getAgent().getLocalName() + " W";
+			try {
+				footMemory.writeMemory(cmd);
+			} catch (MemoryException e) {
+				e.printStackTrace();
+			}
 			foot.act();
 			walked++;
 
 		} else if (instr.equals("S")) {
 			
 			// Coloca a nota a ser cantada
-			Event evt = new Event();
-			evt.objContent = (getAgent().getKB().readFact("SoundGenoma")).substring(0,1);
-			getAgent().getKB().writeEventRepository("OUTPUT", "SOUND", mouth.getName(), evt);
+			try {
+				String note = (getAgent().getKB().readFact("SoundGenoma")).substring(0,1);
+				mouthMemory.writeMemory(note);
+			} catch (MemoryException e) {
+				e.printStackTrace();
+			}
 			mouth.act();
 			energyWaste = energyWaste + LM_Constants.CostOfSinging;
 			walked = 0;
 			
 		} else if (instr.equals("T-")) {
 			
-			// Coloca a instru��o no KB para criar o evento
-			Event evt = new Event();
-			evt.objContent = getAgent().getLocalName() + " T-";
-			getAgent().getKB().writeEventRepository("OUTPUT", "MOVEMENT", foot.getName(), evt);
+			String cmd = getAgent().getLocalName() + " T-";
+			try {
+				footMemory.writeMemory(cmd);
+			} catch (MemoryException e) {
+				e.printStackTrace();
+			}
 			foot.act();
 			walked = 0;
 				
 		} else if (instr.equals("T+")) {
 				
-			// Coloca a instru��o no KB para criar o evento
-			Event evt = new Event();
-			evt.objContent = getAgent().getLocalName() + " T+";
-			getAgent().getKB().writeEventRepository("OUTPUT", "MOVEMENT", foot.getName(), evt);
+			String cmd = getAgent().getLocalName() + " T+";
+			try {
+				footMemory.writeMemory(cmd);
+			} catch (MemoryException e) {
+				e.printStackTrace();
+			}
 			foot.act();
 			walked = 0;
 				
@@ -164,9 +185,12 @@ public class LM_Reasoning extends Reasoning {
 			// Verifica o ListeningPleasure, se for maior que 1, vira para o som
 			
 			// Coloca a instru��o no KB para criar o evento
-			Event evt = new Event();
-			evt.objContent = getAgent().getLocalName() + " T+";
-			getAgent().getKB().writeEventRepository("OUTPUT", "MOVEMENT", foot.getName(), evt);
+			String cmd = getAgent().getLocalName() + " Ts";
+			try {
+				footMemory.writeMemory(cmd);
+			} catch (MemoryException e) {
+				e.printStackTrace();
+			}
 			foot.act();
 			walked = 0;
 			

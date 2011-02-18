@@ -57,6 +57,7 @@ public class Loader {
 	private static final String CONF_KB = "KB";
 	private static final String CONF_FACT = "FACT";
 	private static final String CONF_PUBLIC = "PUBLIC";
+	private static final String CONF_QUANTITY = "QUANTITY";
 	private static final String CONF_REAS_CYCLIC = "CYCLIC";
 	
 //	private Logger logger = Logger.getLogger("");
@@ -70,13 +71,24 @@ public class Loader {
 	// System initialization / termination
 	//--------------------------------------------------------------------------------
 	
-	private static void startJADE() {
+	private static void startJADE(Element elem_mms) {
 
 		// Cria o Container JADE
 		rt = Runtime.instance();
 		p = new ProfileImpl();
 		p.setParameter(Profile.MAIN_HOST, "localhost");
 		p.setParameter(Profile.SERVICES, "mms.clock.VirtualClockService;mms.comm.direct.CommDirectService;mms.commands.RouterService;mms.osc.OSCServerService");
+
+		// Load Global Parameters	
+		NodeList nl = elem_mms.getElementsByTagName(CONF_GLOBAL_PARAMETERS);
+		if (nl.getLength() == 1) {
+			Element elem_gp = (Element)nl.item(0);
+			
+			p.setParameter(Constants.CLOCK_MODE, readAttribute(elem_gp, Constants.CLOCK_MODE, Constants.CLOCK_CPU));
+			p.setParameter(Constants.PROCESS_MODE, readAttribute(elem_gp, Constants.PROCESS_MODE, Constants.MODE_REAL_TIME));
+			p.setParameter(Constants.OSC, readAttribute(elem_gp, Constants.OSC, "FALSE"));
+		}
+		
 		cc = rt.createMainContainer(p);
 		
 	}
@@ -95,7 +107,7 @@ public class Loader {
 		if (attrib != null && !attrib.equals("")) {
 			ret = attrib;
 		} else {
-			System.out.println("\tParameter " + attributeName + " not found in configuration file...");
+//			System.out.println("\tParameter " + attributeName + " not found in configuration file...");
 			ret = defaultValue;
 		}
 		
@@ -169,21 +181,10 @@ public class Loader {
 		
 	}
 	
-	private static void loadSystem(Document doc) {
+	private static void loadSystem(Element elem_mms) {
 		
 		NodeList nl;
-		Element elem_mms = doc.getDocumentElement();
 
-		// Load Global Parameters	
-		nl = elem_mms.getElementsByTagName(CONF_GLOBAL_PARAMETERS);
-		if (nl.getLength() == 1) {
-			Element elem_gp = (Element)nl.item(0);
-			
-			p.setParameter(Constants.CLOCK_MODE, readAttribute(elem_gp, Constants.CLOCK_MODE, Constants.CLOCK_CPU));
-			p.setParameter(Constants.PROCESS_MODE, readAttribute(elem_gp, Constants.PROCESS_MODE, Constants.MODE_REAL_TIME));
-			p.setParameter(Constants.OSC, readAttribute(elem_gp, Constants.OSC, "FALSE"));
-		}
-		
 		// Load Environment Agent
 		nl = elem_mms.getElementsByTagName(CONF_ENVIRONMENT_AGENT_CLASS);
 		if (nl.getLength() == 1) {
@@ -207,7 +208,6 @@ public class Loader {
 				if (nl.getLength() == 1) {
 					Element elem_gp = (Element)nl.item(0);
 					ea_parameters.put(Constants.CLASS_WORLD, readAttribute(elem_gp, Constants.CLASS_WORLD, "mms.world.World"));
-					ea_parameters.put(Constants.CLASS_ENTITY_STATE, readAttribute(elem_gp, Constants.CLASS_WORLD, "mms.world.EntityState"));
 					nl = elem_gp.getElementsByTagName("LAW");
 					if (nl.getLength() > 0) {
 						String laws = "";
@@ -269,130 +269,151 @@ public class Loader {
 		for (int i = 0; i < nl.getLength(); i++) {
 
 			Element elem_ma = (Element)nl.item(i);
-			String ma_class = readAttribute(elem_ma, CONF_CLASS, null);
-			String ma_name = readAttribute(elem_ma, CONF_NAME, ma_class+"_"+i);
-			Parameters parameters = readArguments(elem_ma);
+			String ma_class = readAttribute(elem_ma, CONF_CLASS, "mms.MusicalAgent");
+			String ma_name_pre = readAttribute(elem_ma, CONF_NAME, ma_class);
+			int ma_quantiy = Integer.valueOf(readAttribute(elem_ma, CONF_QUANTITY, "1"));
 			
-			// Le os facts a serem carregados na KB
-			Parameters facts = readFacts(elem_ma);
-
-			try {
-				// Procurar a classe correspondente a esta instância
-				NodeList nl_ma_class = elem_mms.getElementsByTagName(CONF_MUSICAL_AGENT_CLASS);
-				for (int j = 0; j < nl_ma_class.getLength(); j++) {
-					Element elem_ma_class = (Element)nl_ma_class.item(j);
-					String ma_class_name = readAttribute(elem_ma_class, CONF_NAME, null);
-					if (ma_class_name.equals(ma_class)) {
-						
-						// Criar nova instância do MA solicitado
-						String ma_class_class = readAttribute(elem_ma_class, CONF_CLASS, "mms.rt.MusicalAgent");
-						Class maClass = Class.forName(ma_class_class);
-						MusicalAgent ma = (MusicalAgent)maClass.newInstance();
-						Object[] arguments;
-						arguments = new Object[1];
-						arguments[0] = parameters;
-						ma.setArguments(arguments);
-						
-						System.out.println("Class " + ma_class_name);
-						
-						// Preenche a KB do agente
-						NodeList nl_ma_class_kb = elem_ma_class.getElementsByTagName(CONF_KB);
-						if (nl_ma_class_kb.getLength() == 1) {
-							Element elem_ma_class_kb = (Element)nl_ma_class_kb.item(0);
-							NodeList nl_facts = elem_ma_class_kb.getElementsByTagName(CONF_FACT);
-							for (int k = 0; k < nl_facts.getLength(); k++) {
-								// Cria o fact na KB
-								Element elem_fact = (Element)nl_facts.item(k);
-								String fact_name = elem_fact.getAttribute(CONF_NAME);
-								String fact_value = elem_fact.getAttribute(CONF_VALUE);
-								Boolean fact_public = Boolean.valueOf(elem_fact.getAttribute(CONF_PUBLIC));
-								ma.getKB().registerFact(fact_name, fact_value, fact_public);
-								// Verifica se existe algum fact a ser sobrescrito para esta instância
-								if (facts.containsKey(fact_name)) {
-									ma.getKB().updateFact(fact_name, facts.get(fact_name));
-								}
-							}
-						}
-						
-						// Inserir Componentes Musicais no MA
-						NodeList nl_ma_class_comps = elem_ma_class.getElementsByTagName(CONF_COMPONENTS);
-						if (nl_ma_class_comps.getLength() == 1) {
-							Element elem_ma_class_comps = (Element)nl_ma_class_comps.item(0);
-							
-							// Inserir os Reasonings
-							NodeList nl_reasonings = elem_ma_class_comps.getElementsByTagName(CONF_COMP_REASONING);
-							for (int k = 0; k < nl_reasonings.getLength(); k++) {
-								Element elem_reasoning = (Element)nl_reasonings.item(k);
-								Parameters args = readArguments(elem_reasoning);
-								String comp_name = readAttribute(elem_reasoning, CONF_NAME, null);
-								System.out.println("\tREASONING " + comp_name);
-								Parameters args_comp = readComponentArguments(elem_ma, comp_name);
-								args.merge(args_comp);
-								String comp_class = readAttribute(elem_reasoning, CONF_CLASS, null);
-								args.put(Constants.PARAM_REAS_CYCLIC, readAttribute(elem_reasoning, CONF_REAS_CYCLIC, "false"));
-								ma.addComponent(comp_name, comp_class, args);
-							} 
-							
-							// Inserir os Sensors
-							NodeList nl_sensors = elem_ma_class_comps.getElementsByTagName(CONF_COMP_SENSOR);
-							for (int k = 0; k < nl_sensors.getLength(); k++) {
-								Element elem_sensor = (Element)nl_sensors.item(k);
-								Parameters args = readArguments(elem_sensor);
-								String comp_name = readAttribute(elem_sensor, CONF_NAME, "Sensor");
-								System.out.println("\tSENSOR " + comp_name);
-								Parameters args_comp = readComponentArguments(elem_ma, comp_name);
-								args.merge(args_comp);
-								String comp_class = readAttribute(elem_sensor, CONF_CLASS, "mms.Sensor");
-								String comp_event_type = readAttribute(elem_sensor, CONF_COMP_EVENT_TYPE, "DUMMY");
-								String comp_position = readAttribute(elem_sensor, "POSITION", "(0;0;0)");
-								args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
-								args.put(Constants.PARAM_COMM_CLASS, comp_event_type);
-								args.put("POSITION", comp_position);
-								ma.addComponent(comp_name, comp_class, args);
-							}
-
-							// Inserir os Actuators
-							NodeList nl_actuators = elem_ma_class_comps.getElementsByTagName(CONF_COMP_ACTUATOR);
-							for (int k = 0; k < nl_actuators.getLength(); k++) {
-								Element elem_actuator = (Element)nl_actuators.item(k);
-								Parameters args = readArguments(elem_actuator);
-								String comp_name = readAttribute(elem_actuator, CONF_NAME, "Actuator");
-								System.out.println("\tACTUATOR " + comp_name);
-								Parameters args_comp = readComponentArguments(elem_ma, comp_name);
-								args.merge(args_comp);
-								String comp_class = readAttribute(elem_actuator, CONF_CLASS, "mms.Actuator");
-								String comp_event_type = readAttribute(elem_actuator, CONF_COMP_EVENT_TYPE, "DUMMY");
-								String comp_position = readAttribute(elem_actuator, "POSITION", "(0;0;0)");
-								args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
-								args.put(Constants.PARAM_COMM_CLASS, comp_event_type);
-								args.put("POSITION", comp_position);
-								ma.addComponent(comp_name, comp_class, args);
-							}
-							
-						}
-
-						// Inserir o Agente no Jade
-						AgentController ac = cc.acceptNewAgent(ma_name, ma);
-						ac.start();
-						
-						break;
-					}
+			for (int qty = 0; qty < ma_quantiy; qty++) {
+				
+				String ma_name;
+				if (ma_quantiy > 1) {
+					ma_name = ma_name_pre + "_" + qty;
+				} else {
+					ma_name = ma_name_pre;
 				}
 				
+				Parameters parameters = readArguments(elem_ma);
 				
-			} catch (ClassNotFoundException e) {
-				System.err.println("FATAL ERROR: Class " + ma_class + " not found");
-				System.exit(-1);
-			} catch (InstantiationException e) {
-				System.err.println("FATAL ERROR: Not possible to create an instance of " + ma_class);
-				System.exit(-1);
-			} catch (IllegalAccessException e) {
-				System.err.println("FATAL ERROR: Not possible to create an instance of " + ma_class);
-				System.exit(-1);
-			} catch (StaleProxyException e) {
-				System.err.println("FATAL ERROR: Not possible to insert agent " + ma_class + " in JADE");
-				System.exit(-1);
+				// Le os facts a serem carregados na KB
+				Parameters facts = readFacts(elem_ma);
+	
+				try {
+					// Procurar a classe correspondente a esta instância
+					NodeList nl_ma_class = elem_mms.getElementsByTagName(CONF_MUSICAL_AGENT_CLASS);
+					for (int j = 0; j < nl_ma_class.getLength(); j++) {
+						Element elem_ma_class = (Element)nl_ma_class.item(j);
+						String ma_class_name = readAttribute(elem_ma_class, CONF_NAME, null);
+						if (ma_class_name.equals(ma_class)) {
+							
+							// Criar nova instância do MA solicitado
+							String ma_class_class = readAttribute(elem_ma_class, CONF_CLASS, "mms.rt.MusicalAgent");
+							Class maClass = Class.forName(ma_class_class);
+							MusicalAgent ma = (MusicalAgent)maClass.newInstance();
+							Object[] arguments;
+							arguments = new Object[1];
+							arguments[0] = parameters;
+							ma.setArguments(arguments);
+							
+							if (qty == 1) {
+								System.out.println("Class " + ma_class_name);
+							}
+							
+							// Preenche a KB do agente
+							NodeList nl_ma_class_kb = elem_ma_class.getElementsByTagName(CONF_KB);
+							if (nl_ma_class_kb.getLength() == 1) {
+								Element elem_ma_class_kb = (Element)nl_ma_class_kb.item(0);
+								NodeList nl_facts = elem_ma_class_kb.getElementsByTagName(CONF_FACT);
+								for (int k = 0; k < nl_facts.getLength(); k++) {
+									// Cria o fact na KB
+									Element elem_fact = (Element)nl_facts.item(k);
+									String fact_name = elem_fact.getAttribute(CONF_NAME);
+									String fact_value = elem_fact.getAttribute(CONF_VALUE);
+									Boolean fact_public = Boolean.valueOf(elem_fact.getAttribute(CONF_PUBLIC));
+									ma.getKB().registerFact(fact_name, fact_value, fact_public);
+									// Verifica se existe algum fact a ser sobrescrito para esta instância
+									if (facts.containsKey(fact_name)) {
+										ma.getKB().updateFact(fact_name, facts.get(fact_name));
+									}
+								}
+							}
+							
+							// Inserir Componentes Musicais no MA
+							NodeList nl_ma_class_comps = elem_ma_class.getElementsByTagName(CONF_COMPONENTS);
+							if (nl_ma_class_comps.getLength() == 1) {
+								Element elem_ma_class_comps = (Element)nl_ma_class_comps.item(0);
+								
+								// Inserir os Reasonings
+								NodeList nl_reasonings = elem_ma_class_comps.getElementsByTagName(CONF_COMP_REASONING);
+								for (int k = 0; k < nl_reasonings.getLength(); k++) {
+									Element elem_reasoning = (Element)nl_reasonings.item(k);
+									Parameters args = readArguments(elem_reasoning);
+									String comp_name = readAttribute(elem_reasoning, CONF_NAME, null);
+									System.out.println("\tREASONING " + comp_name);
+									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
+									args.merge(args_comp);
+									String comp_class = readAttribute(elem_reasoning, CONF_CLASS, null);
+									args.put(Constants.PARAM_REAS_CYCLIC, readAttribute(elem_reasoning, CONF_REAS_CYCLIC, "false"));
+									ma.addComponent(comp_name, comp_class, args);
+								} 
+								
+								// Inserir os Sensors
+								NodeList nl_sensors = elem_ma_class_comps.getElementsByTagName(CONF_COMP_SENSOR);
+								for (int k = 0; k < nl_sensors.getLength(); k++) {
+									Element elem_sensor = (Element)nl_sensors.item(k);
+									Parameters args = readArguments(elem_sensor);
+									String comp_name = readAttribute(elem_sensor, CONF_NAME, "Sensor");
+									System.out.println("\tSENSOR " + comp_name);
+									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
+									args.merge(args_comp);
+									String comp_class = readAttribute(elem_sensor, CONF_CLASS, "mms.Sensor");
+									String comp_event_type = readAttribute(elem_sensor, CONF_COMP_EVENT_TYPE, "DUMMY");
+									String comp_comm_class = readAttribute(elem_sensor, CONF_COMM, "mms.comm.CommMessage");
+									String comp_memory = readAttribute(elem_sensor, "MEMORY", "mms.kb.EventMemory");
+									String comp_position = readAttribute(elem_sensor, "POSITION", "(0;0;0)");
+									args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
+									args.put(Constants.PARAM_COMM_CLASS, comp_comm_class);
+									args.put(Constants.PARAM_MEMORY, comp_memory);
+									args.put(Constants.PARAM_POSITION, comp_position);
+									ma.addComponent(comp_name, comp_class, args);
+								}
+	
+								// Inserir os Actuators
+								NodeList nl_actuators = elem_ma_class_comps.getElementsByTagName(CONF_COMP_ACTUATOR);
+								for (int k = 0; k < nl_actuators.getLength(); k++) {
+									Element elem_actuator = (Element)nl_actuators.item(k);
+									Parameters args = readArguments(elem_actuator);
+									String comp_name = readAttribute(elem_actuator, CONF_NAME, "Actuator");
+									System.out.println("\tACTUATOR " + comp_name);
+									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
+									args.merge(args_comp);
+									String comp_class = readAttribute(elem_actuator, CONF_CLASS, "mms.Actuator");
+									String comp_event_type = readAttribute(elem_actuator, CONF_COMP_EVENT_TYPE, "DUMMY");
+									String comp_comm_class = readAttribute(elem_actuator, CONF_COMM, "mms.comm.CommMessage");
+									String comp_memory = readAttribute(elem_actuator, "MEMORY", "mms.kb.EventMemory");
+									String comp_position = readAttribute(elem_actuator, "POSITION", "(0;0;0)");
+									args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
+									args.put(Constants.PARAM_COMM_CLASS, comp_comm_class);
+									args.put(Constants.PARAM_MEMORY, comp_memory);
+									args.put(Constants.PARAM_POSITION, comp_position);
+									ma.addComponent(comp_name, comp_class, args);
+								}
+								
+							}
+	
+							// Inserir o Agente no Jade
+							AgentController ac = cc.acceptNewAgent(ma_name, ma);
+							ac.start();
+							
+							break;
+						}
+					}
+					
+				} catch (ClassNotFoundException e) {
+					System.err.println("FATAL ERROR: Class " + ma_class + " not found");
+					System.exit(-1);
+				} catch (InstantiationException e) {
+					System.err.println("FATAL ERROR: Not possible to create an instance of " + ma_class);
+					System.exit(-1);
+				} catch (IllegalAccessException e) {
+					System.err.println("FATAL ERROR: Not possible to create an instance of " + ma_class);
+					System.exit(-1);
+				} catch (StaleProxyException e) {
+					System.err.println("FATAL ERROR: Not possible to insert agent " + ma_class + " in JADE");
+					System.exit(-1);
+				}
+		
 			}
+			
 		}
 		
 	}
@@ -479,8 +500,9 @@ public class Loader {
 				
 		// Start the system
 		System.out.println("------------ Loading MMS ------------");
-		Loader.startJADE();
-		Loader.loadSystem(Loader.loadXMLFile(args[0]));
+		Element elem_mms = Loader.loadXMLFile(args[0]).getDocumentElement();
+		Loader.startJADE(elem_mms);
+		Loader.loadSystem(elem_mms);
 		
 		// TODO Colocar alguma condição para que o usuário possa encerrar a execução do sistema
 //		while (true) {}

@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import mms.EnvironmentAgent;
+import mms.MusicalAgent;
 import mms.Parameters;
 import mms.clock.VirtualClockHelper;
 import mms.world.law.Law;
@@ -50,7 +51,7 @@ public class World {
 	 * Table with entities' state
 	 */
 	// TODO Na hora da criação, fine tune no tamanho e no load factor
-    protected HashMap<String, EntityState> entities;
+    protected HashMap<String, EntityState> entities = new HashMap<String, EntityState>();
 
     /**
      * World GUI
@@ -84,8 +85,6 @@ public class World {
     	this.envAgent = envAgent;
     	this.clock = envAgent.getClock();
     	
-    	entities = new HashMap<String, EntityState>();
-    	
     	// Laws
     	if (getParameters().containsKey("LAW")) {
 	    	String[] laws = getParameters().get("LAW").split(" ");
@@ -99,7 +98,10 @@ public class World {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	
+		
+//		System.out.println("[WORLD] " + "Initialized");
+		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":WORLD] " + "Initialized");
+	
     }
     
     /**
@@ -114,10 +116,13 @@ public class World {
     	lock.lock();
     	try {
     		if (!entities.containsKey(entityName)) {
+    			
     			// Creates a new EntityState for the Entity
     			EntityState state = new EntityState();
 		    	entities.put(entityName, state);
+
 		    	// Checks for defaults attributes for an entity
+		    	// TODO ISSO NÃO VALE PARA O LM!!!
 		    	Vector position = null;
 		    	if (parameters.contains("POSITION")) {
 		    		position = Vector.parse(parameters.get("POSITION"));
@@ -125,7 +130,12 @@ public class World {
 		    		position = new Vector(dimensions);
 		    	}
 	    		state.attributes.put("POSITION", position);
+	    		
+	    		// Calls user implemented method
+	    		entityAdded(entityName);
+	    		
 		    	result = true;
+		    	
     		}			
     	} finally {
     		lock.unlock();
@@ -141,7 +151,11 @@ public class World {
      */
     public final void removeEntity(String entityName) {
     	
-    	entities.remove(entityName);
+		// Calls user implemented method
+		entityRemoved(entityName);
+
+		// Removes entity from the world
+		entities.remove(entityName);
     	
     }
     
@@ -214,6 +228,12 @@ public class World {
     	
     }
     
+    public final void setWorldGUI(WorldGUI gui) {
+    	
+    	this.gui = gui;
+    	
+    }
+    
     //--------------------------------------------------------------------------------
 	// State Management methods
 	//--------------------------------------------------------------------------------
@@ -231,6 +251,12 @@ public class World {
     public void addEntityStateAttribute(String entityName, String attribute, Object value) {
 
     	entities.get(entityName).attributes.put(attribute, value);
+    
+    }
+    
+    public Object removeEntityStateAttribute(String entityName, String attribute) {
+
+    	return entities.get(entityName).attributes.remove(attribute);
     
     }
     
@@ -268,6 +294,22 @@ public class World {
 	 */
 	protected void init() throws Exception {
 //		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "init()");
+	}
+	
+	/**
+	 * Called when an entity is added from the World. Must be overrided by the user.
+	 * @param entityName
+	 */
+	protected void entityAdded(String entityName) {
+//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "entityAdded()");
+	}
+
+	/**
+	 * Called when an entity is removed from the World. Must be overrided by the user.
+	 * @param entityName
+	 */
+	protected void entityRemoved(String entityName) {
+//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "entityRemoved()");
 	}
 
 }

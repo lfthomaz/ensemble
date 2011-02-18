@@ -240,9 +240,9 @@ public class Actuator extends EventHandler implements Acting {
 			
 		} else {
 			
+			// TODO E se não for em segundos? No caso de turnos!
 			double instant = clock.getCurrentTime(TimeUnit.SECONDS);
 			content = myMemory.readMemory(instant, TimeUnit.SECONDS);
-//			System.out.println("[" + getAgent().getName() + "] Content read = " + content);
 			
 		}
 

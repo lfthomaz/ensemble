@@ -2,7 +2,6 @@ package mms.apps.lm;
 
 import mms.Actuator;
 import mms.Event;
-import mms.MusicalAgent;
 import mms.Parameters;
 
 public class LM_SoundActuator extends Actuator {

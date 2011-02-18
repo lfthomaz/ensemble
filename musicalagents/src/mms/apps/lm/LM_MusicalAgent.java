@@ -9,7 +9,7 @@ import mms.Parameters;
 
 public class LM_MusicalAgent extends MusicalAgent {
 
-	private void randomizeSoundGenoma() {
+	private String randomizeSoundGenoma() {
 		
 		// Sorteia um SoundGenoma, de 1 at� 10 notas
 		int numberOfNotes = (int)Math.ceil(Math.random() * LM_Constants.MaxSoundGenomeLength);
@@ -18,12 +18,12 @@ public class LM_MusicalAgent extends MusicalAgent {
 			soundGenoma = soundGenoma + String.valueOf((int)Math.ceil(Math.random() * 12)) + ":";
 		}
 		soundGenoma  = soundGenoma .substring(0, soundGenoma.length() - 1);
-		
-		getKB().registerFact("SoundGenoma", soundGenoma, true);
+
+		return soundGenoma;
 		
 	}
 	
-	private void randomizeProceduralGenoma() {
+	private String randomizeProceduralGenoma() {
 		
 		// Sorteia um ProceduralGenoma, de 1 at� DeathLength
 		int numberOfInstructions = (int)Math.ceil(Math.random() * LM_Constants.DeathLength);
@@ -103,38 +103,16 @@ public class LM_MusicalAgent extends MusicalAgent {
 		}
 		proceduralGenoma = proceduralGenoma.substring(0, proceduralGenoma.length() - 1);
 		
-		getKB().registerFact("ProceduralGenoma", proceduralGenoma, true);
+		return proceduralGenoma;
 		
 	}
 	
-	// Argumentos: SoundGenoma, ProceduralGenoma, Energy, Position
-	public void init(Hashtable<String,String> parameters) {
-
-		String pos_x = null;
-		String pos_y = null;
-
-		// Agente rand�mico criado na inicializa��o
-		if (parameters == null) {
-			
-			randomizeSoundGenoma();
-			randomizeProceduralGenoma();
-			getKB().registerFact("Energy", "15.0", true);
-			
-		} else {
+	@Override
+	protected void configure() {
 		
-			getKB().registerFact("SoundGenoma", parameters.get("SoundGenoma"), true);
-			getKB().registerFact("ProceduralGenoma", parameters.get("ProceduralGenoma"), true);
-			getKB().registerFact("Energy", parameters.get("Energy"), true);
-			pos_x = parameters.get("pos_x");
-			pos_y = parameters.get("pos_y");
+		String pos_x = parameters.get("pos_x");
+		String pos_y = parameters.get("pos_y");
 
-		}
-		
-		getKB().registerFact("Age", "0", true);
-		getKB().registerFact("ListeningPleasure", "0.0", true);
-
-		System.out.println(getLocalName() + ": "  + getKB().readFact("SoundGenoma") + "\t" + getKB().readFact("ProceduralGenoma"));
-		
 		// Adiciona os componentes do Agente Musical
 		// TODO Nesse caso, deve ser feito depois caso o componente precise de alguma informa��o do KB
 		this.addComponent("Reasoning", "mms.apps.lm.LM_Reasoning", null);
@@ -144,17 +122,17 @@ public class LM_MusicalAgent extends MusicalAgent {
 			footParameters.put("pos_x", pos_x);
 			footParameters.put("pos_y", pos_y);
 		}
-		this.addComponent("Feet", "mms.apps.lm.LM_Reasoning", footParameters);
+		this.addComponent("Feet", "mms.apps.lm.LM_MovementActuator", footParameters);
 		
-		this.addComponent("Mouth", "mms.apps.lm.LM_SoundActuator", null);
+		this.addComponent("Mouth", "mms.apps.lm.LM_SoundActuator", new Parameters());
 		
-		this.addComponent("Ear", "mms.apps.lm.LM_SoundSensor", null);
+		this.addComponent("Ear", "mms.apps.lm.LM_SoundSensor", new Parameters());
 
-		this.addComponent("Food", "mms.apps.lm.LM_FoodSensor", null);
+//		this.addComponent("Food", "mms.apps.lm.LM_FoodSensor", new Parameters());
 
-		//this.addComponent(new LM_FoodActuator("Evacuador", this));
+//		//this.addComponent(new LM_FoodActuator("Evacuador", this));
 		
-		// Tentancles
+		// Tentacles
 		Parameters leftParameters = new Parameters();
 		leftParameters.put("position", "LEFT");
 		this.addComponent("Tentacle_left", "mms.apps.lm.LM_TentacleSensor", leftParameters);
@@ -165,6 +143,20 @@ public class LM_MusicalAgent extends MusicalAgent {
 		frontParameters.put("position", "FRONT");
 		this.addComponent("Tentacle_front", "mms.apps.lm.LM_TentacleSensor", frontParameters);
 		
+	}
+	
+	@Override
+	protected void init() {
+		
+		// Agente rand�mico criado na inicializa��o
+		getKB().registerFact("SoundGenoma", parameters.get("SoundGenoma", randomizeSoundGenoma()), true);
+		getKB().registerFact("ProceduralGenoma", parameters.get("ProceduralGenoma", randomizeProceduralGenoma()), true);
+		getKB().registerFact("Energy", parameters.get("Energy", "15.0"), true);		
+		getKB().registerFact("Age", "0", true);
+		getKB().registerFact("ListeningPleasure", "0.0", true);
+
+		System.out.println(getLocalName() + ": "  + getKB().readFact("SoundGenoma") + "\t" + getKB().readFact("ProceduralGenoma"));
+
 	}
 
 }

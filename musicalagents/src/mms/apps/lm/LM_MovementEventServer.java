@@ -3,7 +3,7 @@ package mms.apps.lm;
 import java.util.Hashtable;
 import java.util.Set;
 
-import mms.apps.lm.LM_World.Agent;
+import mms.apps.lm.LM_World.Position;
 import mms.EnvironmentAgent;
 import mms.Event;
 import mms.EventServer;
@@ -15,13 +15,10 @@ public class LM_MovementEventServer extends EventServer {
 	LM_World world;
 	
 	// Campos para o evento
-	private String 	destAgentName;
-	private String 	destAgentCompName;
-	private String  destAgentNote;
-	private Agent 	proxAgent;
-	
-	// 
-	private int newAgentsCounter = 0;
+	private String 		destAgentName;
+	private String 		destAgentCompName;
+	private String  	destAgentNote;
+	private Position 	proxPosition;
 	
 	@Override
 	protected void configure() {
@@ -37,9 +34,9 @@ public class LM_MovementEventServer extends EventServer {
 	}
 
 	
-	private Agent checkAgentPresence(int x, int y) {
+	private Position checkAgentPresence(int x, int y) {
 
-		Agent agent = null;
+		Position agent = null;
 		if ((x >= 0 && x < LM_Constants.WorldSize) && (y >= 0 && y < LM_Constants.WorldSize)) {
 			agent = world.squareLattice[x][y].agent;
 		}
@@ -57,7 +54,7 @@ public class LM_MovementEventServer extends EventServer {
 			String[] str = sensor.split(":");
 			Hashtable<String,String> param = sensors.get(str[0] + ":" + str[1]);
 
-			Agent agent = world.agents.get(str[0]);
+			Position agent = (Position)world.getEntityStateAttribute(str[0], "POSITION");
 			if (agent != null) {
 			
 				int x = agent.pos_x;
@@ -66,9 +63,6 @@ public class LM_MovementEventServer extends EventServer {
 				if (param == null) {
 					System.out.println(str[0] + ":" + str[1] + " param NULL");
 				}
-				if (sensor == null) {
-					System.out.println("sensor NULL");
-				}
 				
 				String position = param.get("position");
 				
@@ -76,80 +70,80 @@ public class LM_MovementEventServer extends EventServer {
 				
 				case LM_World.DIR_N:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x, y-1);
+						proxPosition = checkAgentPresence(x, y-1);
 					} else if (position.equals("FRONT")) {
-						proxAgent  = checkAgentPresence(x-1, y);
+						proxPosition  = checkAgentPresence(x-1, y);
 					} else if (position.equals("RIGHT")) {
-						proxAgent  = checkAgentPresence(x, y+1);
+						proxPosition  = checkAgentPresence(x, y+1);
 					}
 					break;
 				case LM_World.DIR_NE:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x-1, y-1);
+						proxPosition = checkAgentPresence(x-1, y-1);
 					} else if (position.equals("FRONT")) {
-						proxAgent = checkAgentPresence(x-1, y+1);
+						proxPosition = checkAgentPresence(x-1, y+1);
 					} else if (position.equals("RIGHT")) {
-						proxAgent = checkAgentPresence(x+1, y+1);
+						proxPosition = checkAgentPresence(x+1, y+1);
 					}
 					break;
 				case LM_World.DIR_E:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x-1, y);
+						proxPosition = checkAgentPresence(x-1, y);
 					} else if (position.equals("FRONT")) {
-						proxAgent = checkAgentPresence(x, y+1);
+						proxPosition = checkAgentPresence(x, y+1);
 					} else if (position.equals("RIGHT")) {
-						proxAgent = checkAgentPresence(x+1, y);
+						proxPosition = checkAgentPresence(x+1, y);
 					}
 					break;
 				case LM_World.DIR_SE:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x-1, y+1);
+						proxPosition = checkAgentPresence(x-1, y+1);
 					} else if (position.equals("FRONT")) {
-						proxAgent = checkAgentPresence(x+1, y+1);
+						proxPosition = checkAgentPresence(x+1, y+1);
 					} else if (position.equals("RIGHT")) {
-						proxAgent = checkAgentPresence(x+1, y-1);
+						proxPosition = checkAgentPresence(x+1, y-1);
 					}
 					break;
 				case LM_World.DIR_S:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x, y+1);
+						proxPosition = checkAgentPresence(x, y+1);
 					} else if (position.equals("FRONT")) {
-						proxAgent = checkAgentPresence(x+1, y);
+						proxPosition = checkAgentPresence(x+1, y);
 					} else if (position.equals("RIGHT")) {
-						proxAgent = checkAgentPresence(x, y-1);
+						proxPosition = checkAgentPresence(x, y-1);
 					}
 					break;
 				case LM_World.DIR_SW:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x+1, y+1);
+						proxPosition = checkAgentPresence(x+1, y+1);
 					} else if (position.equals("FRONT")) {
-						proxAgent = checkAgentPresence(x+1, y-1);
+						proxPosition = checkAgentPresence(x+1, y-1);
 					} else if (position.equals("RIGHT")) {
-						proxAgent = checkAgentPresence(x-1, y-1);
+						proxPosition = checkAgentPresence(x-1, y-1);
 					}
 					break;
 				case LM_World.DIR_W:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x+1, y);
+						proxPosition = checkAgentPresence(x+1, y);
 					} else if (position.equals("FRONT")) {
-						proxAgent = checkAgentPresence(x, y-1);
+						proxPosition = checkAgentPresence(x, y-1);
 					} else if (position.equals("RIGHT")) {
-						proxAgent = checkAgentPresence(x-1, y);
+						proxPosition = checkAgentPresence(x-1, y);
 					}
 					break;
 				case LM_World.DIR_NW:
 					if (position.equals("LEFT")) {
-						proxAgent = checkAgentPresence(x-1, y+1);
+						proxPosition = checkAgentPresence(x-1, y+1);
 					} else if (position.equals("FRONT")) {
-						proxAgent  = checkAgentPresence(x-1, y-1);
+						proxPosition  = checkAgentPresence(x-1, y-1);
 					} else if (position.equals("RIGHT")) {
-						proxAgent  = checkAgentPresence(x+1, y-1);
+						proxPosition  = checkAgentPresence(x+1, y-1);
 					}
 					break;
 				}
 				
 				// Se existe um agente pr�ximo, guarda as informa��es e chama o action()
-				if (proxAgent != null) {
+				if (proxPosition != null) {
 					destAgentName 		= str[0];
 					destAgentCompName 	= str[1];
 					destAgentNote 		= envAgent.agentsPublicFacts.get(destAgentName+":"+"SoundGenoma").substring(0, 1);
@@ -169,7 +163,7 @@ public class LM_MovementEventServer extends EventServer {
 		String agentName = str[0];
 		String instr = str[1];
 		
-		Agent agent = world.agents.get(agentName);
+		Position agent = (Position)world.getEntityStateAttribute(agentName, "POSITION");
 		
 		if (instr.equals("W")) {
 			
@@ -275,16 +269,16 @@ public class LM_MovementEventServer extends EventServer {
 		}
 		
 	}
-	
-	public Hashtable<String, String> actuatorRegistered(String agentName, String eventHandlerName, Hashtable<String, String> param) {
-		
-		//System.out.println("LM_MovementEventServer: Novo atuador registrado");
+
+	@Override
+	protected Parameters actuatorRegistered(String agentName, String eventHandlerName, Parameters userParam) {
+
 		int pos_x = -1;
 		int pos_y = -1;
 		
-		if (param.size() == 2) {
-			pos_x = Integer.valueOf(param.get("pos_x"));
-			pos_y = Integer.valueOf(param.get("pos_y"));
+		if (userParam.containsKey("pos_x") && userParam.containsKey("pos_y")) {
+			pos_x = Integer.valueOf(userParam.get("pos_x"));
+			pos_y = Integer.valueOf(userParam.get("pos_y"));
 		} // Se n�o foi passada uma posi��o como par�metro, ou se j� existe um agente na posi��o, posiciona o agente aleatoriamente no mundo virtual
 		else {
 			boolean found = false;
@@ -298,27 +292,27 @@ public class LM_MovementEventServer extends EventServer {
 		}
 		
 		// Crio um novo agente
-		Agent agent = world.new Agent(agentName);
-		agent.pos_x = pos_x;
-		agent.pos_y = pos_y;
+		Position pos = world.new Position(agentName);
+		pos.pos_x = pos_x;
+		pos.pos_y = pos_y;
 		//agent.direction = (int) Math.floor(Math.random() * 4); 
-		agent.direction = 0; 
-		world.agents.put(agentName, agent);
+		pos.direction = 0;
+		world.addEntityStateAttribute(agentName, "POSITION", pos);
 		
-		world.squareLattice[pos_x][pos_y].agent = agent;
+		world.squareLattice[pos_x][pos_y].agent = pos;
 
-		System.out.println("Coloquei um novo agente " + agentName + " em (" + pos_x + ", " + pos_y + ") com dir " + agent.direction);
+		System.out.println("Coloquei um novo agente " + agentName + " em (" + pos_x + ", " + pos_y + ") com dir " + pos.direction);
 		
 		return null;
 		
 	}
 	
-	// TODO Implementar a retirada do agente do mundo
+	@Override
 	public void actuatorDeregistered(String agentName, String eventHandlerName) {
 		
-		Agent agent = world.agents.get(agentName);
+		Position agent = (Position)world.getEntityStateAttribute(agentName, "POSITION");
 		world.squareLattice[agent.pos_x][agent.pos_y].agent = null;
-		world.agents.remove(agentName);
+		world.removeEntityStateAttribute(agentName, "POSITION");
 		
 	}
 

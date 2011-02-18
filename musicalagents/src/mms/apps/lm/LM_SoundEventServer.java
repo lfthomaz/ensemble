@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
-import mms.apps.lm.LM_World.Agent;
+import mms.apps.lm.LM_World.Position;
 import mms.apps.lm.LM_World.Sound;
 import mms.EnvironmentAgent;
 import mms.Event;
@@ -228,15 +228,15 @@ public class LM_SoundEventServer extends EventServer {
 		for (Event evt : events) {
 			// Propagar o som
 			int note = Integer.parseInt((String)evt.objContent);
-			Agent agent = world.agents.get(evt.oriAgentName);
-			setSound(agent.pos_x - 1, 	agent.pos_y, 		note, LM_Constants.SoundRadius, LM_World.DIR_N);
-			setSound(agent.pos_x - 1, 	agent.pos_y + 1,	note, LM_Constants.SoundRadius, LM_World.DIR_NE);
-			setSound(agent.pos_x, 		agent.pos_y + 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_E);
-			setSound(agent.pos_x + 1, 	agent.pos_y + 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_SE);
-			setSound(agent.pos_x + 1, 	agent.pos_y,	 	note, LM_Constants.SoundRadius, LM_World.DIR_S);
-			setSound(agent.pos_x + 1, 	agent.pos_y - 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_SW);
-			setSound(agent.pos_x, 		agent.pos_y - 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_W);
-			setSound(agent.pos_x - 1, 	agent.pos_y - 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_NW);
+			Position pos = (Position)world.getEntityStateAttribute(evt.oriAgentName, "POSITION");
+			setSound(pos.pos_x - 1, 	pos.pos_y, 		note, LM_Constants.SoundRadius, LM_World.DIR_N);
+			setSound(pos.pos_x - 1, 	pos.pos_y + 1,	note, LM_Constants.SoundRadius, LM_World.DIR_NE);
+			setSound(pos.pos_x, 		pos.pos_y + 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_E);
+			setSound(pos.pos_x + 1, 	pos.pos_y + 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_SE);
+			setSound(pos.pos_x + 1, 	pos.pos_y,	 	note, LM_Constants.SoundRadius, LM_World.DIR_S);
+			setSound(pos.pos_x + 1, 	pos.pos_y - 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_SW);
+			setSound(pos.pos_x, 		pos.pos_y - 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_W);
+			setSound(pos.pos_x - 1, 	pos.pos_y - 1, 	note, LM_Constants.SoundRadius, LM_World.DIR_NW);
 		}
 		events.clear();
 		
@@ -251,8 +251,8 @@ public class LM_SoundEventServer extends EventServer {
 		Set<String> set = sensors.keySet();
 		for (String sensor : set) {
 			String[] str = sensor.split(":");
-			Agent agent = world.agents.get(str[0]);
-			if (world.squareLattice[agent.pos_x][agent.pos_y].sound.direction != LM_World.DIR_NONE) {
+			Position pos = (Position)world.getEntityStateAttribute(str[0], "POSITION");
+			if (world.squareLattice[pos.pos_x][pos.pos_y].sound.direction != LM_World.DIR_NONE) {
 				agentName 		= str[0];
 				agentCompName 	= str[1];
 				act();
@@ -279,7 +279,7 @@ public class LM_SoundEventServer extends EventServer {
 			velocity = 20;
 		}
 
-		Agent agent = world.agents.get(evt.oriAgentName);
+		Position pos = (Position)world.getEntityStateAttribute(evt.oriAgentName, "POSITION");
 
 		int midiNote = 84;
 		int agentNote = Integer.valueOf((String)evt.objContent);
@@ -290,10 +290,10 @@ public class LM_SoundEventServer extends EventServer {
 			if (LM_Constants.GlobalInterval) {
 				localLastNote = lastMidiNote;
 			} else {
-				localLastNote = agent.lastSungMidiNote;
+				localLastNote = pos.lastSungMidiNote;
 			}
 			// Calcula o intervalo baseado na posi��o do Agent
-			if (agent.direction >= 0 && agent.direction <=3) {
+			if (pos.direction >= 0 && pos.direction <=3) {
 				midiNote = localLastNote - agentNote;   
 			} else {
 				midiNote = localLastNote + agentNote;   
@@ -304,7 +304,7 @@ public class LM_SoundEventServer extends EventServer {
 		}
 
 		lastMidiNote = midiNote;
-		agent.lastSungMidiNote = midiNote;
+		pos.lastSungMidiNote = midiNote;
 		
 		channel.noteOn(midiNote, velocity);
 //		ShortMessage noteOn = new ShortMessage();
@@ -324,10 +324,10 @@ public class LM_SoundEventServer extends EventServer {
 		Event event = new Event();
 		event.destAgentName = agentName;
 		event.destAgentCompName = agentCompName;
-		Agent agent = world.agents.get(agentName);
-		event.objContent = world.squareLattice[agent.pos_x][agent.pos_y].sound.note + " " + 
-						world.squareLattice[agent.pos_x][agent.pos_y].sound.amplitude + " " +
-						world.squareLattice[agent.pos_x][agent.pos_y].sound.direction;
+		Position pos = (Position)world.getEntityStateAttribute(agentName, "POSITION");
+		event.objContent = world.squareLattice[pos.pos_x][pos.pos_y].sound.note + " " + 
+						world.squareLattice[pos.pos_x][pos.pos_y].sound.amplitude + " " +
+						world.squareLattice[pos.pos_x][pos.pos_y].sound.direction;
 
 		return event;
 	}

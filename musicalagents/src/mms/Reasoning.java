@@ -63,14 +63,12 @@ public class Reasoning extends MusicalAgentComponent {
 	public void setWakeUp(long time) {
 		
 		// No caso de processamento Batch, coloca o Agente para dormir até o primeiro turno
-		getAgent().getClock().schedule(getAgent(), new Reason(), time);
+		getAgent().getClock().schedule(getAgent(), new ReasonBatch(), time);
 		
 	}
 	
-//	class Reason extends OneShotBehaviour {
-	class Reason implements Runnable {
+	class ReasonBatch implements Runnable {
 
-//		public void action() {
 		public void run() {
 		
 			// Apenas processa o raciocínio se o agente estiver ativo
@@ -84,12 +82,13 @@ public class Reasoning extends MusicalAgentComponent {
 					e.printStackTrace();
 				}
 				
-				if (getAgent().getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
-					//System.out.println(getAgent().getLocalName() + " foi dormir!");
-					// TODO E se quiser dormir mais de 1 turno???
-					setWakeUp((long)clock.getCurrentTime(TimeUnit.TURNS) + 1);
-				}
-				
+//				if (getAgent().getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
+//					//System.out.println(getAgent().getLocalName() + " foi dormir!");
+//					// TODO E se quiser dormir mais de 1 turno???
+//					long when = (long)clock.getCurrentTime(TimeUnit.TURNS) + 1; 
+//					setWakeUp(when);
+//				}
+//				
 				getAgent().reasoningProcessDone(getName());
 				
 			}

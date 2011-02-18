@@ -126,13 +126,14 @@ public class RT_ListenerReasoning extends Reasoning {
 			String earName = sourceSensor.getName();
 			Memory earMemory = earMemories.get(earName);
 			SourceDataLine line = lines.get(earName);
-			
-			double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
+			if (line != null) {
+				double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
+		
+				byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
+				line.write(buffer, 0, buffer.length);
 	
-			byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
-			line.write(buffer, 0, buffer.length);
-
-//			logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Inseri chunk " + instant + " na fila para tocar");
+	//			logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Inseri chunk " + instant + " na fila para tocar");
+			}
 			
 		}
 

@@ -1,5 +1,7 @@
 package mms.world;
 
-public class WorldGUI {
+public interface WorldGUI {
 
+	public void update();
+	
 }

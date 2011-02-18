@@ -2,7 +2,7 @@ package mms.apps.lm;
 
 import java.util.Set;
 
-import mms.apps.lm.LM_World.Agent;
+import mms.apps.lm.LM_World.Position;
 import mms.Event;
 import mms.EventServer;
 import mms.Parameters;
@@ -50,8 +50,8 @@ public class LM_EnergyEventServer extends EventServer {
 		for (String sensor : set) {
 
 			String[] str = sensor.split(":");
-			Agent agent = world.agents.get(str[0]);
-			food = world.squareLattice[agent.pos_x][agent.pos_y].food;
+			Position pos = (Position)world.getEntityStateAttribute(str[0], "POSITION");
+			food = world.squareLattice[pos.pos_x][pos.pos_y].food;
 			if (food > 0.0f) {
 
 				// Envia o evento para o agente
@@ -60,7 +60,7 @@ public class LM_EnergyEventServer extends EventServer {
 				act();
 				
 				// Apaga a comida usada do tabuleiro
-				world.squareLattice[agent.pos_x][agent.pos_y].food = 0.0f;
+				world.squareLattice[pos.pos_x][pos.pos_y].food = 0.0f;
 				
 			}
 

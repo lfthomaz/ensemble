@@ -5,7 +5,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import javax.swing.*;
 
-import mms.apps.lm.LM_World.Agent;
+import mms.apps.lm.LM_World.Position;
 import mms.apps.lm.LM_World.Site;
 import mms.world.WorldGUI;
 
@@ -18,7 +18,7 @@ public class LM_BoardGUI extends JFrame implements WorldGUI {
     private int cols;
     
     private Site[][] squareLattice;
-    private int turn = 1;
+    private int turn = 0;
     
     public LM_BoardGUI(Site[][] squareLattice) {
 
@@ -189,7 +189,7 @@ public class LM_BoardGUI extends JFrame implements WorldGUI {
 				  		g2.draw(p1);
 					}
 					
-					Agent agent = squareLattice[i][j].agent;
+					Position agent = squareLattice[i][j].agent;
 					if (agent != null) {
 	
 						// Pinta o agente

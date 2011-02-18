@@ -22,7 +22,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	/**
 	 * Event Handler's parameters
 	 */
-	protected String 		eventType 			= "DUMMY";
+	protected String 		eventType 			= null;
 	protected String		eventExchange 		= Constants.EVT_EXC_NOT_DEFINED;
 	protected String 		commType 			= "mms.comm.direct.CommDirect";
 	protected Vector		position 			= new Vector();
@@ -45,7 +45,9 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		
 		// Define o tipo de evento que o EventHandler irá tratar
 		// TODO Colocar um tratamento de erro aqui!
-		this.eventType = parameters.get(Constants.PARAM_EVT_TYPE);
+		if (this.eventType == null) {
+			this.eventType = parameters.get(Constants.PARAM_EVT_TYPE);
+		}
 		
 		// Initializes de communication channel
 		try {
@@ -82,7 +84,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		if (getState() == EA_STATE.CREATED) {
 			this.eventType = eventType;
 		} else {
-//    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Trying to set eventType after initialization!");
+    		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Trying to set eventType after initialization!");
 		}
 	}
 

@@ -42,6 +42,7 @@ public final class Constants {
 	public static final String	PARAM_FACT_NAME			= "FACT_NAME";
 	public static final String	PARAM_FACT_VALUE 		= "FACT_VALUE";
 	public static final String	PARAM_REAS_CYCLIC 		= "CYCLIC";
+	public static final String 	PARAM_MEMORY	 		= "MEMORY";
 	public static final String 	PARAM_POSITION 			= "POSITION";
 	
 	// Parâmetros da troca de evento periódica
@@ -75,6 +76,7 @@ public final class Constants {
 	public static final String 	CMD_BATCH_EVENT_ACK		= "BATCH_EVENT_ACK";
 	public static final String 	CMD_PUBLIC_FACT_UPDATE	= "PUBLIC_FACT_UPDATE";
 	public static final String 	CMD_KILL_AGENT			= "KILL_AGENT";
+	public static final String 	CMD_KILL_AGENT_ACK		= "KILL_AGENT_ACK";
 
 	public static final String 	CMD_CREATE_AGENT 		= "CREATE_AGENT";
 	public static final String 	CMD_ADD_COMPONENT 		= "ADD_COMPONENT";
@@ -93,7 +95,7 @@ public final class Constants {
 	// MusicalAgent States
 	public static enum EA_STATE {CREATED, INITIALIZED, FINALIZED};
 	// MusicalAgent States
-	public static enum MA_STATE {CREATED, INITIALIZED, REGISTERED, FINALIZED};
+	public static enum MA_STATE {CREATED, INITIALIZED, REGISTERED, TERMINATING, FINALIZED};
 	// Actuator States
 	public static enum AC_STATE {CREATED, INITIALIZED, WAITING_BEGIN, PROCESSING, NEED_ACTING, WAITING_RESPONSE, TERMINATED}
 	// EventServer States
@@ -106,10 +108,6 @@ public final class Constants {
 	
 	// Classes
 	public static final String CLASS_WORLD		 		= "CLASS_WORLD";
-	public static final String CLASS_ENTITY_STATE 		= "CLASS_ENTITY_STATE";
 	public static final String CLASS_MUSICAL_AGENT 		= "CLASS_MUSICAL_AGENT";
 	
-	// Simulation initialization
-	public static final String INIT_NUMBER_INITIAL_AGENTS 	= "NUMBER_INITIAL_AGENTS";
-
 }

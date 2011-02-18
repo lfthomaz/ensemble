@@ -1,7 +1,11 @@
 package mms.clock;
 
+import java.util.HashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import mms.Constants;
 import mms.MusicalAgent;
 import mms.clock.TimeUnit;
 
@@ -18,15 +22,35 @@ public class VirtualClockService extends BaseService {
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-	//----------------------------------------------------------
 	// Service name
 	public static final String NAME = "VirtualClock";
-	
+
+	// Indica se o clock funciona em tempo real ou em batch
+	private boolean userClockMode = false;
+
+	//----------------------------------------------------------
+	// USER MODE
+	//----------------------------------------------------------
+
+	// Contador de tempo, no caso de processamento Batch
+	private static long userTime = 0;
+
+	// Lock para criar um Mutual exclusion entre os mÈtodos updateClock() e schedule()
+	private static Lock lock = new ReentrantLock();
+
+	// Despertadores agendados
+	private static HashMap<Long,UserModeClockTask> scheduledTasks = new HashMap<Long,UserModeClockTask>();
+
+	//----------------------------------------------------------
+	// CPU MODE
+	//----------------------------------------------------------
 	private long referenceStartTime;
 	private long referenceNanoStartTime;
 	
 	private final static ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(20);
 	
+	//----------------------------------------------------------
+
 	@Override
 	public String getName() {
 		return NAME;
@@ -35,9 +59,13 @@ public class VirtualClockService extends BaseService {
 	public void boot(jade.core.Profile p) throws ServiceException {
 		super.boot(p);
 
-		referenceStartTime = System.currentTimeMillis();
-		referenceNanoStartTime = System.nanoTime();
-		MusicalAgent.logger.info("[" + NAME + "] " + "Reference Time = " + referenceStartTime);
+		if (p.getParameter(Constants.CLOCK_MODE, Constants.CLOCK_CPU).equals(Constants.CLOCK_USER)) {
+			userClockMode = true;
+		} else {
+			referenceStartTime = System.currentTimeMillis();
+			referenceNanoStartTime = System.nanoTime();
+			MusicalAgent.logger.info("[" + NAME + "] " + "Reference Time = " + referenceStartTime);
+		}
 	}
 	
 	public VirtualClockHelper getHelper(Agent a) {
@@ -51,28 +79,57 @@ public class VirtualClockService extends BaseService {
 		
 		public double getCurrentTime(TimeUnit unit) {
 			double ret = 0.0;
-			long now = System.currentTimeMillis() - referenceStartTime;
 			switch (unit) {
+			case TURNS:
+				ret = userTime;
+				break;
 			case SECONDS:
-				ret = ((double)now)/1000;
+				ret = ((double)(System.currentTimeMillis() - referenceStartTime))/1000;
 				break;
 			case MILLISECONDS:
-				ret = (double)now;
+				ret = (double)(System.currentTimeMillis() - referenceStartTime);
 				break;
 			}
 			return ret;
 		}
 		
 		public void schedule(Agent a, Runnable b, long wakeupTime) {
-			long wakeupMili = wakeupTime;
-			long now = (long)getCurrentTime(TimeUnit.MILLISECONDS);
-			if (wakeupMili > now) {
-				scheduler.schedule(b, wakeupMili - now, java.util.concurrent.TimeUnit.MILLISECONDS);
+
+			// CLOCK_USER_MODE
+			if (userClockMode) {
+				
+				// No caso do processamento Batch, È importante n„o deixar o schedule() entrar em conflito com o updateClock()
+				lock.lock();
+				try {
+					if (wakeupTime <= userTime) {
+						scheduler.execute(b);
+					}
+					else if (scheduledTasks.containsKey(wakeupTime)) {
+						UserModeClockTask existingTask = scheduledTasks.get(wakeupTime);
+						while (existingTask.nextTask != null) {
+							existingTask = existingTask.nextTask;
+						}
+						existingTask.nextTask = new UserModeClockTask(a, b);
+					} else {
+						scheduledTasks.put(wakeupTime, new UserModeClockTask(a, b));
+					}
+				} finally {
+					lock.unlock();
+				}
+				
 			} else {
-				//System.out.println("ERRO!");
-				scheduler.execute(b);
+			
+				long wakeupMili = wakeupTime;
+				long now = (long)getCurrentTime(TimeUnit.MILLISECONDS);
+				if (wakeupMili > now) {
+					scheduler.schedule(b, wakeupMili - now, java.util.concurrent.TimeUnit.MILLISECONDS);
+				} else {
+					//System.out.println("ERRO!");
+					scheduler.execute(b);
+				}
+		//			System.out.println("(" + now + ") " + a.getLocalName() + " vai acordar em \t" + (wakeupMili - now) + "\t(" + System.currentTimeMillis() + ")");
 			}
-//			System.out.println("(" + now + ") " + a.getLocalName() + " vai acordar em \t" + (wakeupMili - now) + "\t(" + System.currentTimeMillis() + ")");
+			
 		}
 
 		@Override
@@ -82,16 +139,48 @@ public class VirtualClockService extends BaseService {
 
 		@Override
 		public void updateClock(long units) {
-			// TODO Auto-generated method stub
-			
+			if (userClockMode) {
+				lock.lock();
+				try {
+					// Updates the clock
+					userTime += units;
+					// Verifica os despertadores para o tempo atual
+					UserModeClockTask task = scheduledTasks.remove(userTime);
+					while (task != null) {
+						task.b.run();
+						task = task.nextTask;
+					}
+					
+				} finally {
+					lock.unlock();
+				}
+			}
+			else {
+				logger.warning("[VirtualClock] " + "updateClock() was called without being in USER mode");
+			}
 		}
 
 		@Override
 		public void updateClock() {
-			// TODO Auto-generated method stub
-			
+			this.updateClock(1);
 		}
 
 	}
+	
+	// Internal class that stores user mode clock tasks
+	class UserModeClockTask {
+
+		protected Agent a;
+		protected Runnable b;
+		
+		public UserModeClockTask nextTask = null;
+		
+		public UserModeClockTask(Agent a, Runnable b) {
+			this.a = a;
+			this.b = b;
+		}
+		
+	}
+
 		
 }

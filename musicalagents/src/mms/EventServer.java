@@ -7,15 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import sun.security.action.GetLongAction;
 
 import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
@@ -62,6 +57,7 @@ public abstract class EventServer implements Sensing, Acting {
 	private String 		eventType 			= "DUMMY";
 	private String		eventExchange 		= Constants.EVT_EXC_SPORADIC;
 	private String 		commType 			= "mms.comm.direct.CommDirect";
+	private boolean		isBatch				= false;
 
 	// Periodic Events' variables
 	protected long 		period;
@@ -121,12 +117,16 @@ public abstract class EventServer implements Sensing, Acting {
 	// TODO colocar um retorno para verificar se a configuração foi bem sucedida
 	protected final boolean start(EnvironmentAgent envAgent, Parameters parameters) {
 		
+		logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Starting initialization...");
+
 		// TODO Verificar se está configurado, caso contrário, não libera a inicialização 
 		
 		this.envAgent = envAgent;
 		
 		// Obtém o clock
 		this.clock = envAgent.getClock();
+		
+		isBatch = envAgent.getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH);
 		
 		eventServerState = ES_STATE.CONFIGURED;
 				
@@ -215,8 +215,8 @@ public abstract class EventServer implements Sensing, Acting {
 		}
 		
 		eventServerState = ES_STATE.INITIALIZED;
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Initialized");
-		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Initialized");
+		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Initialized");
+//		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Initialized");
 		
 		return true;
 		
@@ -538,16 +538,15 @@ public abstract class EventServer implements Sensing, Acting {
 		}
 			
 		// Verifica a que janela pertence o evento
-		if (envAgent.getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_REAL_TIME) &&
-				getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
+		if (!isBatch && getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
 			if (evt.frame < workingFrame) {
 //				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame atrasado");
-				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if ((evt.frame == workingFrame && eventServerState != ES_STATE.WAITING_AGENTS)) {
 //				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame atrasado");
-				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
+				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if (evt.frame > workingFrame) {
@@ -578,7 +577,7 @@ public abstract class EventServer implements Sensing, Acting {
 		}
 
 		// avisa o ambiente que o evento foi processado (importante para Batch)
-		if (envAgent.getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
+		if (isBatch) {
 			envAgent.eventProcessed();
 		}
 

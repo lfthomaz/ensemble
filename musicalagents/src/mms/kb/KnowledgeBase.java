@@ -108,8 +108,8 @@ public class KnowledgeBase {
 			// Se o fato faz parte do fenótipo do Agente, enviar atualização 
 			if (aux.isPublic) {
 				Command cmd = new Command(Constants.CMD_PUBLIC_FACT_UPDATE);
-				cmd.addParameter("fact", fact);
-				cmd.addParameter("value", value);
+				cmd.addParameter(Constants.PARAM_FACT_NAME, fact);
+				cmd.addParameter(Constants.PARAM_FACT_VALUE, value);
 				myAgent.sendMessage(cmd);
 			}
 			

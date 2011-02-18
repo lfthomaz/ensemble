@@ -7,16 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import mms.Constants.EA_STATE;
-import mms.Constants.EH_STATUS;
 import mms.Constants.MA_STATE;
-import mms.Reasoning.Reason;
 import mms.clock.TimeUnit;
-import mms.clock.VirtualClockService;
-import mms.clock.VirtualClockHelper;
 import mms.commands.Command;
 import mms.commands.CommandClientInterface;
-import mms.commands.Console;
 import mms.kb.KnowledgeBase;
 import mms.world.Vector;
 //import mms.osc.OSCServerHelper;
@@ -24,7 +18,6 @@ import mms.world.Vector;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.ServiceException;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
@@ -33,7 +26,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.util.Logger;
 
 public class MusicalAgent extends MMSAgent {
 
@@ -41,6 +33,8 @@ public class MusicalAgent extends MMSAgent {
 	// Agent attributes
 	//--------------------------------------------------------------------------------
 	
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+
 	/**
 	 *  Lock
 	 */
@@ -102,12 +96,15 @@ public class MusicalAgent extends MMSAgent {
 	/**
 	 * Inicializa o Agente Musical
 	 */
-	protected void start() {
+	protected final void start() {
 
 		lock.lock();
 		try {
 
-			// 1. Registrar-se no Ambiente (necessário tanto em BATCH como em REAL_TIME)
+			// Inicia a recepção de Mensagens de Controle 
+			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
+	
+			// Registrar-se no Ambiente (necessário tanto em BATCH como em REAL_TIME)
 			DFAgentDescription template = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
 			sd.setType(Constants.EVT_ENVIRONMENT);
@@ -122,8 +119,8 @@ public class MusicalAgent extends MMSAgent {
 						Command cmd = new Command(Constants.CMD_AGENT_REGISTER);
 						sendMessage(cmd);
 					} else {
-						// TODO jeito porco de ficar tentando registrar o Agente
-						MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Environment Agent not found! Trying again...");
+						// TODO jeito ruim de ficar tentando registrar o Agente
+						MusicalAgent.logger.info("[" + getAgent().getLocalName() + "] " + "Environment Agent not found! Trying again...");
 						Thread.sleep(500);
 					}
 				}
@@ -135,8 +132,10 @@ public class MusicalAgent extends MMSAgent {
 			
 			// TODO Registras os fatos públicos do KB
 			
+			// Executa o método de inicialização do usuário
+			init();
 			
-			// 2. Inicializa os componentes
+			// Inicializa os componentes
 			Collection<MusicalAgentComponent> comps = components.values();
 			for (Iterator<MusicalAgentComponent> iterator = comps.iterator(); iterator.hasNext();) {
 				MusicalAgentComponent comp = iterator.next();
@@ -155,13 +154,10 @@ public class MusicalAgent extends MMSAgent {
 				}
 			}
 			
-			// 3. Inicia a recepção de Mensagens de Controle 
-			this.addBehaviour(new ReceiveMessages(this));
-	
-			// 4. Aguarda o registro de todos os componentes, caso seja necessário
+			// Aguarda o registro de todos os EventHandlers, caso seja necessário
 			this.addBehaviour(new CheckRegister(this));			
 			
-			// 5. Fim da inicialização do Agente Musical
+			// Fim da inicialização do Agente Musical
 			state = MA_STATE.INITIALIZED;
 //			logger.info("[" + this.getLocalName() + "] " + "Initialized");
 			System.out.println("[" + this.getLocalName() + "] " + "Initialized");
@@ -171,28 +167,13 @@ public class MusicalAgent extends MMSAgent {
 		}
 
 	}
-
-	/**
-	 * Método chamado pelo Jade ao matar um agente (doDelete())
-	 */
-	// TODO Durante este método, o agente ainda está no estado ativo!!! ver qual o problema disso!!
-	protected void takeDown() { 
-
-		System.out.println("Entrei no takeDown!!!");
-		
-		// Desregistra todos os EventHandlers
-		for (MusicalAgentComponent existingComp : components.values()) {
-			if (existingComp instanceof EventHandler) {
-				((EventHandler)existingComp).deregister();
-			}
-		}
-
-		// Desregistra o agente dos turnos
-		Command cmd = new Command(Constants.CMD_AGENT_DEREGISTER);
-		sendMessage(cmd);
-		
-	}
 	
+	@Override
+	protected final void stop() {
+		// Calls JADE finalization method
+		this.doDelete();
+	}
+
 	/** 
 	 * Adiciona um componente ao agente, seja um raciocínio, sensor, atuador etc. Deve configurar o componente e iniciar sua execução.
 	 * @param compName
@@ -228,10 +209,6 @@ public class MusicalAgent extends MMSAgent {
 				comp.configure(arguments);
 
 				if (comp instanceof EventHandler) {
-					if (!arguments.containsKey(Constants.PARAM_EVT_TYPE)) {
-						System.out.println("[" + this.getLocalName() + "] Sensor/Actuator '" + compName + "' must have an EVT_TYPE parameter");
-						return;
-					}
 					if (arguments.containsKey(Constants.PARAM_POSITION)) {
 						Vector position = Vector.parse(arguments.get(Constants.PARAM_POSITION));
 						((EventHandler)comp).setPosition(position);
@@ -241,7 +218,7 @@ public class MusicalAgent extends MMSAgent {
 				// Adicionar o componente na tabela
 				components.put(compName, comp);
 
-				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o EventServer
+				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o componente
 				if (state == MA_STATE.REGISTERED) {
 					comp.start();
 					// Descobre qual o tipo do componente
@@ -293,15 +270,12 @@ public class MusicalAgent extends MMSAgent {
 		if (comp instanceof EventHandler) {
 			
 			// Desregistrar o componente, no caso de ser um sensor/atuador
-			((EventHandler) comp).deregister();
-			numberEventHandlersRegistered--;
-			// Avisar os reasonings que esse sensor/atuador foi deregistrado (talvez seja funçao do próprio eventHandler)
-			
+			((EventHandler)comp).deregister();
+
 		} else {
 			
 			if (comp instanceof Reasoning) {
 				numberReasoning--;
-				System.out.println();
 			}
 			
 			comp.end();
@@ -382,8 +356,9 @@ public class MusicalAgent extends MMSAgent {
 	 */
 	protected final void processMessage(String sender, Command cmd) {
 
+		String command = cmd.getCommand();
 		// Registro efetuado com sucesso
-		if (cmd.getCommand().equals(Constants.CMD_ADD_COMPONENT)) {
+		if (command.equals(Constants.CMD_ADD_COMPONENT)) {
 			
 			String compName = cmd.getParameter("NAME");
 			String compClass = cmd.getParameter("CLASS");
@@ -395,7 +370,7 @@ public class MusicalAgent extends MMSAgent {
 			}
 
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_REMOVE_COMPONENT)) {
+		else if (command.equals(Constants.CMD_REMOVE_COMPONENT)) {
 			
 			String compName = cmd.getParameter("NAME");
 			if (compName != null) {
@@ -405,11 +380,12 @@ public class MusicalAgent extends MMSAgent {
 			}
 			
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_AGENT_READY_ACK)) {
+		else if (command.equals(Constants.CMD_AGENT_READY_ACK)) {
 			// No caso de processamento BATCH
-			if (getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
+			if (isBatch) {
 				// Programa os raciocínios para despertarem no turno indicado
-				long turn = Long.valueOf(cmd.getParameter(Constants.PARAM_TURN));
+				double value = Double.valueOf(cmd.getParameter(Constants.PARAM_TURN));
+				long turn = (long)value;
 				for (Enumeration<MusicalAgentComponent> e = components.elements() ; e.hasMoreElements() ;) {
 					MusicalAgentComponent comp = e.nextElement();
 					if (comp instanceof Reasoning) {
@@ -423,7 +399,7 @@ public class MusicalAgent extends MMSAgent {
 		}
 		// Confirmação de registro do Atuador/Sensor
 		// TODO Agente Musical deve passar os parâmetros para os EventHandler, e não tratar aqui!!!
-		else if (cmd.getCommand().equals(Constants.CMD_EVENT_REGISTER_ACK)) {
+		else if (command.equals(Constants.CMD_EVENT_REGISTER_ACK)) {
 			String componentName 		= cmd.getParameter(Constants.PARAM_COMP_NAME);
 			String eventExecution 		= cmd.getParameter(Constants.PARAM_EVT_EXECUTION);
 			Parameters serverParameters = cmd.getParameters();
@@ -444,17 +420,17 @@ public class MusicalAgent extends MMSAgent {
 				}
 			}
 
-			System.out.println("[" + getAgentName() + "] " + "Component '" + comp.getName() + "' added");
+			System.out.println("[" + getAgentName() + "] " + "EventHandler '" + comp.getName() + "' registered");
 
 			
-		} else if (cmd.getCommand().equals(Constants.CMD_EVENT_DEREGISTER_ACK)) {
+		} else if (command.equals(Constants.CMD_EVENT_DEREGISTER_ACK)) {
 			
 			String componentName 		= cmd.getParameter(Constants.PARAM_COMP_NAME);
 
 			// Avisar o componente sobre o deregistro
 			EventHandler comp = (EventHandler)components.get(componentName);
-			comp.confirmDeregistration();
-			//
+
+			// Informs all reasonings about the deregistration 
 			for (MusicalAgentComponent existingComp : components.values()) {
 				if (existingComp instanceof Reasoning) {
 					try {
@@ -465,15 +441,32 @@ public class MusicalAgent extends MMSAgent {
 				}
 			}
 
+			comp.confirmDeregistration();
 		}
-		else if (cmd.getCommand().equals(Constants.CMD_KILL_AGENT)) {
-		
-			doDelete();
+		else if (command.equals(Constants.CMD_KILL_AGENT)) {
+
+			if (isBatch) {
+				dieNextTurn = true;
+			} else {
+				this.state = MA_STATE.TERMINATING;
+				// Deregisters EventHandlers
+				for (MusicalAgentComponent existingComp : components.values()) {
+					if (existingComp instanceof EventHandler) {
+						try {
+							((EventHandler)existingComp).deregister();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				// Wait until everything is deregistered
+				addBehaviour(new CheckDeregister(this));
+			}
 			
 		}
 		else {
 				
-			System.out.println("[" + getLocalName() + "] " + "Command not recognized: " + cmd.getCommand());
+			System.out.println("[" + getLocalName() + "] " + "Command not recognized: " + command);
 				
 		}
 
@@ -528,8 +521,8 @@ public class MusicalAgent extends MMSAgent {
 	
 	/**
 	 * Classe interna que verifica se todos os componentes estão inicializados e registrados
-	 * Existe um timeout para o registro dos componentes, no caso de não existir um ES compatível
 	 */
+	// TODO NÃO existe um timeout para o registro dos componentes, no caso de não existir um ES compatível
 	private final class CheckRegister extends CyclicBehaviour {
 
 		public CheckRegister(Agent a) {
@@ -537,15 +530,6 @@ public class MusicalAgent extends MMSAgent {
 		}
 		
 		public void action() {
-
-			int numberEventHandlersRegistered = 0;
-			Collection<MusicalAgentComponent> comps = components.values();
-			for (MusicalAgentComponent comp: comps) {
-				if (comp instanceof EventHandler && ((EventHandler)comp).status == EH_STATUS.REGISTERED ) {
-					numberEventHandlersRegistered++;
-				}
-			}
-
 			if (numberEventHandlersRegistered == numberEventHandlersRequest) {
 				// Envia um OK para Ambiente
 				Command cmd = new Command(Constants.CMD_AGENT_READY);
@@ -560,42 +544,110 @@ public class MusicalAgent extends MMSAgent {
 
 	private final class CheckEndTurn extends OneShotBehaviour {
 		
+		Agent a;
+		
 		public CheckEndTurn(Agent a) {
 			super(a);
+			this.a = a;
 		}
 		
 		public void action() {
+			
 			// Caso todos tenham terminado o processamento, envia a mensagem para o Ambiente
 			if (numberReasoning == numberReasoningReady) {
 			
 				if (dieNextTurn) {
-					state = MA_STATE.FINALIZED;
-					// Agenda a morte do Agente para o pr�ximo turno
-					getAgent().getClock().schedule(getAgent(), new KillAgent(), (long)getAgent().getClock().getCurrentTime(TimeUnit.TURNS) + 1);
+					// TODO Teria que deregistrar também os raciocínios do próximo turno!!!!
+					// Agenda a morte do Agente para o próximo turno
+					state = MA_STATE.TERMINATING;
+					// Deregister all eventHandlers
+					getAgent().getClock().schedule(getAgent(), new Deregister(), (long)getAgent().getClock().getCurrentTime(TimeUnit.TURNS) + 1);
+					// Wait until everything is deregistered
+					addBehaviour(new CheckDeregister(a));
+				} else {
+					// Schedules reasonings for the next turn
+					long next_turn = (long)getClock().getCurrentTime(TimeUnit.TURNS) + 1; 
+					for (Enumeration<MusicalAgentComponent> e = components.elements() ; e.hasMoreElements() ;) {
+						MusicalAgentComponent comp = e.nextElement();
+						if (comp instanceof Reasoning) {
+							((Reasoning)comp).setWakeUp(next_turn);
+						}
+					}
 				}
-				
+
 				Command cmd = new Command(Constants.CMD_BATCH_TURN);
 				cmd.addParameter(Constants.PARAM_NUMBER_EVT_SENT, Integer.toString(numberEventsSent));
 				sendMessage(cmd);
 
-				numberReasoningReady 	= 0;
-				numberEventsSent 		= 0;
+				numberReasoningReady = 0;
+				numberEventsSent = 0;
 				
 				MusicalAgent.logger.info("[" + getLocalName() + "] " + "Enviei fim de turno");
+				
 			}
+			
 		}
 	
 	}
 
 	/**
-	 * Verifica se todos os componentes estão inicializados e registrados
+	 * Classe interna que verifica se todos os componentes estão inicializados e registrados
 	 */
-	private final class KillAgent implements Runnable {
+	// TODO NÃO existe um timeout para o registro dos componentes, no caso de não existir um ES compatível
+	private final class CheckDeregister extends CyclicBehaviour {
 
-//		public void action() {
+		public CheckDeregister(Agent a) {
+			super(a);
+		}
+		
+		public void action() {
+			if (numberEventHandlersRegistered == 0) {
+				// Informs the EA that the agent is being deregistered
+				sendMessage(new Command(Constants.CMD_AGENT_DEREGISTER));
+				// Kills the Musical Agent
+				myAgent.addBehaviour(new KillAgent());
+				// Finaliza o behaviour cíclico
+				myAgent.removeBehaviour(this);
+			}
+			
+		}
+		
+	}
+
+	/**
+	 * Verifica se todos os componentes estão finalizados e registrados
+	 */
+	private final class Deregister implements Runnable {
+
 		public void run() {
+			// Deregisters EventHandlers
+			for (MusicalAgentComponent existingComp : components.values()) {
+				if (existingComp instanceof EventHandler) {
+					try {
+						((EventHandler)existingComp).deregister();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * Kills this agent
+	 */
+	private final class KillAgent extends OneShotBehaviour {
+
+		@Override
+		public void action() {
 			MusicalAgent.logger.info("[" + getAgent().getLocalName() + " iniciou o processo de morte!");
-			doDelete();
+			
+			// Calls the user implemented finalization method
+			finit();
+			
+			// Calls the MMS finalization method
+			stop();
 		}
 		
 	}
@@ -606,14 +658,16 @@ public class MusicalAgent extends MMSAgent {
 	protected final synchronized void eventHandlerRegistered(String compName) {
 		
 		numberEventHandlersRegistered++;
+		
 		System.out.println("[" + this.getLocalName() + "] " + "Component " + compName + " registered");
 
 	}
 	
 	protected final synchronized void eventHandlerDeregistered(String compName) {
 		
-		MusicalAgentComponent comp = components.remove(compName);
+		numberEventHandlersRegistered--;
 		
+		MusicalAgentComponent comp = components.remove(compName);
 		comp.end();
 		
 		System.out.println("[" + this.getLocalName() + "] " + "Component " + compName + " deregistered");
@@ -621,16 +675,17 @@ public class MusicalAgent extends MMSAgent {
 	}
 
 	protected final synchronized void eventSent() {
+		
 		numberEventsSent++;
+		
 	}
 	
 	// TODO Se não tiver reasoning nenhum, ele deveria mandar um fim de turno imediatamente (CyclicBehaviour igual ao de eventso?)
 	protected final synchronized void reasoningProcessDone(String reasoningName) {
 		
 		numberReasoningReady++;
-		
 		// Checar o fim de turno
-		addBehaviour(new CheckEndTurn(getAgent()));
+		addBehaviour(new CheckEndTurn(this));
 
 	}
 

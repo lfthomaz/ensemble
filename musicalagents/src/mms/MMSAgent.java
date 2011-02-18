@@ -66,8 +66,10 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 		return router;
 	}
 	
+	protected boolean isBatch = false;
+	
 	/**
-	 * Método de inicialização utilizado pelo JADE
+	 * Initialization method called by JADE
 	 */
 	protected void setup() {
 		
@@ -78,7 +80,8 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 		if (arguments != null && arguments[0] instanceof Parameters) {
 			parameters = (Parameters)arguments[0];
 		}
-		
+		isBatch = getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH);
+	
 		// 2. Inicializa os serviços básicos do agente
 		try {
 			clock = (VirtualClockHelper)getHelper(VirtualClockService.NAME);
@@ -96,11 +99,13 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 		// 4. Inicializa o agente
 		start();
 
-		// 5. Executa o método de inicialização do usuário
-		init();
-		
-		// 6. Atualiza o estado do agente (?)
-		
+	}
+	
+	/**
+	 * Finalization method called by JADE
+	 */
+	protected void takeDown() {
+		System.out.println("takeDown()");
 	}
 
 	// ---------------------------------------------- 
@@ -140,8 +145,15 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 	/**
 	 * 
 	 */
-	protected void finalize() {
-		System.out.println("[" + getLocalName() + "] MMSAgent finalize()");
+	protected void finit() {
+//		System.out.println("[" + getLocalName() + "] MMSAgent finit()");
+	}
+
+	/**
+	 * 
+	 */
+	protected void stop() {
+//		System.out.println("[" + getLocalName() + "] MMSAgent finit()");
 	}
 
 }
