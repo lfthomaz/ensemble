@@ -49,6 +49,8 @@ public class AudioEventServerLight extends EventServer {
     private double 	STEP 				= 1 / SAMPLE_RATE;
     private int 	CHUNK_SIZE 			= 4410;
     private int 	DIVISION_FACTOR		= 2;
+    private boolean POL_INTERPOLATION 	= true;
+    private int 	NUMBER_OF_POINTS	= 5;
 	
     // Table that stores the last calculated delta of each pair
     private HashMap<String, Double> last_deltas = new HashMap<String, Double>();
@@ -222,7 +224,7 @@ public class AudioEventServerLight extends EventServer {
 					Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], "MOVEMENT");
 					Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], "MOVEMENT");
 
-					// Calculates the first and last deltas
+					// Guess
 					if (last_deltas.containsKey(pair)) {
 						guess = last_deltas.get(pair);
 					} else {
@@ -245,29 +247,29 @@ public class AudioEventServerLight extends EventServer {
 					}
 					
 					double delta_i = 0.0, delta_f = 0.0;
-					int samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
-					for (int i = 0; i < CHUNK_SIZE; i += samples_jump) {
-						
-						t = instant + (i * STEP);
-						
-						// first delta of the chunk
-						delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
-						// last delta of the chunk (if it's the last division of the chunk, gets the last sample)
-						if (i + samples_jump >= CHUNK_SIZE) {
-							delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
-						} else {
-							delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((i+samples_jump-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
-						}
 
-						// TODO Verificar os valores de delta! Não pode ser menor que zero!!!
-						double delta_step = (delta_f - delta_i) / (samples_jump - 1);
+					if (POL_INTERPOLATION) {
 						
+						double[] xa = new double[2+DIVISION_FACTOR-1]; 
+						double[] ya = new double[2+DIVISION_FACTOR-1]; 
+
+						// calculates points for the polinomial interpolation
+						xa[0] = instant;
+						ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
+						int samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
+						for (int i = 0; i < DIVISION_FACTOR-1; i++) {							
+							xa[i] = instant + (i * samples_jump * STEP);
+							ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], guess, 0.0, mem_mov_src.getPast());
+						}
+						xa[DIVISION_FACTOR] = instant + ((CHUNK_SIZE-1) * STEP);
+						ya[DIVISION_FACTOR] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[DIVISION_FACTOR], delta_i, 0.0, mem_mov_src.getPast());
+
 						// For each sample in this division...
-						for (int j = 0; (i+j < CHUNK_SIZE && j < samples_jump); j++) {
+						for (int i = 0; i < CHUNK_SIZE; i++) {
 							
-							t = instant + ((i+j) * STEP);
+							t = instant + (i * STEP);
 							
-							double delta = delta_i + (delta_step * j);
+							double delta = polint(xa, ya, t);
 							double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
 							double value = 0.0;
 							try {
@@ -276,10 +278,50 @@ public class AudioEventServerLight extends EventServer {
 								e.printStackTrace();
 							}
 
-							buf[i+j] = buf[i+j] + (value * gain);
+							buf[i] = buf[i] + (value * gain);
 							
 						}
 						
+					} else {
+					
+						int samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
+						for (int i = 0; i < CHUNK_SIZE; i += samples_jump) {
+							
+							t = instant + (i * STEP);
+							
+							// first delta of the chunk
+							delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
+							// last delta of the chunk (if it's the last division of the chunk, gets the last sample)
+							if (i + samples_jump >= CHUNK_SIZE) {
+								delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
+							} else {
+								delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((i+samples_jump-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
+							}
+	//						System.out.println("delta_i = " + delta_i + " - delta_f = " + delta_f);
+	
+							// TODO Verificar os valores de delta! Não pode ser menor que zero!!!
+							double delta_step = (delta_f - delta_i) / (samples_jump - 1);
+							
+							// For each sample in this division...
+							for (int j = 0; (i+j < CHUNK_SIZE && j < samples_jump); j++) {
+								
+								t = instant + ((i+j) * STEP);
+								
+								double delta = delta_i + (delta_step * j);
+								double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
+								double value = 0.0;
+								try {
+									value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
+								} catch (Exception e) {
+									e.printStackTrace();
+								}
+	
+								buf[i+j] = buf[i+j] + (value * gain);
+								
+							}
+							
+						}
+					
 					}
 
 					last_deltas.put(pair, delta_f);
@@ -296,7 +338,7 @@ public class AudioEventServerLight extends EventServer {
 
 	}
 
-    public void function(MovementState src_state, MovementState rcv_state, double t, double delta) {
+    private void function(MovementState src_state, MovementState rcv_state, double t, double delta) {
     	
     	if (src_state == null || rcv_state == null) {
 			// Se é null, é porque o agente não existia nesse momento
@@ -304,7 +346,6 @@ public class AudioEventServerLight extends EventServer {
     		f_res[0] = 0; f_res[1] = 0;
     	}
     	
-    	// TODO Aqui é o problema, pq a gente está usando o nome completo do componente, mas o mundo armazena só o nome do agente!!!
     	Vector q = rcv_state.position;
     	Vector p = src_state.position;
     	Vector v = src_state.velocity;
@@ -316,11 +357,13 @@ public class AudioEventServerLight extends EventServer {
 
     }
     
-    public double newton_raphson(Memory mem_src, Memory mem_rcv, double t, double initial_guess, double x1, double x2) {
+    private double newton_raphson(Memory mem_src, Memory mem_rcv, double t, double initial_guess, double x1, double x2) {
     	    	
     	double dx, dx_old, rts, xl, xh, temp;
     	MovementState rcv_state_old, src_state_old;
 
+//    	System.out.println("newton() - t = " + t + " - guess = " + initial_guess);
+    	
 		rcv_state_old = (MovementState)mem_rcv.readMemory(t, TimeUnit.SECONDS);
 		movLaw.changeState(rcv_state_old, t, rcv_state);
 		rcv_state.position.add(rcv_comp_pos); // Component relative position
@@ -360,12 +403,14 @@ public class AudioEventServerLight extends EventServer {
 		dx_old = Math.abs(x2-x1);
 		dx = dx_old;
 		src_state_old = (MovementState)mem_src.readMemory(t-rts, TimeUnit.SECONDS);
+//		System.out.printf("fui buscar o instante %f e retornou %f\n", t-rts, src_state_old.instant);
 		movLaw.changeState(src_state_old, t-rts, src_state);
+//		System.out.printf("src_state(%f)=%f\n", t-rts, src_state.position.getValue(0));
 		src_state.position.add(src_comp_pos); // Component relative position
 		function(src_state, rcv_state, t, rts);
     	f[0] = f_res[0]; f[1] = f_res[1];
     	if (f == null) {
-    		System.err.println("WARNING: Tentou buscar amostra no futuro ou antes do início da simulação (" + (t - rts) + ")");
+    		System.err.println("WARNING: newton tried to search a sample before the begining of the simulation or in the future (" + (t - rts) + ")");
     		return 0.0;
     	}
     	// Loop over allowed iterations
@@ -401,7 +446,9 @@ public class AudioEventServerLight extends EventServer {
         	}
         	// The one new function evaluation per iteration
     		src_state_old = (MovementState)mem_src.readMemory(t-rts, TimeUnit.SECONDS);
+//    		System.out.printf("fui buscar o instante %f e retornou %f\n", t-rts, src_state_old.instant);
     		movLaw.changeState(src_state_old, t-rts, src_state);
+//    		System.out.printf("src_state(%f)=%f\n", t-rts, src_state.position.getValue(0));
     		src_state.position.add(src_comp_pos); // Component relative position
     		function(src_state, rcv_state, t, rts);
         	f[0] = f_res[0]; f[1] = f_res[1];
@@ -419,6 +466,50 @@ public class AudioEventServerLight extends EventServer {
 		}
     	
 		return rts;
+    }
+
+    public static double polint(double[] xa, double[] ya, double x) {
+    	
+    	double y, dy;
+    	int ns = 0;
+    	double den, dif, dift, ho, hp, w;
+    	double[] c, d;
+    	
+    	dif = Math.abs(x-xa[0]);
+    	// TODO Otimizar e criar antes
+    	int n = xa.length;
+    	c = new double[n];
+    	d = new double[n];
+    	
+    	// Here we find the index ns of the closest table entry 1 = true
+    	for (int i = 0; i < n; i++) {
+    		dift = Math.abs(x-xa[i]);
+    		if (dift < dif) {
+				ns = i;
+				dif = dift;
+			}
+			// Initializes the tableau of c's and d's
+			c[i] = ya[i];
+			d[i] = ya[i];
+		}
+    	y = ya[ns--];
+    	for (int m = 1; m < n; m++) {
+			for (int i = 0; i < n-m; i++) {
+				ho = xa[i] - x;
+				hp = xa[i+m] - x;
+				w = c[i+1] - d[i];
+				if ((den=ho-hp) == 0.0) {
+					System.err.println("Error in routine polint!");
+				}
+				den = w / den;
+				d[i] = hp * den;
+				c[i] = ho * den;
+			}
+			y += (dy = (2 *(ns+1) < (n-m) ? c[ns+1] : d[ns--]));
+		}
+    	
+    	return y;
+    	
     }
 
 }
