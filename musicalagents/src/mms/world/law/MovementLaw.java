@@ -15,14 +15,6 @@ public class MovementLaw extends Law {
 	// temporary variable
 	private Vector frictionAcceleration;
 
-	// time
-	public long time_1 = 0;
-	public long time_2 = 0;
-	public long time_3 = 0;
-	public long time_4 = 0;
-	public long time_5 = 0;
-	public long time_6 = 0;
-	
 	@Override
 	public boolean configure() {
 		setType("MOVEMENT");
@@ -67,7 +59,6 @@ public class MovementLaw extends Law {
 	@Override
 	public void changeState(final State prevState, double instant, State newState) {
 		
-//		long start = System.nanoTime();
 		// If not the right kind of State, returns
 		if (!(prevState instanceof MovementState) && !(newState instanceof MovementState)) {
 			System.err.println("[MovementLaw] Not the right kind of state!");
@@ -76,16 +67,14 @@ public class MovementLaw extends Law {
 		
 		MovementState movPrevState = (MovementState)prevState;
 		MovementState movNewState = (MovementState)newState;
-//		time_1 = time_1 + (System.nanoTime() - start);
 
-//		start = System.nanoTime();
 		// Copies the prevState into newState
 		movPrevState.copy(movNewState);
 		movNewState.instant = instant;
-//		time_2 = time_2 + (System.nanoTime() - start);
 
 		// Does any necessary calculation
 		double interval = instant - movPrevState.instant;
+//		System.out.printf("instant = %f\n", interval);
 		if (interval > 0) {
 			
 			double acc = movPrevState.acceleration.magnitude;
@@ -96,14 +85,11 @@ public class MovementLaw extends Law {
 			}
 			// Se o corpo está em movimento, mas sem acelerar
 			else if (acc == 0 && vel > 0) {
-//				start = System.nanoTime();
 				// Calcular a aceleração devido ao atrito
 				movNewState.velocity.copy(frictionAcceleration);
 				frictionAcceleration.normalizeVectorInverse();
 				frictionAcceleration.product(gravity * friction_coefficient);
-//				time_3 = time_3 + (System.nanoTime() - start);
 
-//				start = System.nanoTime();
 				// Se velocidade chegar em zero durante esse intervalo, calcular 
 				double t_vel_zero = movPrevState.instant + (movPrevState.velocity.magnitude / frictionAcceleration.magnitude);
 	    		if (t_vel_zero < instant) {
@@ -119,7 +105,6 @@ public class MovementLaw extends Law {
 	    			// V = V0 + at
 	    			movNewState.velocity.add(frictionAcceleration, interval);
 	    		}
-//				time_4 = time_4 + (System.nanoTime() - start);
 			}
 			// Se o corpo foi acelerado mas ainda não está em movimento
 			else if (acc > 0 && vel == 0) {
@@ -162,7 +147,6 @@ public class MovementLaw extends Law {
 				movNewState.position.updateMagnitude();
 			}
 			
-//			start = System.nanoTime();
 			// Atualizar a orientação
 			if (movPrevState.angularVelocity.magnitude != 0) {
 				movNewState.orientation.add(movPrevState.angularVelocity, interval);
@@ -172,7 +156,6 @@ public class MovementLaw extends Law {
 				}
 				movNewState.orientation.updateMagnitude();
 			}
-//			time_5 = time_5 + (System.nanoTime() - start);
 			
 		}
 		
