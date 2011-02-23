@@ -14,14 +14,15 @@ public class EventMemory extends Memory {
 	private Lock lock = new ReentrantLock();
 	
 	EventSlot head = null;
-	
+	EventSlot tail = null;
+
 	public int size = 0;
 	
 	double last_instant_read = 0.0;
 	EventSlot ptr_last_instant_read = null;
 
+	@Override
 	public void init(Parameters parameters) {
-
 	}
 	
 	@Override
@@ -41,23 +42,16 @@ public class EventMemory extends Memory {
 		if (head != null) {
 			return head.instant;
 		} else {
-			return -1;
+			return Double.MAX_VALUE;
 		}
 	}
 
 	@Override
 	public double getLastInstant() {
-		if (head != null) {
-			EventSlot ptr = head;
-			while (true) {
-				if (ptr.next == null) {
-					System.out.println("las instant = " + ptr);
-					return ptr.instant;
-				}
-				ptr = ptr.next;
-			}
+		if (tail != null) {
+			return tail.instant;
 		} else {
-			return -1;
+			return Double.MIN_VALUE;
 		}
 	}
 
@@ -67,25 +61,24 @@ public class EventMemory extends Memory {
 	public void updateMemory() {
 		
 		double horizon = clock.getCurrentTime(TimeUnit.SECONDS) - past;
-//		System.out.println("[" + name + "] horizon = " + horizon);
 		EventSlot ptr = head;
 		while (ptr != null) {
 			if (ptr.instant >= horizon) {
 				head = ptr;
 				break;
 			}
-//			System.out.println("[" + name + "] Limpei - " + ptr.instant);
 			ptr = ptr.next;
 			size--;
+		}
+		if (ptr == null) {
+			head = null;
+			tail = null;
 		}
 		
 	}
 	
 	@Override
 	public Object readMemory(double instant, TimeUnit unit) {
-		
-		// TODO Sincronizar o acesso a fila!
-//		updateMemory();
 		
 		if (head == null) {
 			
@@ -94,7 +87,7 @@ public class EventMemory extends Memory {
 
 		} else {
 
-			// Heuristics -> tenta o último instante procurado
+			// Heuristics -> trying the last searched instant
 			EventSlot ptr;
 			if (ptr_last_instant_read == null) {
 				ptr = head;
@@ -106,7 +99,7 @@ public class EventMemory extends Memory {
 				}
 			} else {
 				ptr = ptr_last_instant_read;
-				if (instant > last_instant_read) {
+				if (instant >= ptr.instant) {
 					while (ptr.next != null) {
 						if (ptr.next.instant > instant) {
 							break;
@@ -115,7 +108,8 @@ public class EventMemory extends Memory {
 					}
 				} else {
 					while (ptr.prev != null) {
-						if (ptr.prev.instant > instant) {
+						if (instant >= ptr.prev.instant) {
+							ptr = ptr.prev;
 							break;
 						}
 						ptr = ptr.prev;
@@ -159,25 +153,37 @@ public class EventMemory extends Memory {
 		evt.instant = instant;
 		evt.object = object;
 		
-		// Searches the right place to insert the slot
-		if (head == null) {
+		// Searches the right place to insert the EventSlot
+		// Heuristics - begins from the tail
+		if (tail == null) {
 			head = evt;
+			tail = evt;
 		} else {
-			EventSlot ptr = head;
-			EventSlot ptr_prev = null;
+			EventSlot ptr = tail;
+			EventSlot ptr_next = tail.next;
 			while (ptr != null) {
-				if (instant < ptr.instant) {
+				if (instant > ptr.instant) {
+					if (ptr_next != null) {
+						evt.next = ptr_next;
+						ptr_next.prev = evt;
+					} else {
+						// New tail
+						tail = evt;
+					}
+					ptr.next = evt;
+					evt.prev = ptr;
 					break;
 				}
-				ptr_prev = ptr;
-				ptr = ptr.next;
+				ptr_next = ptr;
+				ptr = ptr.prev;
 			}
-			if (ptr_prev != null) {
-				ptr_prev.next = evt;
+			// New head
+			if (ptr == null) {
+				head.prev = evt;
+				evt.next = head;
+				head = evt;
 			}
-			if (ptr != null) {
-				evt.next = ptr;
-			}
+			
 		}
 		
 		size++;
@@ -197,5 +203,5 @@ public class EventMemory extends Memory {
 		public EventSlot 	prev;
 		public EventSlot 	next;
 	}
-
+	
 }
