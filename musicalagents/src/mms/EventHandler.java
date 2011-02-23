@@ -193,7 +193,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getName());
 		
-		System.out.println("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Register of '" + getName() + "' confirmed");
+		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Register of '" + getName() + "' confirmed");
 		
 	}
 	

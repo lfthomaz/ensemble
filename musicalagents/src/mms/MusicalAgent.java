@@ -420,7 +420,7 @@ public class MusicalAgent extends MMSAgent {
 				}
 			}
 
-			System.out.println("[" + getAgentName() + "] " + "EventHandler '" + comp.getName() + "' registered");
+			MusicalAgent.logger.info("[" + getAgentName() + "] " + "EventHandler '" + comp.getName() + "' registered");
 
 			
 		} else if (command.equals(Constants.CMD_EVENT_DEREGISTER_ACK)) {
@@ -641,7 +641,7 @@ public class MusicalAgent extends MMSAgent {
 
 		@Override
 		public void action() {
-			MusicalAgent.logger.info("[" + getAgent().getLocalName() + " iniciou o processo de morte!");
+			MusicalAgent.logger.info("[" + getAgent().getLocalName() + " Killing agent '" + getAgent().getLocalName() + "'");
 			
 			// Calls the user implemented finalization method
 			finit();
@@ -659,7 +659,7 @@ public class MusicalAgent extends MMSAgent {
 		
 		numberEventHandlersRegistered++;
 		
-		System.out.println("[" + this.getLocalName() + "] " + "Component " + compName + " registered");
+		MusicalAgent.logger.info("[" + this.getLocalName() + "] " + "Component " + compName + " registered");
 
 	}
 	
@@ -670,7 +670,7 @@ public class MusicalAgent extends MMSAgent {
 		MusicalAgentComponent comp = components.remove(compName);
 		comp.end();
 		
-		System.out.println("[" + this.getLocalName() + "] " + "Component " + compName + " deregistered");
+		MusicalAgent.logger.info("[" + this.getLocalName() + "] " + "Component " + compName + " deregistered");
 
 	}
 

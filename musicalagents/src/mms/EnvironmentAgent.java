@@ -545,8 +545,7 @@ public class EnvironmentAgent extends MMSAgent {
 		Command cmd = new Command(Constants.CMD_KILL_AGENT);
 		sendMessage(agentName, cmd);
 		
-//		MusicalAgent.logger.info("[" + this.getAID().getLocalName() + "] Destroyed agent " + agentName);
-		System.out.println("[" + this.getAID().getLocalName() + "] Sent KILL_AGENT to " + agentName);
+//		MusicalAgent.logger.info("[" + this.getAID().getLocalName() + "] Sent KILL_AGENT to " + agentName);
 
 	}
 	
