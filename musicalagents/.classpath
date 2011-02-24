@@ -6,7 +6,5 @@
 	<classpathentry kind="lib" path="lib/libaubio.jar"/>
 	<classpathentry kind="lib" path="lib/libxtract.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/javaosc"/>
-	<classpathentry kind="lib" path="lib/trove-3.0.0a6.jar"/>
-	<classpathentry kind="lib" path="/Users/lfthomaz/Documents/workspace/musicalagents/lib/commons-math-2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
