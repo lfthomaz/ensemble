@@ -2,6 +2,10 @@ package mms.audio;
 
 import jade.util.Logger;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -24,7 +28,9 @@ public class AudioEventServerLight extends EventServer {
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-	//---- WORK VARIABLES ----
+    private enum PROCESS_MODE {NORMAL, LIN_INT, POL_INT};
+
+    //---- WORK VARIABLES ----
 	// Newton function's variables 
 	double[] f_res	= new double[2];
 	double[] f		= new double[2];
@@ -49,10 +55,11 @@ public class AudioEventServerLight extends EventServer {
     private double 	STEP 				= 1 / SAMPLE_RATE;
     private int 	CHUNK_SIZE 			= 4410;
     private int 	DIVISION_FACTOR		= 2;
-    private boolean POL_INTERPOLATION 	= true;
-    private int 	NUMBER_OF_POINTS	= 5;
+    private int 	NUMBER_OF_POINTS	= 3;
+    private PROCESS_MODE mode 			= PROCESS_MODE.NORMAL;
 	
     // Table that stores the last calculated delta of each pair
+    double[] deltas;
     private HashMap<String, Double> last_deltas = new HashMap<String, Double>();
     
     // Table that stores sent audio chunks
@@ -62,6 +69,11 @@ public class AudioEventServerLight extends EventServer {
 	private World world;
 	
 	private MovementLaw movLaw;
+	
+	// Performance
+	int number_of_frames;
+	long proc_time_1, proc_time_2, proc_time_3;
+	PrintWriter file_perf, file_perf_1, file_perf_2, file_perf_3;
 	
 	@Override
 	public void configure() {
@@ -95,6 +107,7 @@ public class AudioEventServerLight extends EventServer {
 		// Chunk size deve ser baseado na freqüência
 		// TODO Cuidado com aproximações aqui!
 		this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
+		this.deltas 			= new double[CHUNK_SIZE];
 //		System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
 		
 		this.world = envAgent.getWorld();
@@ -112,6 +125,14 @@ public class AudioEventServerLight extends EventServer {
 //			e.printStackTrace();
 //		}
 //		buffer = new StringBuilder(50);
+		try {
+			file_perf = new PrintWriter(new FileOutputStream("out_perf.txt"), false);
+//			file_perf_1 = new PrintWriter(new FileOutputStream("out_perf_1.txt"), false);
+//			file_perf_2 = new PrintWriter(new FileOutputStream("out_perf_2.txt"), false);
+//			file_perf_3 = new PrintWriter(new FileOutputStream("out_perf_3.txt"), false);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		
 		return true;
 
@@ -181,6 +202,7 @@ public class AudioEventServerLight extends EventServer {
 
 		// TODO Ver se vamos trabalhar com milisegundos ou segundos
 		double instant = (double)(startTime + workingFrame * period) / 1000;
+//		file_perf.println("t = " + instant);
 
 //		System.out.println("SENSORS = " + sensors.size() + " - ACTUATORS = " + actuators.size());
 		for (Enumeration<String> s = sensors.keys(); s.hasMoreElements();) {
@@ -245,46 +267,55 @@ public class AudioEventServerLight extends EventServer {
 						guess = distance / SPEED_SOUND;
 //						System.out.println("initial guess for " + pair + " = " + guess);
 					}
-					
-					double delta_i = 0.0, delta_f = 0.0;
 
-					if (POL_INTERPOLATION) {
-						
-						double[] xa = new double[2+DIVISION_FACTOR-1]; 
-						double[] ya = new double[2+DIVISION_FACTOR-1]; 
+					// Finds the deltas for all the samples in the chunk, according to the chosen process mode
+					double delta = 0.0, delta_i = 0.0, delta_f = 0.0;
+
+					switch (mode) {
+					case NORMAL:
+						long start = System.nanoTime();
+						// For each sample...
+						for (int j = 0; j < CHUNK_SIZE; j++) {
+							t = instant + (j * STEP);
+							delta = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
+							if (delta < 0.0) {
+								System.err.println("[ERROR] delta = " + delta);
+								delta = 0.0;
+							}
+							deltas[j] = delta;
+							guess = delta;
+						}
+						break;
+					case POL_INT:
+						start = System.nanoTime();
+						double[] xa = new double[NUMBER_OF_POINTS]; 
+						double[] ya = new double[NUMBER_OF_POINTS]; 
 
 						// calculates points for the polinomial interpolation
 						xa[0] = instant;
 						ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
-						int samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
-						for (int i = 0; i < DIVISION_FACTOR-1; i++) {							
+						int samples_jump = CHUNK_SIZE / NUMBER_OF_POINTS;
+						for (int i = 0; i < NUMBER_OF_POINTS-2; i++) {							
 							xa[i] = instant + (i * samples_jump * STEP);
 							ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], guess, 0.0, mem_mov_src.getPast());
 						}
-						xa[DIVISION_FACTOR] = instant + ((CHUNK_SIZE-1) * STEP);
-						ya[DIVISION_FACTOR] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[DIVISION_FACTOR], delta_i, 0.0, mem_mov_src.getPast());
+						xa[NUMBER_OF_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
+						ya[NUMBER_OF_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_OF_POINTS-2], delta_i, 0.0, mem_mov_src.getPast());
 
 						// For each sample in this division...
 						for (int i = 0; i < CHUNK_SIZE; i++) {
 							
 							t = instant + (i * STEP);
 							
-							double delta = polint(xa, ya, t);
-							double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
-							double value = 0.0;
-							try {
-								value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+							delta = polint(xa, ya, t);
+							deltas[i] = delta;
 
-							buf[i] = buf[i] + (value * gain);
-							
 						}
-						
-					} else {
-					
-						int samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
+						proc_time_2 = System.nanoTime() - start;
+						break;
+					case LIN_INT:
+						start = System.nanoTime();
+						samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
 						for (int i = 0; i < CHUNK_SIZE; i += samples_jump) {
 							
 							t = instant + (i * STEP);
@@ -307,29 +338,33 @@ public class AudioEventServerLight extends EventServer {
 								
 								t = instant + ((i+j) * STEP);
 								
-								double delta = delta_i + (delta_step * j);
-								double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
-								double value = 0.0;
-								try {
-									value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-	
-								buf[i+j] = buf[i+j] + (value * gain);
+								delta = delta_i + (delta_step * j);
+								deltas[i+j] = delta;
 								
 							}
 							
 						}
-					
+						proc_time_3 = System.nanoTime() - start;
+						break;
+					default:
+						break;
 					}
-
-					last_deltas.put(pair, delta_f);
-
+					
+					// Fills the buffer
+					for (int i = 0; i < CHUNK_SIZE; i++) {
+						t = instant + (i * STEP);
+						double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
+						double value = 0.0;
+						value = mem.readMemoryDouble(t-deltas[i], TimeUnit.SECONDS);
+						buf[i] = buf[i] + (value * gain);
+					}
+					
+					// Stores the last deltas for the next computation
+					last_deltas.put(pair, delta);
 				}
-			}			
+			}
 			
-			// Coloca o evento criado na fila de resposta
+			// Puts the newly created event in the output queue
 			addOutputEvent(evt.destAgentName, evt.destAgentCompName, evt);
 			
 		}
@@ -351,8 +386,8 @@ public class AudioEventServerLight extends EventServer {
     	Vector v = src_state.velocity;
     	
     	f_res[0] 	= (q.magnitude * q.magnitude) - 2 * q.dotProduct(p) + (p.magnitude * p.magnitude) - (delta * delta * SPEED_SOUND * SPEED_SOUND);
-    	v.copy(vec_aux);
-    	vec_aux.subtract(p);
+    	p.copy(vec_aux);
+    	vec_aux.subtract(q);
     	f_res[1] 	= 2 * v.dotProduct(vec_aux) - (2 * delta * SPEED_SOUND * SPEED_SOUND);
 
     }
@@ -468,7 +503,7 @@ public class AudioEventServerLight extends EventServer {
 		return rts;
     }
 
-    public static double polint(double[] xa, double[] ya, double x) {
+    private double polint(double[] xa, double[] ya, double x) {
     	
     	double y, dy;
     	int ns = 0;
