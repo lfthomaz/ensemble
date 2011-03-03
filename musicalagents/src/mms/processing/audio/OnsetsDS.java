@@ -704,7 +704,7 @@ public class OnsetsDS extends Process {
 			Parameters fft_args = new Parameters();
 			fft_args.put("size", String.valueOf(N));
 			double[] fftbuf = (double[])fftproc.process(fft_args, chunk_win);
-		   
+			
 			// Then detect. "onset" will be true when there's an onset, false otherwise
 			boolean onset = onsetsds_process(ods, fftbuf);
 			if (onset) {

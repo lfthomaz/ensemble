@@ -51,7 +51,7 @@ public class ProcessFactory {
 				long start_time = System.currentTimeMillis();
 				System.loadLibrary(libraries[i]);
 				long end_time = System.currentTimeMillis();
-				System.out.println("Library [" + libraries[i] + "] loaded in " + (end_time-start_time) + " ms !");
+				System.out.println("Library [" + libraries[i] + "] loaded in " + (end_time-start_time) + " ms");
 				loadedLibraries.add(libraries[i]);
 			} catch (UnsatisfiedLinkError e) {
 	    		System.out.println("Failed to load the library [" + libraries[i] + "]");

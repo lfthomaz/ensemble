@@ -87,7 +87,7 @@ public class RT_ListenerReasoning extends Reasoning {
 			} else {
 				// Gets the next available channel
 				// TODO O QUE FAZER AQUI? TEMOS QUE TER UMA LISTA dos canais já utilizados!
-				System.out.println("SEM PARAMETROS DE CANAL!!!");
+				System.out.println("No channel parameters!");
 			}
 
 			// Obtain and open the line.

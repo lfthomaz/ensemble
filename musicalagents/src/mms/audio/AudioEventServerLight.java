@@ -54,11 +54,11 @@ public class AudioEventServerLight extends EventServer {
     private int 	SAMPLE_RATE 		= 44100;
     private double 	STEP 				= 1 / SAMPLE_RATE;
     private int 	CHUNK_SIZE 			= 4410;
-    private int 	DIVISION_FACTOR		= 2;
     private int 	NUMBER_OF_POINTS	= 3;
-    private PROCESS_MODE mode 			= PROCESS_MODE.NORMAL;
+    private PROCESS_MODE mode 			= PROCESS_MODE.POL_INT;
 	
     // Table that stores the last calculated delta of each pair
+//    double[] deltas, deltas_1, deltas_2, deltas_3;
     double[] deltas;
     private HashMap<String, Double> last_deltas = new HashMap<String, Double>();
     
@@ -70,10 +70,10 @@ public class AudioEventServerLight extends EventServer {
 	
 	private MovementLaw movLaw;
 	
-	// Performance
-	int number_of_frames;
-	long proc_time_1, proc_time_2, proc_time_3;
-	PrintWriter file_perf, file_perf_1, file_perf_2, file_perf_3;
+//	// Performance
+//	int number_of_frames;
+//	long proc_time_1, proc_time_2, proc_time_3;
+//	PrintWriter file_perf, file_perf_1, file_perf_2, file_perf_3;
 	
 	@Override
 	public void configure() {
@@ -108,6 +108,9 @@ public class AudioEventServerLight extends EventServer {
 		// TODO Cuidado com aproximações aqui!
 		this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
 		this.deltas 			= new double[CHUNK_SIZE];
+//		this.deltas_1 			= new double[CHUNK_SIZE];
+//		this.deltas_2 			= new double[CHUNK_SIZE];
+//		this.deltas_3 			= new double[CHUNK_SIZE];
 //		System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
 		
 		this.world = envAgent.getWorld();
@@ -125,14 +128,14 @@ public class AudioEventServerLight extends EventServer {
 //			e.printStackTrace();
 //		}
 //		buffer = new StringBuilder(50);
-		try {
-			file_perf = new PrintWriter(new FileOutputStream("out_perf.txt"), false);
+//		try {
+//			file_perf = new PrintWriter(new FileOutputStream("out_perf.txt"), false);
 //			file_perf_1 = new PrintWriter(new FileOutputStream("out_perf_1.txt"), false);
 //			file_perf_2 = new PrintWriter(new FileOutputStream("out_perf_2.txt"), false);
 //			file_perf_3 = new PrintWriter(new FileOutputStream("out_perf_3.txt"), false);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
 		
 		return true;
 
@@ -202,7 +205,6 @@ public class AudioEventServerLight extends EventServer {
 
 		// TODO Ver se vamos trabalhar com milisegundos ou segundos
 		double instant = (double)(startTime + workingFrame * period) / 1000;
-//		file_perf.println("t = " + instant);
 
 //		System.out.println("SENSORS = " + sensors.size() + " - ACTUATORS = " + actuators.size());
 		for (Enumeration<String> s = sensors.keys(); s.hasMoreElements();) {
@@ -273,7 +275,7 @@ public class AudioEventServerLight extends EventServer {
 
 					switch (mode) {
 					case NORMAL:
-						long start = System.nanoTime();
+//						long start = System.nanoTime();
 						// For each sample...
 						for (int j = 0; j < CHUNK_SIZE; j++) {
 							t = instant + (j * STEP);
@@ -285,9 +287,10 @@ public class AudioEventServerLight extends EventServer {
 							deltas[j] = delta;
 							guess = delta;
 						}
+//						proc_time_1 = System.nanoTime() - start;
 						break;
 					case POL_INT:
-						start = System.nanoTime();
+//						start = System.nanoTime();
 						double[] xa = new double[NUMBER_OF_POINTS]; 
 						double[] ya = new double[NUMBER_OF_POINTS]; 
 
@@ -295,60 +298,39 @@ public class AudioEventServerLight extends EventServer {
 						xa[0] = instant;
 						ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
 						int samples_jump = CHUNK_SIZE / NUMBER_OF_POINTS;
-						for (int i = 0; i < NUMBER_OF_POINTS-2; i++) {							
+						for (int i = 1; i < NUMBER_OF_POINTS-1; i++) {							
 							xa[i] = instant + (i * samples_jump * STEP);
-							ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], guess, 0.0, mem_mov_src.getPast());
+							ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], ya[i-1], 0.0, mem_mov_src.getPast());
 						}
 						xa[NUMBER_OF_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
-						ya[NUMBER_OF_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_OF_POINTS-2], delta_i, 0.0, mem_mov_src.getPast());
+						ya[NUMBER_OF_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_OF_POINTS-1], ya[NUMBER_OF_POINTS-2], 0.0, mem_mov_src.getPast());
 
 						// For each sample in this division...
 						for (int i = 0; i < CHUNK_SIZE; i++) {
-							
 							t = instant + (i * STEP);
-							
 							delta = polint(xa, ya, t);
 							deltas[i] = delta;
-
 						}
-						proc_time_2 = System.nanoTime() - start;
+//						proc_time_2 = System.nanoTime() - start;
 						break;
 					case LIN_INT:
-						start = System.nanoTime();
-						samples_jump = CHUNK_SIZE / DIVISION_FACTOR;
-						for (int i = 0; i < CHUNK_SIZE; i += samples_jump) {
-							
+//						start = System.nanoTime();
+						// first delta of the chunk
+						delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, instant, guess, 0.0, mem_mov_src.getPast());
+						delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
+						// For each sample in this division...
+						for (int i = 0; i < CHUNK_SIZE; i++) {
 							t = instant + (i * STEP);
-							
-							// first delta of the chunk
-							delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
-							// last delta of the chunk (if it's the last division of the chunk, gets the last sample)
-							if (i + samples_jump >= CHUNK_SIZE) {
-								delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
-							} else {
-								delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((i+samples_jump-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
-							}
-	//						System.out.println("delta_i = " + delta_i + " - delta_f = " + delta_f);
-	
-							// TODO Verificar os valores de delta! Não pode ser menor que zero!!!
-							double delta_step = (delta_f - delta_i) / (samples_jump - 1);
-							
-							// For each sample in this division...
-							for (int j = 0; (i+j < CHUNK_SIZE && j < samples_jump); j++) {
-								
-								t = instant + ((i+j) * STEP);
-								
-								delta = delta_i + (delta_step * j);
-								deltas[i+j] = delta;
-								
-							}
-							
+							delta = delta_i + ((t-instant)/((CHUNK_SIZE-1) * STEP))*(delta_f-delta_i);
+							deltas[i] = delta;
 						}
-						proc_time_3 = System.nanoTime() - start;
+//						proc_time_3 = System.nanoTime() - start;
 						break;
 					default:
 						break;
 					}
+
+//					file_perf.printf("proc_time %f %f %f\n", ((double)proc_time_1/1000000), ((double)proc_time_2/1000000), ((double)proc_time_3/1000000));
 					
 					// Fills the buffer
 					for (int i = 0; i < CHUNK_SIZE; i++) {
@@ -357,10 +339,17 @@ public class AudioEventServerLight extends EventServer {
 						double value = 0.0;
 						value = mem.readMemoryDouble(t-deltas[i], TimeUnit.SECONDS);
 						buf[i] = buf[i] + (value * gain);
+						// Performance
+//						MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(t-deltas_1[i], TimeUnit.SECONDS);
+//						movLaw.changeState(rcv_state_old, instant, rcv_state);
+//						file_perf.printf("%d %f %.10f %.10f %.10f\n", i, t, deltas_1[i], deltas_2[i], deltas_3[i]);
 					}
 					
 					// Stores the last deltas for the next computation
 					last_deltas.put(pair, delta);
+					
+//					// Performance
+//					file_perf.flush();
 				}
 			}
 			
