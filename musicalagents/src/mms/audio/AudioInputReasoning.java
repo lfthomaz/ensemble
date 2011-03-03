@@ -163,7 +163,7 @@ public class AudioInputReasoning extends Reasoning {
 		@Override
 		public State callback(ByteBuffer arg0, ByteBuffer arg1) {
 			
-			long now = getAgent().getClock().getCurrentTime();
+			long now = (long)getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS);
 			
 			// If it's the first call, sets the startTime based in the mms's clock
 			if (firstCall) {

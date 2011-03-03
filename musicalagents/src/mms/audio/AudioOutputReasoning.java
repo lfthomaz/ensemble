@@ -119,9 +119,8 @@ public class AudioOutputReasoning extends Reasoning {
 		}
 	}
 
- 	@Override
-	public void newSense(String eventType, double instant, double duration) {
-
+	@Override
+	public void newSense(Sensor sourceSensor, double instant, double duration) {
 //		System.out.println(getAgent().getClock().getCurrentTime() + " Recebi evento de " + instant + " até " + (instant+duration));
 		double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
 //		for (int i = 0; i < buf.length; i++) {
@@ -137,7 +136,7 @@ public class AudioOutputReasoning extends Reasoning {
 
 		@Override
 		public State callback(ByteBuffer arg0, ByteBuffer arg1) {
-			long now = getAgent().getClock().getCurrentTime();
+			long now = (long)getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS);
 			// If it's the first call, sets the startTime based in the mms's clock
 			if (firstCall) {
 				startTime = now /1000.0;
