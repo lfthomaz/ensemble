@@ -13,7 +13,7 @@
 			<ARG NAME="form" VALUE="cube:200:loop" />
 			<ARG NAME="friction_coefficient" VALUE="0.25" />
 		</WORLD>
-		<EVENT_SERVER CLASS="mms.audio.AudioEventServerLight" COMM="mms.comm.direct.CommDirect" PERIOD="1000 300 800 1000">
+		<EVENT_SERVER CLASS="mms.audio.AudioEventServerLight" COMM="mms.comm.direct.CommDirect" PERIOD="100 30 80 1000">
 			<ARG NAME="SPEED_SOUND" VALUE="343.3" />
 			<ARG NAME="REFERENCE_DISTANCE" VALUE="1.0" />
 			<ARG NAME="ROLLOF_FACTOR" VALUE="1.0" />
