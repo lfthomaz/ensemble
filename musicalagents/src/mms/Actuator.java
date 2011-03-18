@@ -78,7 +78,7 @@ public class Actuator extends EventHandler implements Acting {
 		this.sendLag = sendLag;
 	}
 	
-	protected void setAutomaticAction(boolean automaticAction) {
+	public void setAutomaticAction(boolean automaticAction) {
 		this.automaticAction = automaticAction;
 	}
 	

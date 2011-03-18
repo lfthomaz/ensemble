@@ -503,7 +503,7 @@ public class Loader {
 		Element elem_mms = Loader.loadXMLFile(args[0]).getDocumentElement();
 		Loader.startJADE(elem_mms);
 		Loader.loadSystem(elem_mms);
-		
+			
 		// TODO Colocar alguma condição para que o usuário possa encerrar a execução do sistema
 //		while (true) {}
 
