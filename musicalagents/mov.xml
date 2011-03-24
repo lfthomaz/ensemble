@@ -1,17 +1,19 @@
-<MMS NAME="Real Time Test">
+<MMS NAME="Movement Test">
 
-	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" />
+	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" OSC="TRUE"/>
 	
   <!-- ********** ENVIRONMENT AGENT ********** -->
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
-		<WORLD CLASS_WORLD="mms.world.World3D" CLASS_ENTITY_STATE="mms.world.EntityState3D">
+		<LAW CLASS="mms.world.law.MovementLaw" />
+		<WORLD CLASS_WORLD="mms.world.World">
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
-			<ARG NAME="friction_coefficient" VALUE="0.25" />
 		</WORLD>
 		<EVENT_SERVER CLASS="mms.movement.MovementEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 0">
+			<ARG NAME="friction_coefficient" VALUE="0.25" />
+			<ARG NAME="gravity" VALUE="10.0" />
 		</EVENT_SERVER>
 	</ENVIRONMENT_AGENT_CLASS>
 	
@@ -19,7 +21,7 @@
 
 	<MUSICAL_AGENT_CLASS NAME="WALKER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
-			<REASONING NAME="Reasoning" CLASS="rt.RT_MovementReasoning" CYCLIC="true" />
+			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" CYCLIC="true" />
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
@@ -30,6 +32,8 @@
 	<MUSICAL_AGENT NAME="Agent_1" CLASS="WALKER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
 	</MUSICAL_AGENT>
 <!--
 	<MUSICAL_AGENT NAME="Agent_2" CLASS="WALKER">
