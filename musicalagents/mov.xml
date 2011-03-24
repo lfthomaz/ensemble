@@ -5,8 +5,8 @@
   <!-- ********** ENVIRONMENT AGENT ********** -->
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
-		<LAW CLASS="mms.world.law.MovementLaw" />
 		<WORLD CLASS_WORLD="mms.world.World">
+			<LAW CLASS="mms.world.law.MovementLaw" />
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
@@ -33,7 +33,7 @@
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
 		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
-		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
 	</MUSICAL_AGENT>
 <!--
 	<MUSICAL_AGENT NAME="Agent_2" CLASS="WALKER">

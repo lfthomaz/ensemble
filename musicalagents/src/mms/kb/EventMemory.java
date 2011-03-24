@@ -73,7 +73,7 @@ public class EventMemory extends Memory {
 			ptr_last_instant_read = null;
 			head = null;
 			tail = null;
-		} else if (ptr.instant > ptr_last_instant_read.instant) {
+		} else if (ptr_last_instant_read != null && ptr.instant > ptr_last_instant_read.instant) {
 			ptr_last_instant_read = head;
 		}
 		

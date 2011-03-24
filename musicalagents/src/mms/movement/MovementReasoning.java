@@ -40,9 +40,9 @@ public class MovementReasoning extends Reasoning {
 	
 	// 
 	private int 				state = 0;
-	private Vector 			actual_pos = null;
-	private Vector 			actual_vel = null;
-	private Vector 			actual_ori = null;
+	private Vector 				actual_pos = null;
+	private Vector 				actual_vel = null;
+	private Vector 				actual_ori = null;
 	
 	// 
 	private double MAX_ACELERATION = 10.0;
@@ -115,7 +115,7 @@ public class MovementReasoning extends Reasoning {
 			actual_vel = Vector.parse(cmd.getParameter("vel"));
 			actual_ori = Vector.parse(cmd.getParameter("ori"));
 		}
-//		System.out.println("New position " + actual_pos + " velocity " + actual_vel);
+		System.out.println("New position " + actual_pos + " velocity " + actual_vel);
 
 	}
 	
