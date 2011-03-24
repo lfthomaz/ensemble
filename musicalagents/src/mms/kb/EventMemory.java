@@ -18,7 +18,6 @@ public class EventMemory extends Memory {
 
 	public int size = 0;
 	
-	double last_instant_read = 0.0;
 	EventSlot ptr_last_instant_read = null;
 
 	@Override
@@ -71,8 +70,11 @@ public class EventMemory extends Memory {
 			size--;
 		}
 		if (ptr == null) {
+			ptr_last_instant_read = null;
 			head = null;
 			tail = null;
+		} else if (ptr.instant > ptr_last_instant_read.instant) {
+			ptr_last_instant_read = head;
 		}
 		
 	}
@@ -117,7 +119,6 @@ public class EventMemory extends Memory {
 				}
 			}
 			
-			last_instant_read = instant;
 			ptr_last_instant_read = ptr;
 				
 			return ptr.object;
