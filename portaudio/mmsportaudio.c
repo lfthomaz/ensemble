@@ -195,6 +195,8 @@ typedef struct {
 JavaVM * virtual_machine;
 
 int callback(const void * input, void * output, unsigned long frame_count, const PaStreamCallbackTimeInfo * time_info, PaStreamCallbackFlags status_flags, void * user_data) {
+	int ret;
+	
 	UserData * data = (UserData *) user_data;
 	if (data == NULL) {
 		printf("portaudio: there is no user data...\n"); fflush(stdout);
@@ -207,14 +209,7 @@ int callback(const void * input, void * output, unsigned long frame_count, const
 		data->mid = (*data->env)->GetMethodID(data->env, data->cls, "callback", "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;JDDD)I");
 	}
 
-//	printf("C::callback() - currentTime = %f\n", time_info->currentTime); fflush(stdout);
-//	printf("C::callback() - inputBufferAdcTime = %f\n", time_info->inputBufferAdcTime); fflush(stdout);
-//	printf("C::callback() - outputBufferDacTime = %f\n", time_info->outputBufferDacTime); fflush(stdout);
-//	printf("C::callback() - outputBufferDacTime = %f\n", time_info->outputBufferDacTime); fflush(stdout);
-//	printf("C::callback() - frame_count = %d\n", frame_count); fflush(stdout);
-//	printf("C::callback() - numOutputChannels = %d\n", data->numOutputChannels); fflush(stdout);
-//	printf("C::callback() - output_frame_size = %d\n", data->output_frame_size); fflush(stdout);
-	int ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
+	ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
 								(*data->env)->NewDirectByteBuffer(data->env, (void *) input, (jint) frame_count * data->input_frame_size),
 								(*data->env)->NewDirectByteBuffer(data->env, output, (jint) frame_count * data->output_frame_size),
 								frame_count,
@@ -1557,6 +1552,10 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsFormatSupported(JNIEnv
 
 
 SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv, jclass jcls, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jdouble jarg4, jlong jarg5, jlong jarg6, jobject jarg7) {
+	UserData * data;
+	PaError error;
+	PaStream * stream;
+  
   jint jresult = 0 ;
   PaStreamParameters *arg2 = (PaStreamParameters *) 0 ;
   PaStreamParameters *arg3 = (PaStreamParameters *) 0 ;
@@ -1578,7 +1577,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv,
 	// Leandro - BEGIN
 
   	// Creates userData and set parameters
-	UserData * data = malloc(sizeof(UserData));
+	data = (UserData *)malloc(sizeof(UserData));
 	data->attached = 0;
 	data->obj_callback = (*jenv)->NewGlobalRef(jenv, jarg7);
 	if (arg2 != NULL) {
@@ -1599,8 +1598,6 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv,
 	data->output_frame_size = Pa_GetSampleSize(data->output_sampleFormat) * data->numOutputChannels;
 
   	// Opens the stream
-	PaError error;
-	PaStream * stream;
 	error = (PaError)Pa_OpenStream(&stream,arg2,arg3,arg4,arg5,arg6,callback,data);
 	data->stream = (long) stream;
 //	printf("OpenStream = %ld\n", data->stream);fflush(stdout);
@@ -1613,6 +1610,10 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv,
 
 
 SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenDefaultStream(JNIEnv *jenv, jclass jcls, jint jarg2, jint jarg3, jlong jarg4, jdouble jarg5, jlong jarg6, jobject jarg7) {
+	UserData * data;
+	PaError error;
+	PaStream * stream;
+
   jint jresult = 0 ;
   int arg2 ;
   int arg3 ;
@@ -1632,7 +1633,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenDefaultStream(JNIEn
   // Leandro - BEGIN
 
   // Creates userData and set parameters
-	UserData * data = malloc(sizeof(UserData));
+	data = (UserData *)malloc(sizeof(UserData));
 	data->attached = 0;
   	data->obj_callback = (*jenv)->NewGlobalRef(jenv, jarg7);
 	data->numInputChannels = arg2;
@@ -1645,8 +1646,6 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenDefaultStream(JNIEn
 	data->output_frame_size = Pa_GetSampleSize(data->output_sampleFormat) * data->numOutputChannels;
 
   // Opens the stream
-	PaError error;
-	PaStream * stream;
 	error = (PaError)Pa_OpenDefaultStream(&stream,arg2,arg3,arg4,arg5,arg6,callback,data);
 	error = Pa_SetStreamFinishedCallback(stream, hook);
 	data->stream = (long) stream;
@@ -1666,7 +1665,6 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1CloseStream(JNIEnv *jenv
   (void)jcls;
 //  arg1 = *(PaStream **)&jarg1;
 //  printf("CloseStream = %d\n", jarg1);fflush(stdout);
-  PaStream * stream = (PaStream *)(jarg1);
   result = (PaError)Pa_CloseStream((PaStream *)jarg1);
   jresult = (jint)result; 
   return jresult;
