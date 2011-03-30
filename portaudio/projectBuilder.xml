@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <project name="portaudio" default="portaudio" basedir=".">
+  	
+    <property name="src.dir"     value="src"/>
+    <property name="classes.dir" value="bin"/>
+  	<property name="c.dir" 		 value="c"/>
+  	
+  	<property name="cp" 		value=".;${classes.dir}"/>
+  	
+  	<!-- ================================= 
+          target: portaudio              
+         ================================= -->
+    <target name="portaudio" depends="compile_native,compile_java" description="description">
+        
+    </target>
+
+  	<!-- - - - - - - - - - - - - - - - - - 
+          target: compile_native                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="compile_native">
+
+        <exec executable="swig" dir="swig/">
+          <arg line="-java -package portaudio portaudio.i" />
+        </exec>
+
+    	<!--
+    	<move todir="src/portaudio">
+    		<fileset dir=".">
+    			<include name="*.java"/>
+    		</fileset>
+    	</move>
+    	-->
+    	
+    	<!-- Compiles c file -->
+        <exec executable="cc">
+          <arg line="-I/System/Library/Frameworks/JavaVM.framework/Headers -c mmsportaudio.c -o mmsportaudio.o" />
+        </exec>
+    	
+    	<!-- Creates the library --> 
+        <exec executable="cc">
+          <arg line="-framework JavaVM -bundle mmsportaudio.o -lportaudio -o libmmsportaudio.jnilib"/>
+        </exec>
+
+    </target>
+
+  	<!-- - - - - - - - - - - - - - - - - - 
+          target: compile_java                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="compile_java" depends="compile_native">
+		<javac srcdir="${src.dir}"
+         destdir="${classes.dir}"
+         classpath="${cp}"
+         debug="off"
+	/>    </target>
+  	
+  </project>
