@@ -40,6 +40,7 @@ public class AudioEventServer extends EventServer {
 	MovementState 	rcv_state;
 	MovementState 	src_state;
 	Vector 			vec_aux;
+	Vector 			vec_aux_2;
 	Vector 			rcv_comp_pos;
 	Vector 			src_comp_pos;
 	
@@ -67,7 +68,8 @@ public class AudioEventServer extends EventServer {
 
 	// Descrição do mundo
 	private World world;
-	
+
+	private boolean 	movementPresent = false;
 	private MovementLaw movLaw;
 	
 //	// Performance
@@ -108,19 +110,21 @@ public class AudioEventServer extends EventServer {
 		// TODO Cuidado com aproximações aqui!
 		this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
 		this.deltas 			= new double[CHUNK_SIZE];
-//		this.deltas_1 			= new double[CHUNK_SIZE];
-//		this.deltas_2 			= new double[CHUNK_SIZE];
-//		this.deltas_3 			= new double[CHUNK_SIZE];
 //		System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
 		
 		this.world = envAgent.getWorld();
-		
+
+		// Verifies if there is a MovementEventServer and a MovementLaw
+		this.movLaw = (MovementLaw)world.getLaw("MOVEMENT");
+		if (envAgent.getEventServer("MOVEMENT") != null && movLaw != null) {
+			movementPresent = true;
+		} else {
+			movementPresent = false;
+		}
 		rcv_state = new MovementState(world.dimensions);
 		src_state = new MovementState(world.dimensions);
 		vec_aux = new Vector(world.dimensions);
-		
-		// Gets the Movement Law
-		this.movLaw = (MovementLaw)world.getLaw("MOVEMENT");
+		vec_aux_2 = new Vector(world.dimensions);
 		
 //		try {
 //			out = new PrintWriter(new BufferedWriter(new FileWriter("foo.out")));
@@ -233,7 +237,7 @@ public class AudioEventServer extends EventServer {
 
 				String[] actuator = a_key.split(":");
 				
-				// If it's the same agente, just copy
+				// If it's the same agent, just copy
 				if (actuator[0].equals(sensor[0])) {
 					
 					System.arraycopy((double[])mem.readMemory(instant, (double)(CHUNK_SIZE * STEP), TimeUnit.SECONDS), 0, buf, 0, CHUNK_SIZE);
@@ -242,114 +246,137 @@ public class AudioEventServer extends EventServer {
 				// Else, simulates the propagation of sound
 				else {
 					
-					double t, guess;
+					double t;
 					
-					// Gets the movement memory
-					Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], "MOVEMENT");
-					Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], "MOVEMENT");
-
-					// Guess
-					if (last_deltas.containsKey(pair)) {
-						guess = last_deltas.get(pair);
-					} else {
-						// Only runs the first time
-						MovementState src_state_old = (MovementState)mem_mov_rcv.readMemory(instant, TimeUnit.SECONDS);
-						movLaw.changeState(src_state_old, instant, src_state);
-//				    	System.out.println("src_state = " + src_state.position);
-						
-						MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(instant, TimeUnit.SECONDS);
-						movLaw.changeState(rcv_state_old, instant, rcv_state);
-//				    	System.out.println("rcv_state = " + rcv_state.position);
-
-						// Adjusts the position according to the component relative position to the center of the agent
-						src_state.position.add(src_comp_pos);
-						rcv_state.position.add(rcv_comp_pos);
-						
-						double distance = src_state.position.getDistance(rcv_state.position);
-						guess = distance / SPEED_SOUND;
-//						System.out.println("initial guess for " + pair + " = " + guess);
-					}
-
-					// Finds the deltas for all the samples in the chunk, according to the chosen process mode
-					double delta = 0.0, delta_i = 0.0, delta_f = 0.0;
-
-					switch (mode) {
-					case NORMAL:
-//						long start = System.nanoTime();
-						// For each sample...
-						for (int j = 0; j < CHUNK_SIZE; j++) {
-							t = instant + (j * STEP);
-							delta = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
-							if (delta < 0.0) {
-								System.err.println("[ERROR] delta = " + delta);
-								delta = 0.0;
+					if (movementPresent) {
+					
+						// Gets the movement memory
+						Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], "MOVEMENT");
+						Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], "MOVEMENT");
+	
+						// Guess
+						double guess;
+						if (last_deltas.containsKey(pair)) {
+							guess = last_deltas.get(pair);
+						} else {
+							// Only runs the first time
+							MovementState src_state_old = (MovementState)mem_mov_rcv.readMemory(instant, TimeUnit.SECONDS);
+							movLaw.changeState(src_state_old, instant, src_state);
+	//				    	System.out.println("src_state = " + src_state.position);
+							
+							MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(instant, TimeUnit.SECONDS);
+							movLaw.changeState(rcv_state_old, instant, rcv_state);
+	//				    	System.out.println("rcv_state = " + rcv_state.position);
+	
+							// Adjusts the position according to the component relative position to the center of the agent
+							src_state.position.add(src_comp_pos);
+							rcv_state.position.add(rcv_comp_pos);
+							
+							double distance = src_state.position.getDistance(rcv_state.position);
+							guess = distance / SPEED_SOUND;
+	//						System.out.println("initial guess for " + pair + " = " + guess);
+						}
+	
+						// Finds the deltas for all the samples in the chunk, according to the chosen process mode
+						double delta = 0.0, delta_i = 0.0, delta_f = 0.0;
+	
+						switch (mode) {
+						case NORMAL:
+	//						long start = System.nanoTime();
+							// For each sample...
+							for (int j = 0; j < CHUNK_SIZE; j++) {
+								t = instant + (j * STEP);
+								delta = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
+								if (delta < 0.0) {
+									System.err.println("[ERROR] delta = " + delta);
+									delta = 0.0;
+								}
+								deltas[j] = delta;
+								guess = delta;
 							}
-							deltas[j] = delta;
-							guess = delta;
+	//						proc_time_1 = System.nanoTime() - start;
+							break;
+						case POL_INT:
+	//						start = System.nanoTime();
+							double[] xa = new double[NUMBER_OF_POINTS]; 
+							double[] ya = new double[NUMBER_OF_POINTS]; 
+	
+							// calculates points for the polinomial interpolation
+							xa[0] = instant;
+							ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
+							int samples_jump = CHUNK_SIZE / NUMBER_OF_POINTS;
+							for (int i = 1; i < NUMBER_OF_POINTS-1; i++) {							
+								xa[i] = instant + (i * samples_jump * STEP);
+								ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], ya[i-1], 0.0, mem_mov_src.getPast());
+							}
+							xa[NUMBER_OF_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
+							ya[NUMBER_OF_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_OF_POINTS-1], ya[NUMBER_OF_POINTS-2], 0.0, mem_mov_src.getPast());
+	
+							// For each sample in this division...
+							for (int i = 0; i < CHUNK_SIZE; i++) {
+								t = instant + (i * STEP);
+								delta = polint(xa, ya, t);
+								deltas[i] = delta;
+							}
+	//						proc_time_2 = System.nanoTime() - start;
+							break;
+						case LIN_INT:
+	//						start = System.nanoTime();
+							// first delta of the chunk
+							delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, instant, guess, 0.0, mem_mov_src.getPast());
+							delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
+							// For each sample in this division...
+							for (int i = 0; i < CHUNK_SIZE; i++) {
+								t = instant + (i * STEP);
+								delta = delta_i + ((t-instant)/((CHUNK_SIZE-1) * STEP))*(delta_f-delta_i);
+								deltas[i] = delta;
+							}
+	//						proc_time_3 = System.nanoTime() - start;
+							break;
+						default:
+							break;
 						}
-//						proc_time_1 = System.nanoTime() - start;
-						break;
-					case POL_INT:
-//						start = System.nanoTime();
-						double[] xa = new double[NUMBER_OF_POINTS]; 
-						double[] ya = new double[NUMBER_OF_POINTS]; 
-
-						// calculates points for the polinomial interpolation
-						xa[0] = instant;
-						ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
-						int samples_jump = CHUNK_SIZE / NUMBER_OF_POINTS;
-						for (int i = 1; i < NUMBER_OF_POINTS-1; i++) {							
-							xa[i] = instant + (i * samples_jump * STEP);
-							ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], ya[i-1], 0.0, mem_mov_src.getPast());
-						}
-						xa[NUMBER_OF_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
-						ya[NUMBER_OF_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_OF_POINTS-1], ya[NUMBER_OF_POINTS-2], 0.0, mem_mov_src.getPast());
-
-						// For each sample in this division...
+	
+	//					file_perf.printf("proc_time %f %f %f\n", ((double)proc_time_1/1000000), ((double)proc_time_2/1000000), ((double)proc_time_3/1000000));
+						
+						// Fills the buffer
 						for (int i = 0; i < CHUNK_SIZE; i++) {
 							t = instant + (i * STEP);
-							delta = polint(xa, ya, t);
-							deltas[i] = delta;
+							double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((deltas[i] * SPEED_SOUND) - REFERENCE_DISTANCE)));
+							double value = 0.0;
+							value = mem.readMemoryDouble(t-deltas[i], TimeUnit.SECONDS);
+							buf[i] = buf[i] + (value * gain);
+							// Performance
+//							MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(t-deltas_1[i], TimeUnit.SECONDS);
+//							movLaw.changeState(rcv_state_old, instant, rcv_state);
+//							file_perf.printf("%d %f %.10f %.10f %.10f\n", i, t, deltas_1[i], deltas_2[i], deltas_3[i]);
 						}
-//						proc_time_2 = System.nanoTime() - start;
-						break;
-					case LIN_INT:
-//						start = System.nanoTime();
-						// first delta of the chunk
-						delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, instant, guess, 0.0, mem_mov_src.getPast());
-						delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
-						// For each sample in this division...
-						for (int i = 0; i < CHUNK_SIZE; i++) {
-							t = instant + (i * STEP);
-							delta = delta_i + ((t-instant)/((CHUNK_SIZE-1) * STEP))*(delta_f-delta_i);
-							deltas[i] = delta;
-						}
-//						proc_time_3 = System.nanoTime() - start;
-						break;
-					default:
-						break;
+						
+						// Stores the last delta for the next computation
+						last_deltas.put(pair, deltas[deltas.length-1]);
+						
+//						// Performance
+//						file_perf.flush();
+
 					}
-
-//					file_perf.printf("proc_time %f %f %f\n", ((double)proc_time_1/1000000), ((double)proc_time_2/1000000), ((double)proc_time_3/1000000));
-					
-					// Fills the buffer
-					for (int i = 0; i < CHUNK_SIZE; i++) {
-						t = instant + (i * STEP);
+					// There is no Movement Event Server or Law present
+					else {
+						// Gets static positions from the world and
+						// adjusts the position according to the component relative position to the center of the agent
+						((Vector)world.getEntityStateAttribute(actuator[0], "POSITION")).copy(vec_aux);
+						vec_aux.add(src_comp_pos);
+						((Vector)world.getEntityStateAttribute(sensor[0], "POSITION")).copy(vec_aux_2);
+						vec_aux_2.add(rcv_comp_pos);
+						// Calculates the delay between them
+						double delta = (vec_aux.getDistance(vec_aux_2)) / SPEED_SOUND;
 						double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
-						double value = 0.0;
-						value = mem.readMemoryDouble(t-deltas[i], TimeUnit.SECONDS);
-						buf[i] = buf[i] + (value * gain);
-						// Performance
-//						MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(t-deltas_1[i], TimeUnit.SECONDS);
-//						movLaw.changeState(rcv_state_old, instant, rcv_state);
-//						file_perf.printf("%d %f %.10f %.10f %.10f\n", i, t, deltas_1[i], deltas_2[i], deltas_3[i]);
+						for (int i = 0; i < CHUNK_SIZE; i++) {
+							t = instant + (i * STEP);
+							double value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
+							buf[i] = buf[i] + (value * gain);
+						}
 					}
-					
-					// Stores the last deltas for the next computation
-					last_deltas.put(pair, delta);
-					
-//					// Performance
-//					file_perf.flush();
+				
 				}
 			}
 			
