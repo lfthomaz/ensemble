@@ -149,6 +149,7 @@ public class MovementEventServer extends EventServer {
 
 				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, "MOVEMENT");
 				
+				boolean positionChanged = false;
 				if (movMemory != null) {
 
 					MovementState movState = (MovementState)movMemory.readMemory(t, TimeUnit.SECONDS);
@@ -169,11 +170,12 @@ public class MovementEventServer extends EventServer {
 						}
 
 						movState = updateMovementState(entity, movState, movMemory, t);
+						positionChanged = true;
 
 					}
 
 					// Sends an OSC message
-					if (osc) {
+					if (osc && positionChanged) {
 						sendOSCPosition(entity, movState);
 					}
 					
