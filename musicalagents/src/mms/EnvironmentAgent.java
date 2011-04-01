@@ -127,6 +127,10 @@ public class EnvironmentAgent extends MMSAgent {
 		return world;
 	}
 	
+	public final EventServer getEventServer(String eventType) {
+		return eventServers.get(eventType);
+	}
+	
 	//--------------------------------------------------------------------------------
 	// Initialization
 	//--------------------------------------------------------------------------------
