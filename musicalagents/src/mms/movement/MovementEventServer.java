@@ -411,11 +411,26 @@ public class MovementEventServer extends EventServer {
 			// TODO Se eu mudar a posição aqui, vai mandar uma atualizaçai de volta para o gui??
 			if (arguments[0].equals("pos")) {
 				String agentName = (String)arguments[1];
-//				String x = (String)arguments[2];
-//				float y = (Float)arguments[3];
-//				float z = (Float)arguments[4];
-//				System.out.printf("pos %s %f %f %f\n", agentName, x, y, z);
-//				System.out.println("pos " + x);
+
+				System.out.println("OSC args count(" + arguments.length + "): ");
+
+				//recupera a nova posicao
+				float x = Float.parseFloat(arguments[2].toString());
+				float y = Float.parseFloat(arguments[3].toString());
+				float z = Float.parseFloat(arguments[4].toString());
+				
+				System.out.printf("Incoming OSC: pos %s %f %f %f\n", agentName, x, y, z);
+				//System.out.println("pos " + x);
+				
+				//acc_command.put(agentName,new Vector(x,y,z));
+				Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
+				
+				MovementState movState = new MovementState(world.dimensions);
+				movState.position = new Vector(x,y,z);
+				movState.acceleration = new Vector(world.dimensions);
+				
+				updateMovementState(agentName, movState ,movMemory,clock.getCurrentTime(TimeUnit.SECONDS));
+				
 			}
 			else if (arguments[0].equals("mouse")) {
 				String agentName = (String)arguments[1];

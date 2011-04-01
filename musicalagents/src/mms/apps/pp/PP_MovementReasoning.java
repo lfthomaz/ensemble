@@ -196,13 +196,16 @@ public class PP_MovementReasoning extends Reasoning {
 	@Override
 	public void process() {
 
-		System.out.println("Process " + actual_pos + " - " + waypoints.get(active_waypoint));
+		//System.out.println("Process " + actual_pos + " - " + waypoints.get(active_waypoint));
 		
 		if (legsMemory != null && actual_pos != null && waypoints.size() != 0) {
 			// Tenho destino?
 			if (active_waypoint < waypoints.size()) {
 				Vector dest_pos = waypoints.get(active_waypoint);
 				double actual_distance = actual_pos.getDistance(dest_pos);
+				System.out.println("Process " + actual_pos + " - " + waypoints.get(active_waypoint)+ " - Distance : " + actual_distance);
+				
+				last_distance=actual_distance; 
 				// Cheguei?
 				if (actual_distance < precision) {
 					//System.out.println("Cheguei no waypoint " + active_waypoint + " - " + waypoints.get(active_waypoint));
@@ -218,11 +221,11 @@ public class PP_MovementReasoning extends Reasoning {
 				}
 				else {
 					// Estou parado ou passei
-					if (actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance > actual_distance)) {
+					//if (actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance > actual_distance)) {
 						// TODO Mudar para o m�todo de Newton!!!
 						// Calcular quanto e por quanto tempo devo acelerar
 						double time_constrain = time_constrains.get(active_waypoint);
-//						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time);
+						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time_constrain);
 //						System.out.println("dist_to_wp = " + dist_to_wp);
 						double acc_mag = MAX_ACELERATION;
 						double t1 = 0.2; 
@@ -252,11 +255,11 @@ public class PP_MovementReasoning extends Reasoning {
 								(dest_pos.getValue(2)-actual_pos.getValue(2)));
 						acc.normalizeVector();
 						acc.product(acc_mag);
-//						System.out.println("acc_vec = " + acc);
+						System.out.println("acc_vec = " + acc);
 						// Enviar comando
 						sendAccCommand(acc, t1);
 						
-					}
+					//}
 				}
 			}
 			else {
