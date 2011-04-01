@@ -283,7 +283,16 @@ public class MovementEventServer extends EventServer {
 
 		// Get the initial parameters
 		if (userParam.containsKey("pos")) {
-			movState.position = Vector.parse(userParam.get("pos"));
+			String pos = userParam.get("pos") ;
+			if (pos.equals("random")) {
+				movState.position = new Vector();
+				for (int i = 0; i < world.dimensions; i++) {
+					movState.position.setValue(i, Math.random() * world.form_size - world.form_size_half);
+				}
+				System.out.println(agentName + " position is " + movState.position);
+			} else {
+				movState.position = Vector.parse(pos);
+			}
 		} else {
 			movState.position = new Vector(world.dimensions);
 		}

@@ -41,8 +41,15 @@ public class Aubio_FFT extends Process {
 
 	@Override
 	public Object process(Parameters arguments, Object in) {
+		
+//		System.out.println("Entrei no process()...");
 
 		double[] out = null;
+		
+		SWIGTYPE_p_fvec_t in_fvec = null;
+		SWIGTYPE_p_cvec_t out_cvec = null;
+		SWIGTYPE_p_cvec_t in_cvec = null;
+		SWIGTYPE_p_fvec_t out_fvec = null;
 		
 		// Valide input data
 		if (!(in instanceof double[])) {
@@ -51,24 +58,17 @@ public class Aubio_FFT extends Process {
 		}
 		double[] chunk = (double[])in;
 		
-		// Creates fft plan only if needed
-		if (fft_size != default_fft_size) {
-			mfft_t = aubiowrapper.new_aubio_mfft(fft_size, 1);
-			default_fft_size = fft_size;
-			System.out.println("FFT plan recreated - size = " + default_fft_size);
-		}
-		
 		// Forward FFT
 		if (!inverse) {
 	
 			// Creates the input vector
-			SWIGTYPE_p_fvec_t in_fvec = aubiowrapper.new_fvec(fft_size, 1);
+			in_fvec = aubiowrapper.new_fvec(fft_size, 1);
 			for (int i = 0; i < fft_size; i++) {
 				aubiowrapper.fvec_write_sample(in_fvec, (float)chunk[i], 0, i);
 			}
 	      
 			// Creates the output vector
-			SWIGTYPE_p_cvec_t out_cvec = aubiowrapper.new_cvec(fft_size, 1);
+			out_cvec = aubiowrapper.new_cvec(fft_size, 1);
 	      
 			// FFT
 			aubiowrapper.aubio_mfft_do(mfft_t, in_fvec, out_cvec);
@@ -96,14 +96,14 @@ public class Aubio_FFT extends Process {
 		// Inverse FFT
 		} else {
 			// Creates the input vector
-			SWIGTYPE_p_cvec_t in_cvec = aubiowrapper.new_cvec(fft_size, 1);
+			in_cvec = aubiowrapper.new_cvec(fft_size, 1);
 			for (int i = 0; i < fft_size/2+1; i++) {
 				aubiowrapper.cvec_write_norm(in_cvec, (float)chunk[i*2], 0, i);
 				aubiowrapper.cvec_write_phas(in_cvec, (float)chunk[i*2+1], 0, i);
 			}
 	      
 			// Creates the output vector
-			SWIGTYPE_p_fvec_t out_fvec = aubiowrapper.new_fvec(fft_size, 1);
+			out_fvec = aubiowrapper.new_fvec(fft_size, 1);
 	      
 			// FFT
 			aubiowrapper.aubio_mfft_rdo(mfft_t, in_cvec, out_fvec);
@@ -116,12 +116,28 @@ public class Aubio_FFT extends Process {
 			
 		}
 		
+		if (in_fvec != null) {
+			aubiowrapper.del_fvec(in_fvec);
+		}
+		if (out_fvec != null) {
+			aubiowrapper.del_fvec(out_fvec);
+		}
+		if (in_cvec != null) {
+			aubiowrapper.del_cvec(in_cvec);
+		}
+		if (out_cvec != null) {
+			aubiowrapper.del_cvec(out_cvec);
+		}
+		
 		return out;
 
 	}
 
 	@Override
 	public boolean fini() {
+		
+		aubiowrapper.del_aubio_mfft(mfft_t);
+		
 		return true;
 	}
 	    

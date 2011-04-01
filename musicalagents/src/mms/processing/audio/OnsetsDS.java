@@ -40,7 +40,8 @@ public class OnsetsDS extends Process {
 		ODS_FFT_FFTW3_HC, ///< FFTW <a href="http://www.fftw.org/fftw3_doc/The-Halfcomplex_002dformat-DFT.html">"halfcomplex"</a> format 
 		ODS_FFT_FFTW3_R2C,   ///< FFTW regular format, typically produced using <a href="http://www.fftw.org/fftw3_doc/One_002dDimensional-DFTs-of-Real-Data.html#One_002dDimensional-DFTs-of-Real-Data">real-to-complex</a> transform
 		ODS_FFT_SST_R2C,
-		ODS_FFT_AUBIO_R2C
+		ODS_FFT_AUBIO_R2C,
+		ODS_FFT_LIBXTRACT
 	}
 
 	/**
@@ -345,6 +346,11 @@ public class OnsetsDS extends Process {
 					ods.curr.bin[i].mag   = fftbuf[i*2];
 					ods.curr.bin[i].phase = fftbuf[(i*2)+1];
 				}
+				break;
+				
+			case ODS_FFT_LIBXTRACT:
+				
+				
 				break;
 				
 		}

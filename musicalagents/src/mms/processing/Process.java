@@ -28,10 +28,10 @@ public abstract class Process implements LifeCycle {
 		
 		// Check for arguments
 		// TODO Deveriamos ter uma lista dos argumentos necessário (e opcionais) para cada process, e checar a existência deles aqui!
-//		if (arguments == null) {
-//			System.err.println("ERROR: No arguments was passed to the Process class!");
-//			return false;
-//		}
+		if (arguments == null) {
+			System.err.println("ERROR: No arguments was passed to the Process class!");
+			return false;
+		}
 		
 		// Call the user initialization method
 		init();

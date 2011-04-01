@@ -9,22 +9,50 @@ import mms.processing.Process;
 
 public class LibXtract_FFT extends Process {
 
+	private final String PARAM_SIZE 		= "size";
+	private final String PARAM_SAMPLE_RATE	= "sample_rate";
+	private final String PARAM_OUTPUT_TYPE 	= "output_type";
+	private final String PARAM_INVERSE		= "inverse";
+
 	// FFT
 	private static int default_fft_size = 512;
+	private int fft_size;
+	private double Fs;
+	private String fft_output;
+	private boolean inverse;
 
-	static {
-		xtract.xtract_init_fft(default_fft_size, xtract_features_.XTRACT_SPECTRUM.swigValue());
+	private floatArray vector;
+	private	floatArray argf = new floatArray(4);
+	private floatArray spectrum;
+
+	@Override
+	public boolean init() {
+		
+		// Validate arguments
+		fft_size = Integer.valueOf(arguments.get(PARAM_SIZE, "512"));
+		Fs = Double.valueOf(arguments.get(PARAM_SAMPLE_RATE, "44100"));
+		fft_output = arguments.get(PARAM_OUTPUT_TYPE, "polar"); // real, complex, polar
+		inverse = Boolean.parseBoolean(arguments.get(PARAM_INVERSE, "false"));
+
+		vector = new floatArray(fft_size);
+		spectrum = new floatArray(fft_size);
+		
+		xtract.xtract_init_fft(fft_size, xtract_features_.XTRACT_SPECTRUM.swigValue());
+		return true;
+		
 	}
-	
+
+	@Override
+	public boolean fini() {
+		
+		xtract.xtract_free_fft();
+		return true;
+		
+	}
+
 	@Override
 	public Object process(Parameters arguments, Object in) {
 
-		// Validate arguments
-		int fft_size = Integer.valueOf(arguments.get("fft_size", "512"));
-		double Fs = Double.valueOf(arguments.get("Fs", "44100"));
-		String fft_type = "r2c";
-		String fft_output = arguments.get("fft_output", "real"); // real, complex, polar
-		
 		// Valide input data
 		if (!(in instanceof double[])) {
 			System.out.println("SPECTRUM: input must be a double[]");
@@ -35,22 +63,21 @@ public class LibXtract_FFT extends Process {
 		// Creates fft plan only if needed
 		if (fft_size != default_fft_size) {
 			xtract.xtract_init_fft(fft_size, xtract_features_.XTRACT_SPECTRUM.swigValue());
+			vector = new floatArray(fft_size);
+			spectrum = new floatArray(fft_size);
 			default_fft_size = fft_size;
 		}
 
 		// Input vector
-		floatArray vector = new floatArray(fft_size);
 		for (int i = 0; i < chunk.length; i++) {
 			vector.setitem(i, (float)chunk[i]);
 		}
 
 		// Spectrum
-		floatArray argf = new floatArray(4);
 		argf.setitem(0, (float)Fs/fft_size);
 		argf.setitem(1, xtract_spectrum_.XTRACT_MAGNITUDE_SPECTRUM.swigValue());
 		argf.setitem(2, 0.0f);
 		argf.setitem(3, 0.0f);
-		floatArray spectrum = new floatArray(fft_size);
 		xtract.xtract_spectrum(vector.cast(), fft_size, argf.cast().getVoidPointer(), spectrum.cast());
 
 		// Results

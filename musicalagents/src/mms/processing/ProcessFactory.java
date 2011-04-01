@@ -11,6 +11,7 @@ import mms.processing.audio.Aubio_FFT;
 import mms.processing.audio.Aubio_Onset;
 import mms.processing.audio.Aubio_PhaseVocoder;
 import mms.processing.audio.Aubio_PitchDetection;
+import mms.processing.audio.LibXtract_FFT;
 import mms.processing.audio.LibXtract_RMS;
 import mms.processing.audio.OnsetsDS;
 import mms.tools.AudioInputFile;
@@ -103,14 +104,21 @@ public class ProcessFactory {
 		// Initializes de Process object
 		proc.configure(arguments);
 		proc.start();
+		proc.init();
 
 		return proc;
 	}
 	
+	public static void deleteAudioProcessor(Process proc) {
+		proc.fini();
+		proc.end();
+	}
+
+	
 	public static void main(String[] args) {
 		
-    	int N = 512;
-    	double Fs = 44100;
+    	final int N = 2048;
+    	final double Fs = 44100;
 
 		// Open input file
 		AudioInputFile in_file = null;
@@ -120,26 +128,57 @@ public class ProcessFactory {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		double[] chunk = in_file.readNextChunk(N);
+		final double[] chunk = in_file.readNextChunk(N);
 //		System.out.println("Chunk");
 //		for (int i = 0; i < N; i++) {
 //			System.out.printf("%.2f\n", chunk[i]);
 //		}
       
-//		Process fftproc = ProcessFactory.createAudioProcessor(AudioOperation.FFT, null);
-//		
-//		Parameters fft_args = new Parameters();
-//		fft_args.put("size", String.valueOf(N));
-//		fft_args.put("output_type", "polar");
-//		fft_args.put("sample_rate", String.valueOf(Fs));
-//		double[] fftbuf = (double[])fftproc.process(fft_args, chunk);
-//
-//		// FFT Results
-//		System.out.println("FFT Results");
-//		for (int i = 0; i < N/2+1; i++) {
-//			System.out.printf("%.2f Hz \t %.2f \t %.2f\n", i*Fs/N, fftbuf[i*2], fftbuf[i*2+1]);
-//		}
-//    
+		Parameters parameters = new Parameters();
+		parameters.put("size", String.valueOf(N));
+		parameters.put("sample_rate", String.valueOf(Fs));
+		final Process fftproc = ProcessFactory.createAudioProcessor(AudioOperation.FFT, parameters);
+		final Process fftproc2 = ProcessFactory.createAudioProcessor(AudioOperation.FFT, parameters);
+
+		new Thread() {
+			public void run() {
+				System.out.println("Entrei 1");
+				for (int i = 0; i < 1000; i++) {
+					Parameters fft_args = new Parameters();
+					fft_args.put("size", String.valueOf(N));
+					fft_args.put("output_type", "polar");
+					fft_args.put("sample_rate", String.valueOf(Fs));
+					double[] fftbuf = (double[])fftproc.process(fft_args, chunk);
+				}
+//				// FFT Results
+//				System.out.println("FFT Results");
+//				for (int i = 0; i < N/2+1; i++) {
+//					System.out.printf("%.2f Hz \t %.2f \t %.2f\n", i*Fs/N, fftbuf[i*2], fftbuf[i*2+1]);
+//				}
+		    
+			};
+		}.start();
+
+		new Thread() {
+			public void run() {
+				System.out.println("Entrei 2");
+				for (int i = 0; i < 1000; i++) {
+					Parameters fft_args = new Parameters();
+					fft_args.put("size", String.valueOf(N));
+					fft_args.put("output_type", "polar");
+					fft_args.put("sample_rate", String.valueOf(Fs));
+					double[] fftbuf = (double[])fftproc2.process(fft_args, chunk);
+				}
+
+				// FFT Results
+//				System.out.println("FFT Results");
+//				for (int i = 0; i < N/2+1; i++) {
+//					System.out.printf("%.2f Hz \t %.2f \t %.2f\n", i*Fs/N, fftbuf[i*2], fftbuf[i*2+1]);
+//				}
+		    
+			};
+		}.start();
+
 //		// IFFT Results
 //		Parameters ifft_args = new Parameters();
 //		ifft_args.put("size", String.valueOf(N));
@@ -152,17 +191,17 @@ public class ProcessFactory {
 //			System.out.printf("%.2f\n", real[i]);
 //		}
 		
-		// Pitch Detection
-		Parameters pd_args = new Parameters();
-		pd_args.put("bufsize", String.valueOf(N));
-		pd_args.put("hopsize", String.valueOf(256));
-		pd_args.put("sample_rate", String.valueOf(Fs));
-		pd_args.put("type", "yin");
-		pd_args.put("mode", "freq");
-		Process pdproc = ProcessFactory.createAudioProcessor(AudioOperation.PITCH_DETECTION, pd_args);
-		float res = (Float)pdproc.process(pd_args, chunk);
-		
-		System.out.println("res = " + res);
+//		// Pitch Detection
+//		Parameters pd_args = new Parameters();
+//		pd_args.put("bufsize", String.valueOf(N));
+//		pd_args.put("hopsize", String.valueOf(256));
+//		pd_args.put("sample_rate", String.valueOf(Fs));
+//		pd_args.put("type", "yin");
+//		pd_args.put("mode", "freq");
+//		Process pdproc = ProcessFactory.createAudioProcessor(AudioOperation.PITCH_DETECTION, pd_args);
+//		float res = (Float)pdproc.process(pd_args, chunk);
+//		
+//		System.out.println("res = " + res);
 		    	
     }
 	
