@@ -47,7 +47,7 @@ public class OSCServerService extends BaseService {
 		try {
 			
 			Listener listener = new Listener();
-			receiver = new OSCPortIn(6666);
+			receiver = new OSCPortIn(57111);
 			receiver.addListener("/mms/.*", listener);
 //			receiver.addListener("/mms/movement", listener);
 //			receiver.addListener("/mms/Bassist/foot", listener);
