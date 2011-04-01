@@ -208,6 +208,7 @@ public class MusicalAgent extends MMSAgent {
 				comp.addParameters(arguments);
 				comp.configure(arguments);
 
+				// Sets the position of the EventHandler in Agent's "body"
 				if (comp instanceof EventHandler) {
 					if (arguments.containsKey(Constants.PARAM_POSITION)) {
 						Vector position = Vector.parse(arguments.get(Constants.PARAM_POSITION));
@@ -236,6 +237,19 @@ public class MusicalAgent extends MMSAgent {
 					// TODO Broadcast aos componentes existentes sobre o novo componente
 				}
 //				logger.info("[" + getAgentName() + "] " + "Component " + comp.getName() + " added");
+				
+				// Warns the Reasoning about all EventHandlers present
+				if (comp instanceof Reasoning) {
+					for (MusicalAgentComponent existingComp : components.values()) {
+						if (existingComp instanceof EventHandler) {
+							try {
+								((Reasoning)comp).eventHandlerRegistered((EventHandler)existingComp);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
 				
 			} catch (ClassNotFoundException e) {
 	//			e.printStackTrace();
@@ -409,7 +423,7 @@ public class MusicalAgent extends MMSAgent {
 			EventHandler comp = (EventHandler)components.get(componentName);
 			comp.confirmRegistration(eventExecution, serverParameters, extraParameters);
 
-			// Avisa os Reasonings do novo EventHandler registrado
+			// Warns all Reasonings about the new EventHandler
 			for (MusicalAgentComponent existingComp : components.values()) {
 				if (existingComp instanceof Reasoning) {
 					try {
