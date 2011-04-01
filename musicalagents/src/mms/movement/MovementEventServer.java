@@ -429,7 +429,12 @@ public class MovementEventServer extends EventServer {
 				movState.position = new Vector(x,y,z);
 				movState.acceleration = new Vector(world.dimensions);
 				
-				updateMovementState(agentName, movState ,movMemory,clock.getCurrentTime(TimeUnit.SECONDS));
+				try {
+		              movMemory.writeMemory(movState);
+		         } catch (MemoryException e) {
+		              e.printStackTrace();
+		         }
+				
 				
 			}
 			else if (arguments[0].equals("mouse")) {

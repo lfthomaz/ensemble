@@ -10,7 +10,7 @@
 			<LAW CLASS="mms.world.law.MovementLaw" />
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
-			<ARG NAME="form" VALUE="cube:200:loop" />
+			<ARG NAME="form" VALUE="cube:200:infinite" />
 			<ARG NAME="friction_coefficient" VALUE="0.25" />
 		</WORLD>
 		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="1000 300 800 1000">
@@ -36,7 +36,7 @@
 			<REASONING NAME="AudioReasoning" CLASS="mms.apps.pp.PP_Reasoning" CYCLIC="false" />
 			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
-			<REASONING NAME="MovementReasoning" CLASS="mms.apps.pp.PP_MovementReasoning" CYCLIC="true" />
+			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" CYCLIC="true" />
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
@@ -52,6 +52,13 @@
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
+	<MUSICAL_AGENT_CLASS NAME="WALKER" CLASS="mms.MusicalAgent">
+		<COMPONENTS>
+			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" CYCLIC="true" />
+			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+		</COMPONENTS>
+	</MUSICAL_AGENT_CLASS>
 	<!--
 	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.apps.rt.RT_ListenerMusicalAgent">
 	</MUSICAL_AGENT_CLASS>
@@ -78,12 +85,14 @@
 	</MUSICAL_AGENT>
 	-->
 	<MUSICAL_AGENT NAME="Ambulance" CLASS="MUSICIAN">
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;-10.0;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(20;0;0)" /> 
-		<!-- <ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" /> -->
-		<!-- <ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" /> -->
+		<!-- <ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;-50;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(20;0;0)" />  -->
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
+		 <ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
+		 <ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
 		<FACT NAME="instructions" VALUE="ppt_instructions.xml" />
-		<FACT NAME="filename" VALUE="siren_2.wav" />
+		<FACT NAME="filename" VALUE="media/siren_2.wav" />
 	</MUSICAL_AGENT>
 	
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
@@ -93,22 +102,27 @@
 		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
 	</MUSICAL_AGENT>
 	
-	
+	<!--
+	<MUSICAL_AGENT NAME="Agent_1" CLASS="WALKER">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-10;20;0) 2.0:(-10;-20;0) 4.0:(10;-10;0) 4.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
+	</MUSICAL_AGENT>
+	 
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;50;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Ear_left" NAME="channel" VALUE="LEFT" />
-		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
+		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="LEFT" />
 	</MUSICAL_AGENT>
 	
-	
-	<MUSICAL_AGENT NAME="Listener_3" CLASS="LISTENER">
+ 		<MUSICAL_AGENT NAME="Listener_3" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;-50;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
-		<ARG_COMP COMP="Ear_left" NAME="channel" VALUE="LEFT" />
+		<ARG_COMP COMP="Ear_left" NAME="channel" VALUE="RIGHT" />
 		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
 	</MUSICAL_AGENT>
-	
 	
 	<MUSICAL_AGENT NAME="Listener_4" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(50;-50;0)" />
@@ -116,6 +130,7 @@
 		<ARG_COMP COMP="Ear_left" NAME="channel" VALUE="LEFT" />
 		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
 	</MUSICAL_AGENT>
+	-->
 	
 	<!-- 	
 	<MUSICAL_AGENT NAME="Drummer" CLASS="MUSICIAN">
