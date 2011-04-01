@@ -107,44 +107,26 @@ public class MovementEventServer extends EventServer {
 		
 	}
 
-	private void updateMovementState(String entity, MovementState movState, Memory movMemory, double t) {
+	private MovementState updateMovementState(String entity, MovementState movState, Memory movMemory, double t) {
 
 		// Updates the movement state
 		MovementState newState = new MovementState(world.dimensions);
 		movLaw.changeState(movState, t, newState);
-		movState = newState;
 		try {
-			movMemory.writeMemory(movState);
+			movMemory.writeMemory(newState);
 		} catch (MemoryException e) {
 			e.printStackTrace();
 		}
 
 //		System.out.println(entity + " newState = " + newState.position);
 		
-		// Sends an OSC message
-		if (osc) {
-			sendOSCPosition(entity, newState);
-		}
+//		System.out.println("\tpos = " + newState.position);
+//		System.out.println("\tvel = " + newState.velocity);
+//		System.out.println("\tacc = " + newState.acceleration);
+//		System.out.println("\tori = " + newState.orientation);
+//		System.out.println("\tang = " + newState.angularVelocity);
 		
-		// Creates a response event if there is a sensor registered
-		String[] sensors = searchRegisteredEventHandler(entity, "", Constants.EVT_MOVEMENT, Constants.COMP_SENSOR);
-//				System.out.println("Found " + sensors.length + " sensors!");
-		if (sensors.length == 1) {
-			EventHandlerInfo info = EventHandlerInfo.parse(sensors[0]);
-			Event evt = new Event();
-			Command cmd2 = new Command("INFO");
-			cmd2.addParameter("pos", movState.position.toString());
-			cmd2.addParameter("vel", movState.velocity.toString());
-			cmd2.addParameter("ori", movState.orientation.toString());
-			evt.objContent = cmd2.toString();
-			addOutputEvent(info.agentName, info.componentName, evt);
-		}
-		
-//		System.out.println("\tpos = " + movState.position);
-//		System.out.println("\tvel = " + movState.velocity);
-//		System.out.println("\tacc = " + movState.acceleration);
-//		System.out.println("\tori = " + movState.orientation);
-//		System.out.println("\tang = " + movState.angularVelocity);
+		return newState;
 
 	}
 	
@@ -186,8 +168,27 @@ public class MovementEventServer extends EventServer {
 							}
 						}
 
-						updateMovementState(entity, movState, movMemory, t);
+						movState = updateMovementState(entity, movState, movMemory, t);
 
+					}
+
+					// Sends an OSC message
+					if (osc) {
+						sendOSCPosition(entity, movState);
+					}
+					
+					// Creates a response event if there is a sensor registered
+					String[] sensors = searchRegisteredEventHandler(entity, "", Constants.EVT_MOVEMENT, Constants.COMP_SENSOR);
+//							System.out.println("Found " + sensors.length + " sensors!");
+					if (sensors.length == 1) {
+						EventHandlerInfo info = EventHandlerInfo.parse(sensors[0]);
+						Event evt = new Event();
+						Command cmd2 = new Command("INFO");
+						cmd2.addParameter("pos", movState.position.toString());
+						cmd2.addParameter("vel", movState.velocity.toString());
+						cmd2.addParameter("ori", movState.orientation.toString());
+						evt.objContent = cmd2.toString();
+						addOutputEvent(info.agentName, info.componentName, evt);
 					}
 						
 				}
@@ -363,22 +364,6 @@ public class MovementEventServer extends EventServer {
 			movMemory = createEntityMemory(agentName);
 		}
 
-		Event evt = new Event();
-		Command cmd = new Command("INFO");
-		MovementState movState = (MovementState)movMemory.readMemory(clock.getCurrentTime(TimeUnit.SECONDS), TimeUnit.SECONDS);
-		cmd.addParameter("pos", movState.position.toString());
-		cmd.addParameter("vel", movState.velocity.toString());
-		cmd.addParameter("ori", movState.orientation.toString());
-		evt.objContent = cmd.toString();
-		addOutputEvent(agentName, eventHandlerName, evt);
-//			System.err.println("Vou enviar - sensorRegistered");
-		// Enviar os eventos
-		try {
-			act();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
 		return userParam;
 	}
 	
