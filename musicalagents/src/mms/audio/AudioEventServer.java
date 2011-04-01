@@ -215,7 +215,7 @@ public class AudioEventServer extends EventServer {
 			
 			String s_key = s.nextElement();
 			String[] sensor = s_key.split(":");
-			rcv_comp_pos = Vector.parse(sensors.get(s_key).get(Constants.PARAM_POSITION, "(0;0;0)"));
+			rcv_comp_pos = Vector.parse(sensors.get(s_key).get(Constants.PARAM_REL_POS, "(0;0;0)"));
 
 			// Cria o evento a ser enviado para o sensor
 			Event evt = new Event();
@@ -231,7 +231,7 @@ public class AudioEventServer extends EventServer {
 
 				String a_key = a.nextElement();
 				String pair = s_key + "<>" + a_key;
-				src_comp_pos = Vector.parse(actuators.get(a_key).get(Constants.PARAM_POSITION, "(0;0;0)"));
+				src_comp_pos = Vector.parse(actuators.get(a_key).get(Constants.PARAM_REL_POS, "(0;0;0)"));
 				
 				AudioMemory mem = (AudioMemory)memories.get(a_key);
 

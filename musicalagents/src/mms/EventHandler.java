@@ -155,15 +155,6 @@ public abstract class EventHandler extends MusicalAgentComponent {
 
 		this.eventExchange = eventExecution;
 
-		// Cria a memória relativa a esse EventHandler
-		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
-		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
-		myMemory = getAgent().getKB().createMemory(getName(), eventType, 5.0, getParameters());
-		if (myMemory == null) {
-			System.err.println("Não foi possível criar a memória");
-		}
-//		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
-
 		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC)) {
 			// Configuration
 			this.startTime 		= Long.valueOf(serverParameters.get(Constants.PARAM_START_TIME));
@@ -180,13 +171,23 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			addParameter(Constants.PARAM_PERIOD, serverParameters.get(Constants.PARAM_PERIOD));
 			addParameter(Constants.PARAM_RCV_DEADLINE, serverParameters.get(Constants.PARAM_RCV_DEADLINE));
 //			System.out.println(startTime + " " + workingFrame + " " + period + " " + sendDeadline);
-
-			if (getType().equals(Constants.COMP_ACTUATOR)) {
-				Actuator act = (Actuator)this;
-				act.setEventFrequency();
-			}
 		}
 		addParameters(extraParameters);
+		
+		// Cria a memória relativa a esse EventHandler
+		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
+		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
+		myMemory = getAgent().getKB().createMemory(getName(), eventType, 5.0, getParameters());
+		if (myMemory == null) {
+			System.err.println("Não foi possível criar a memória");
+		}
+//		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
+
+		// No caso de ser uma troca de evento frequente, armazena os parÃ¢metros
+		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC) && getType().equals(Constants.COMP_ACTUATOR)) {
+			Actuator act = (Actuator)this;
+			act.setEventFrequency();
+		}
 		
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getName());
