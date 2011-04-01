@@ -1,0 +1,22 @@
+#N canvas 389 79 404 455 10;
+#X obj 71 182 audce_gui_grid 200 200 0.2;
+#X obj 71 135 dumpOSC 57110;
+#X obj 71 158 OSCroute /pd;
+#X obj 15 9 loadbang;
+#X obj 15 415 sendOSC;
+#X msg 15 33 connect localhost 57111;
+#X msg 26 60 send /mmf/Listener add_component Sensor AUDIO (pos (1
+\; 0 \; 0));
+#X msg 40 85 send /mmf/Environment create_agent Follower Follower_3
+;
+#X msg 58 110 send /mmf/environment delete_agent Follower_2;
+#X msg 71 391 send /mmf/Environment/Movement pos \$1 \$2 \$3 \$4;
+#X connect 0 0 9 0;
+#X connect 1 0 2 0;
+#X connect 2 0 0 0;
+#X connect 3 0 5 0;
+#X connect 5 0 4 0;
+#X connect 6 0 4 0;
+#X connect 7 0 4 0;
+#X connect 8 0 4 0;
+#X connect 9 0 4 0;
