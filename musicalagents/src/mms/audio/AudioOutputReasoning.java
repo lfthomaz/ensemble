@@ -1,16 +1,13 @@
 package mms.audio;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import jade.util.Logger;
 
-import org.jpab.Callback;
-import org.jpab.Device;
-import org.jpab.PortAudio;
-import org.jpab.PortAudioException;
-import org.jpab.Stream;
-import org.jpab.StreamConfiguration;
+import portaudio.PaCallback;
+import portaudio.PaDeviceInfo;
+import portaudio.PaStreamParameters;
+import portaudio.portaudio;
 
 import mms.Constants;
 import mms.EventHandler;
@@ -26,11 +23,8 @@ public class AudioOutputReasoning extends Reasoning {
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-	// File
-//	FileOutputStream out_byte_sink 	= null;
-
 	// PortAudio
-	Stream 	outStream;
+	long 	stream = 0;
 	boolean firstCall = true, firstSound = true;
 	double 	startTime, instant, period;
 	double 	step = 1/44100.0;
@@ -48,104 +42,92 @@ public class AudioOutputReasoning extends Reasoning {
 	@Override
 	public boolean init() {
 		
-		// Opens audio file for writing
-//		try {
-//			out_byte_sink = new FileOutputStream(getAgent().getAgentName()+"_out.dat");
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
-		
 		device = Integer.valueOf(getParameter("device", "-1"));
 		channel = Integer.valueOf(getParameter("channel", "0"));
-
+		
 		// Initializes PortAudio
-		try {
-			StreamConfiguration conf;
-			if (device != -1) {
-				// Configuration
-				List<Device> devices = PortAudio.getDevices();
-				conf = new StreamConfiguration();
-				Device outDevice = devices.get(device);
-				conf.setMode(StreamConfiguration.Mode.OUTPUT_ONLY);
-				conf.setOutputDevice(outDevice);
-				conf.setOutputChannels(outDevice.getMaxOutputChannels());
-				conf.setOutputLatency(outDevice.getDefaultLowOutputLatency());
-				conf.setOutputFormat(StreamConfiguration.SampleFormat.SIGNED_INTEGER_16);
-				/*conf.setFlags()*/ 
-				conf.setSampleRate(outDevice.getDefaultSampleRate());
-			} else {
-				conf = PortAudio.getDefaultStreamConfiguration(StreamConfiguration.Mode.OUTPUT_ONLY);
-			}
-			outStream = PortAudio.createStream(conf, new ProcessAudio(), null);
-			maxChannels = outStream.getConfiguration().getOutputChannels();
-		} catch (PortAudioException e) {
-			e.printStackTrace();
-			getAgent().logger.severe("[" + getName() + "] " + "PortAudio initialization error!");
-			return false;
+		System.out.println("Starting portaudio...");
+		int err = portaudio.Pa_Initialize();
+
+		if (device != -1) {
+			System.out.println("Opening stream...");
+			// Gets DeviceInfo
+			PaDeviceInfo info = portaudio.Pa_GetDeviceInfo(device);
+			double sr = info.getDefaultSampleRate();
+			maxChannels = info.getMaxOutputChannels();
+			// Sets Parameters
+			PaStreamParameters outputParameters = new PaStreamParameters();
+			outputParameters.setDevice(device);
+			outputParameters.setChannelCount(maxChannels);
+			outputParameters.setHostApiSpecificStreamInfo(null);
+			outputParameters.setSampleFormat(portaudio.SIGNED_INTEGER_16);
+			outputParameters.setSuggestedLatency(info.getDefaultLowOutputLatency());
+			// Opens the stream
+			stream = portaudio.Pa_OpenStream(null, outputParameters, sr, 256, 0, new Callback());
+			System.out.println("Java::stream = " + stream);
+		} else {
+			stream = portaudio.Pa_OpenDefaultStream(0, 1, portaudio.SIGNED_INTEGER_16, 44100.0, 256, new Callback());
+			System.out.println("Java::stream (default) = " + stream);
 		}
 
 		return true;
 		
 	}
 
+	@Override
 	public boolean finit() {
-//		try {
-//			out_byte_sink.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 
-		try {
-			outStream.close();
-		} catch (PortAudioException e) {
-			e.printStackTrace();
-		}
+		portaudio.Pa_StopStream(stream);
+		portaudio.Pa_CloseStream(stream);
+		portaudio.Pa_Terminate();
 		
 		return true;
+		
 	}
 
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
+		
 		if (evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			ear = (Sensor)evtHdl;
 			ear.registerListener(this);
 			period = Double.valueOf(ear.getParameter("PERIOD"))/1000.0;
 			earMemory = getAgent().getKB().getMemory(ear.getName());
-			try {
-				outStream.start();
-			} catch (PortAudioException e) {
-				e.printStackTrace();
-			}
 		}
+		
 	}
 
 	@Override
 	public void newSense(Sensor sourceSensor, double instant, double duration) {
-//		System.out.println(getAgent().getClock().getCurrentTime() + " Recebi evento de " + instant + " até " + (instant+duration));
+		System.out.println(getAgent().getClock().getCurrentTime(TimeUnit.SECONDS) + " Recebi evento de " + instant + " até " + (instant+duration));
 		double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
-//		for (int i = 0; i < buf.length; i++) {
-//			if (Math.abs(buf[0]) > 0.2) {
-//				System.out.println(getAgent().getClock().getCurrentTime() + " newSense() NAO É ZERO!!! instant = " + instant);
-//				break;
-//			}
-//		}
-
+		if (firstSound) {
+			firstSound = false;
+			System.out.println("Starting stream " + stream);
+			portaudio.Pa_StartStream(stream);
+		}
 	}
 
-	class ProcessAudio implements Callback {
-
+	class Callback extends PaCallback {
+		
 		@Override
-		public State callback(ByteBuffer arg0, ByteBuffer arg1) {
-			long now = (long)getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS);
+		public int callback(ByteBuffer input, ByteBuffer output,
+				long frameCount, double inputBufferAdcTime,
+				double currentTime, double outputBufferDacTime) {
+			
+			double now = getAgent().getClock().getCurrentTime(TimeUnit.SECONDS);
+			
+			System.out.printf("CALLBACK %f %f %f\n", now, currentTime, outputBufferDacTime);
+			
 			// If it's the first call, sets the startTime based in the mms's clock
 			if (firstCall) {
-				startTime = now /1000.0;
+				startTime = now-0.05;
 				instant = startTime;
 				firstCall = false;
 //				System.out.println("First call = " + instant);
 			}
-			double duration = (double)(arg1.capacity()/4) * step;
-//			System.out.println(now + " vou ler de instant = " + instant + " até " + (instant+duration));
+			double duration = (double)(output.capacity()/4) * step;
+			System.out.println(now + " vou ler de instant = " + instant + " até " + (instant+duration));
 			double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
 //			if (buf[0] != 0.0 && firstSound) {
 //				System.out.println(getAgent().getClock().getCurrentTime() + " callback() NAO É ZERO!!! instant = " + (instant));
@@ -154,24 +136,30 @@ public class AudioOutputReasoning extends Reasoning {
 			byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
 //			System.out.println("buffer="+buffer.length + " - capacity=" + arg1.capacity());
 			int ptr = 0;
-			while (arg1.remaining() > 0) {
+			while (output.remaining() > 0) {
 				for (int i = 0; i < maxChannels; i++) {
-					// Se foi o canal escolhido, escreve o sample
+					// If it is the righ channel
 					if (i == channel) {
-						arg1.put(buffer[ptr++]);
-						arg1.put(buffer[ptr++]);
+						output.put(buffer[ptr++]);
+						output.put(buffer[ptr++]);
 					}
-					// Caso contrário, silêncio
+					// Else, silence
 					else {
-						arg1.put((byte)(0 & 0xFF));
-						arg1.put((byte)((0 >> 8) & 0xFF));
+						output.put((byte)(0 & 0xFF));
+						output.put((byte)((0 >> 8) & 0xFF));
 					}
 				}
 			}
 			instant = instant + duration;
-			return State.RUNNING;
+			return paContinue;
+			
 		}
 		
-	}
+		@Override
+		public void hook() {
+		}
+		
+	};
+
 	
 }
