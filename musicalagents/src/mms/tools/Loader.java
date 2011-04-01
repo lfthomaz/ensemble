@@ -289,12 +289,13 @@ public class Loader {
 	
 				try {
 					// Procurar a classe correspondente a esta instância
+					boolean found_class = false;
 					NodeList nl_ma_class = elem_mms.getElementsByTagName(CONF_MUSICAL_AGENT_CLASS);
 					for (int j = 0; j < nl_ma_class.getLength(); j++) {
 						Element elem_ma_class = (Element)nl_ma_class.item(j);
 						String ma_class_name = readAttribute(elem_ma_class, CONF_NAME, null);
 						if (ma_class_name.equals(ma_class)) {
-							
+							found_class = true;
 							// Criar nova instância do MA solicitado
 							String ma_class_class = readAttribute(elem_ma_class, CONF_CLASS, "mms.rt.MusicalAgent");
 							Class maClass = Class.forName(ma_class_class);
@@ -397,6 +398,10 @@ public class Loader {
 							break;
 						}
 					}
+
+					if (!found_class) {
+						System.out.println("ERROR: there is no " + ma_class + " class defined");
+					}
 					
 				} catch (ClassNotFoundException e) {
 					System.err.println("FATAL ERROR: Class " + ma_class + " not found");
@@ -411,7 +416,7 @@ public class Loader {
 					System.err.println("FATAL ERROR: Not possible to insert agent " + ma_class + " in JADE");
 					System.exit(-1);
 				}
-		
+				
 			}
 			
 		}
