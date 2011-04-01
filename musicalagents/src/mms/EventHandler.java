@@ -25,7 +25,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	protected String 		eventType 			= null;
 	protected String		eventExchange 		= Constants.EVT_EXC_NOT_DEFINED;
 	protected String 		commType 			= "mms.comm.direct.CommDirect";
-	protected Vector		position 			= new Vector();
+	protected Vector		relative_position 	= new Vector();
 	
 	protected Comm myComm;
 	
@@ -92,13 +92,13 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		return eventType;
 	}
 	
-	public void setPosition(Vector position) {
-		position.copy(this.position);
+	public void setRelativePosition(Vector relative_position) {
+		relative_position.copy(this.relative_position);
 	}
 	
 	// TODO Precisa ser algo mais genérico que Vector3D!!!!
-	public Vector getPosition() {
-		return position;
+	public Vector getRelativePosition() {
+		return relative_position;
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			cmd.addParameter(Constants.PARAM_COMP_NAME, getName());
 			cmd.addParameter(Constants.PARAM_COMP_TYPE, getType());
 			cmd.addParameter(Constants.PARAM_EVT_TYPE, getEventType());
-			cmd.addParameter(Constants.PARAM_POSITION, getPosition().toString());
+			cmd.addParameter(Constants.PARAM_REL_POS, getRelativePosition().toString());
 			cmd.addUserParameters(getParameters());
 			getAgent().sendMessage(cmd);
 		} else {
@@ -154,6 +154,15 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		this.status = EH_STATUS.REGISTERED;
 
 		this.eventExchange = eventExecution;
+
+		// Cria a memória relativa a esse EventHandler
+		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
+		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
+		myMemory = getAgent().getKB().createMemory(getName(), eventType, 5.0, getParameters());
+		if (myMemory == null) {
+			System.err.println("Não foi possível criar a memória");
+		}
+//		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
 
 		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC)) {
 			// Configuration
@@ -171,25 +180,14 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			addParameter(Constants.PARAM_PERIOD, serverParameters.get(Constants.PARAM_PERIOD));
 			addParameter(Constants.PARAM_RCV_DEADLINE, serverParameters.get(Constants.PARAM_RCV_DEADLINE));
 //			System.out.println(startTime + " " + workingFrame + " " + period + " " + sendDeadline);
+
+			if (getType().equals(Constants.COMP_ACTUATOR)) {
+				Actuator act = (Actuator)this;
+				act.setEventFrequency();
+			}
 		}
-		
 		addParameters(extraParameters);
 		
-		// No caso de ser uma troca de evento frequente, armazena os parâmetros
-		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC) && getType().equals(Constants.COMP_ACTUATOR)) {
-			Actuator act = (Actuator)this;
-			act.setEventFrequency();
-		}
-
-		// Cria a memória relativa a esse EventHandler
-		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
-		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
-		myMemory = getAgent().getKB().createMemory(getName(), eventType, 5.0, getParameters());
-		if (myMemory == null) {
-			System.err.println("Não foi possível criar a memória");
-		}
-//		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
-
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getName());
 		

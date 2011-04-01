@@ -216,9 +216,9 @@ public class MusicalAgent extends MMSAgent {
 
 				// Sets the position of the EventHandler in Agent's "body"
 				if (comp instanceof EventHandler) {
-					if (arguments.containsKey(Constants.PARAM_POSITION)) {
-						Vector position = Vector.parse(arguments.get(Constants.PARAM_POSITION));
-						((EventHandler)comp).setPosition(position);
+					if (arguments.containsKey(Constants.PARAM_REL_POS)) {
+						Vector position = Vector.parse(arguments.get(Constants.PARAM_REL_POS));
+						((EventHandler)comp).setRelativePosition(position);
 					}
 				}
 				

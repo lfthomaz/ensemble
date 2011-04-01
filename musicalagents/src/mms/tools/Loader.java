@@ -364,7 +364,7 @@ public class Loader {
 									args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
 									args.put(Constants.PARAM_COMM_CLASS, comp_comm_class);
 									args.put(Constants.PARAM_MEMORY, comp_memory);
-									args.put(Constants.PARAM_POSITION, comp_position);
+									args.put(Constants.PARAM_REL_POS, comp_position);
 									ma.addComponent(comp_name, comp_class, args);
 								}
 	
@@ -385,7 +385,7 @@ public class Loader {
 									args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
 									args.put(Constants.PARAM_COMM_CLASS, comp_comm_class);
 									args.put(Constants.PARAM_MEMORY, comp_memory);
-									args.put(Constants.PARAM_POSITION, comp_position);
+									args.put(Constants.PARAM_REL_POS, comp_position);
 									ma.addComponent(comp_name, comp_class, args);
 								}
 								
