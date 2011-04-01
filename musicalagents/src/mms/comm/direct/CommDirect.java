@@ -39,7 +39,7 @@ public class CommDirect extends Comm {
 	}
 	
 	@Override
-	public boolean end() {
+	public boolean stop() {
 		
 		commDirect.deregister(myAgent.getLocalName(), myAccessPoint);
 		

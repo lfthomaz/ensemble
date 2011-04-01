@@ -49,7 +49,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			this.eventType = parameters.get(Constants.PARAM_EVT_TYPE);
 		}
 		
-		// Initializes de communication channel
+		// Initializes the communication channel
 		try {
 			Class commClass = Class.forName(commType);
 			myComm = (Comm)commClass.newInstance();
@@ -71,10 +71,10 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	}
 	
 	@Override
-	protected boolean end() {
+	protected boolean stop() {
 		
 		// Terminates de communication channel
-		myComm.end();
+		myComm.stop();
 		
 		return true;
 		

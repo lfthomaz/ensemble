@@ -39,8 +39,8 @@ public class Sensor extends EventHandler implements Sensing {
 	}
 	
 	@Override
-	protected final boolean end() {
-		return super.end();
+	protected final boolean stop() {
+		return super.stop();
 	}
 	
 	// Chamado por um raciocínio para registrá-lo como listener dos eventos
@@ -67,11 +67,11 @@ public class Sensor extends EventHandler implements Sensing {
 			// Armazenar o evento na Base de Conhecimentos
 			getAgent().getKB().writeEventRepository(Constants.REP_TYPE_INPUT, eventType, getName(), evt);
 			try {
-//				myMemory.writeMemoryAbsolut(evt.objContent, evt.instant, evt.duration, TimeUnit.SECONDS);
 				if (myMemory == null) {
-					System.err.println("ERRRRRRROOO");
+					System.err.println("ERROR: no memory registered");
+				} else {
+					myMemory.writeMemory(evt.objContent, evt.instant, evt.duration, TimeUnit.SECONDS);
 				}
-				myMemory.writeMemory(evt.objContent, evt.instant, evt.duration, TimeUnit.SECONDS);
 //				System.out.println("[" + getAgent().getLocalName() + "] Guardei na memória um evento no instante " + evt.instant + " de duração " + evt.duration);
 			} catch (MemoryException e1) {
 				MusicalAgent.logger.warning("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Não foi possível armazenar na memória");

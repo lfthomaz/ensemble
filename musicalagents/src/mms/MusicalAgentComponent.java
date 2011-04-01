@@ -101,6 +101,11 @@ public abstract class MusicalAgentComponent {
 	protected abstract boolean start(); 
 
 	/**
+	 * Inicializa o componente 
+	 */
+	protected abstract boolean stop(); 
+
+	/**
 	 * Initialization user method
 	 * @return 
 	 */
@@ -117,11 +122,6 @@ public abstract class MusicalAgentComponent {
 		return true;
 	};
 	
-	/**
-	 * Inicializa o componente 
-	 */
-	protected abstract boolean end(); 
-
 	//--------------------------------------------------------------------------------
 	// User implemented method
 	//--------------------------------------------------------------------------------

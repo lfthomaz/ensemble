@@ -35,7 +35,7 @@ public class CommMessage extends Comm {
 	}
 	
 	@Override
-	public boolean end() {
+	public boolean stop() {
 		
 		myAgent.removeBehaviour(b);
 		

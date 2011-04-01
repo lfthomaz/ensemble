@@ -115,7 +115,7 @@ public class MovementReasoning extends Reasoning {
 			actual_vel = Vector.parse(cmd.getParameter("vel"));
 			actual_ori = Vector.parse(cmd.getParameter("ori"));
 		}
-		System.out.println("New position " + actual_pos + " velocity " + actual_vel);
+		System.out.println(getAgent().getAgentName() + " - new position " + actual_pos + " velocity " + actual_vel);
 
 	}
 	

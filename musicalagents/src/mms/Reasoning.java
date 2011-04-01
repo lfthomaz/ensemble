@@ -5,6 +5,7 @@ import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
@@ -14,6 +15,7 @@ import jade.wrapper.AgentState;
 public class Reasoning extends MusicalAgentComponent {
 
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	Behaviour cyclicBehaviour = null;
 	
 	VirtualClockHelper clock;
 
@@ -29,25 +31,31 @@ public class Reasoning extends MusicalAgentComponent {
 
 		// TODO Verificar quais são os eventHandlers necessários para o funcionamento do raciocinio
 		
-		// Cycle Behaviour que controla o raciocínio
-		if (parameters.get(Constants.PARAM_REAS_CYCLIC, "false").equals("true")) {
-			getAgent().addBehaviour(tbf.wrap(new ReasonCyclic(getAgent())));
-		}
-
 		// Calls user initialization code
 		if (!init()) {
 			return false;
 		}
-
+		
 		// Sets the agent's state to INITIALIZED
 		setState(EA_STATE.INITIALIZED);
 		
+		// Cycle Behaviour que controla o raciocínio
+		if (parameters.get(Constants.PARAM_REAS_CYCLIC, "false").equals("true")) {
+			cyclicBehaviour = new ReasonCyclic(getAgent()); 
+			getAgent().addBehaviour(tbf.wrap(cyclicBehaviour));
+		}
+
 		return true;
 
 	}
 	
 	@Override
-	protected final boolean end() {
+	protected final boolean stop() {
+
+		// Removes the CyclicBehaviour
+		if (cyclicBehaviour != null) {
+			getAgent().removeBehaviour(cyclicBehaviour);
+		}
 		
 		// Calls user finalization method
 		if (!finit()) {

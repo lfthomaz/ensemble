@@ -46,7 +46,7 @@ public abstract class Comm {
 	 * Terminates de communication channel
 	 * @return
 	 */
-	public abstract boolean end();
+	public abstract boolean stop();
 	
 	// Event listener
 	public abstract void receive(Event evt);

@@ -65,8 +65,8 @@ public class Actuator extends EventHandler implements Acting {
 	}
 	
 	@Override
-	protected final boolean end() {
-		return super.end();
+	protected final boolean stop() {
+		return super.stop();
 	}
 	
 	// TODO Em que momento esses métodos seriam chamados pelo usuário?!?!

@@ -133,24 +133,30 @@ public class MusicalAgent extends MMSAgent {
 			// TODO Registras os fatos públicos do KB
 			
 			// Executa o método de inicialização do usuário
+			// TODO Tratar o caso retornar false
 			init();
 			
 			// Inicializa os componentes
 			Collection<MusicalAgentComponent> comps = components.values();
 			for (Iterator<MusicalAgentComponent> iterator = comps.iterator(); iterator.hasNext();) {
 				MusicalAgentComponent comp = iterator.next();
-				comp.start();
-				// Descobre qual o tipo do componente
-				// Se for EventHandler, deve registrar no Ambiente responsável
-				// e avisar os raciocínios existentes sobre o novo EventHandler
-				if (comp instanceof EventHandler) {
-					// incrementa o contador de registros
-					numberEventHandlersRequest++;
-					// solicita o registro
-					((EventHandler)comp).register();
-				}
-				else if (comp instanceof Reasoning) {
-					numberReasoning++;
+				boolean result = comp.start();
+				if (!result) {
+					System.out.println("[" + this.getLocalName() + "] Component '" + comp.getName() + "' not initialized");
+					removeComponent(comp.getName());
+				} else {
+					// Descobre qual o tipo do componente
+					// Se for EventHandler, deve registrar no Ambiente responsável
+					// e avisar os raciocínios existentes sobre o novo EventHandler
+					if (comp instanceof EventHandler) {
+						// incrementa o contador de registros
+						numberEventHandlersRequest++;
+						// solicita o registro
+						((EventHandler)comp).register();
+					}
+					else if (comp instanceof Reasoning) {
+						numberReasoning++;
+					}
 				}
 			}
 			
@@ -221,7 +227,12 @@ public class MusicalAgent extends MMSAgent {
 
 				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o componente
 				if (state == MA_STATE.REGISTERED) {
-					comp.start();
+					boolean result = comp.start();
+					if (!result) {
+						System.out.println("[" + this.getLocalName() + "] Component '" + compName + "' not initialized");
+						removeComponent(compName);
+						return;
+					}
 					// Descobre qual o tipo do componente
 					// Se for EventHandler, deve registrar no Ambiente responsável
 					// e avisar os raciocínios existentes sobre o novo EventHandler
@@ -292,11 +303,11 @@ public class MusicalAgent extends MMSAgent {
 				numberReasoning--;
 			}
 			
-			comp.end();
+			comp.stop();
 			
 			components.remove(compName);
 			
-			System.out.println("[" + this.getLocalName() + "] " + "Component " + comp.getName() + " removed");
+			System.out.println("[" + this.getLocalName() + "] " + "Component '" + comp.getName() + "' removed");
 			
 		}
 		
@@ -682,7 +693,7 @@ public class MusicalAgent extends MMSAgent {
 		numberEventHandlersRegistered--;
 		
 		MusicalAgentComponent comp = components.remove(compName);
-		comp.end();
+		comp.stop();
 		
 		MusicalAgent.logger.info("[" + this.getLocalName() + "] " + "Component " + compName + " deregistered");
 
