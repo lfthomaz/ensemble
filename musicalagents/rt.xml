@@ -6,22 +6,24 @@
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
 		<ARG NAME="arg_ea" VALUE="eaeaea" />
-		<WORLD CLASS_WORLD="mms.world.World" CLASS_ENTITY_STATE="mms.world.EntityState3D">
+		<WORLD CLASS_WORLD="mms.world.World">
 			<LAW CLASS="mms.world.law.MovementLaw" />
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
 			<ARG NAME="friction_coefficient" VALUE="0.25" />
 		</WORLD>
-		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 30 80 1000">
+		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 50 80 1000">
 			<ARG NAME="SPEED_SOUND" VALUE="343.3" />
 			<ARG NAME="REFERENCE_DISTANCE" VALUE="1.0" />
 			<ARG NAME="ROLLOF_FACTOR" VALUE="1.0" />
 		</EVENT_SERVER>
+		<!-- 
 		<EVENT_SERVER CLASS="mms.movement.MovementEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 0">
 			<ARG NAME="friction_coefficient" VALUE="0.25" />
 			<ARG NAME="gravity" VALUE="10" />
 		</EVENT_SERVER>
+		-->
 	</ENVIRONMENT_AGENT_CLASS>
 	
   <!-- ********** MUSICAL AGENT CLASSES ********** -->
@@ -34,20 +36,30 @@
 		<COMPONENTS>
 			<REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_Reasoning" CYCLIC="false" />
 			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
-			<SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
+			<!-- <SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
 			<REASONING NAME="MovementReasoning" CLASS="mms.apps.rt.RT_MovementReasoning" CYCLIC="true" />
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
-			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
 	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
-			<REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_ListenerReasoning" CYCLIC="false" />
+			<!-- <REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_ListenerReasoning" CYCLIC="false" /> -->
+			<REASONING NAME="AudioReasoning" CLASS="mms.audio.AudioOutputReasoning" CYCLIC="false" />
 			<SENSOR NAME="Ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(-2;0;0)"/>
 			<SENSOR NAME="Ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/>
-			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
-			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
+			<!-- <ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
+			<!-- <SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
+		</COMPONENTS>
+	</MUSICAL_AGENT_CLASS>
+	
+	<MUSICAL_AGENT_CLASS NAME="PLAYER" CLASS="mms.MusicalAgent">
+		<COMPONENTS>
+			<REASONING NAME="AudioReasoning" CLASS="mms.audio.AudioInputReasoning" CYCLIC="false" />
+			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
+			<!-- <ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
+			<!-- <SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
@@ -75,27 +87,13 @@
 		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
 		<FACT NAME="filename" VALUE="shifting.wav" />
 	</MUSICAL_AGENT>
-	-->
+
 	<MUSICAL_AGENT NAME="Ambulance" CLASS="MUSICIAN">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;-10.0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(20;0;0)" />
-		<!-- <ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" /> -->
-		<!-- <ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" /> -->
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
 		<FACT NAME="filename" VALUE="siren_2.wav" />
-	</MUSICAL_AGENT>
-	<!-- 	
-	<MUSICAL_AGENT NAME="Drummer" CLASS="MUSICIAN">
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-10;2;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;0;0)" />
-		<ARG NAME="arg1" VALUE="bla1" />
-		<FACT NAME="filename" VALUE="Drums_44_16.wav" />
-	</MUSICAL_AGENT>
-
-	<MUSICAL_AGENT NAME="Bassist" CLASS="MUSICIAN">
-		<ARG NAME="arg1" VALUE="bla1" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;-10;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(-2;0;0)" />
-		<FACT NAME="filename" VALUE="Bass_44_16.wav" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Guitarist" CLASS="MUSICIAN">
@@ -104,16 +102,42 @@
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;1;0)" />
 		<FACT NAME="filename" VALUE="Guitar_44_16.wav" />
 	</MUSICAL_AGENT>
+	
+	<MUSICAL_AGENT NAME="Bassist" CLASS="MUSICIAN">
+		<ARG NAME="arg1" VALUE="bla1" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;-10;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(-2;0;0)" />
+		<FACT NAME="filename" VALUE="Bass_44_16.wav" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Drummer" CLASS="MUSICIAN">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-10;2;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;0;0)" />
+		<ARG NAME="arg1" VALUE="bla1" />
+		<FACT NAME="filename" VALUE="Drums_44_16.wav" />
+	</MUSICAL_AGENT>
 	-->
+
+	<MUSICAL_AGENT NAME="Sine" CLASS="MUSICIAN">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-10;2;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;0;0)" />
+		<FACT NAME="filename" VALUE="media/Sine_440_10s.wav" />
+	</MUSICAL_AGENT>
+
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;-2;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
-		<ARG_COMP COMP="Ear_left" NAME="channel" VALUE="LEFT" />
-		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
+		<ARG_COMP COMP="AudioReasoning" NAME="default_device" VALUE="10" />
+		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="Ear_left:10,0;Ear_right:10,1" />
 	</MUSICAL_AGENT>
 	
-	
-	
+	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;-2;0)" />
+		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="AudioReasoning" NAME="default_device" VALUE="1" />
+		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="Mouth:1,0" />
+	</MUSICAL_AGENT>
+
 	<!-- 
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-2;0;0)" />
