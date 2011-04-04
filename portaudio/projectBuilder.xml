@@ -1,36 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <project name="portaudio" default="portaudio" basedir=".">
+  <project name="portaudio" default="OS-TEST" basedir=".">
   	
-    <property name="src.dir"     value="src"/>
-    <property name="classes.dir" value="bin"/>
-  	<property name="c.dir" 		 value="c"/>
+  	<property name="JAVA_HOME" 		 value="C:\Program Files (x86)\Java\jdk1.6.0_22"/>
+
+  	<property name="lib.dir"     value="lib"/>
+  	<property name="src.dir"     value="src"/>
   	
   	<property name="cp" 		value=".;${classes.dir}"/>
   	
-  	<!-- ================================= 
-          target: portaudio              
-         ================================= -->
-    <target name="portaudio" depends="compile_native,compile_java" description="description">
-        
-    </target>
+    <!-- set the operating system test properties -->
+    <condition property="isMac">
+      <os family="mac" />
+    </condition>
 
-  	<!-- - - - - - - - - - - - - - - - - - 
-          target: compile_native                      
-         - - - - - - - - - - - - - - - - - -->
-    <target name="compile_native">
+    <condition property="isWindows">
+      <os family="windows" />
+    </condition>
 
-        <exec executable="swig" dir="swig/">
-          <arg line="-java -package portaudio portaudio.i" />
-        </exec>
-
-    	<!--
-    	<move todir="src/portaudio">
-    		<fileset dir=".">
-    			<include name="*.java"/>
-    		</fileset>
-    	</move>
-    	-->
-    	
+    <condition property="isUnix">
+      <os family="unix" />
+    </condition>
+  	
+    <!-- define the operating system specific targets -->
+    <target name="doMac" if="isMac">
     	<!-- Compiles c file -->
         <exec executable="cc">
           <arg line="-I/System/Library/Frameworks/JavaVM.framework/Headers -c mmsportaudio.c -o mmsportaudio.o" />
@@ -40,13 +32,30 @@
         <exec executable="cc">
           <arg line="-framework JavaVM -bundle mmsportaudio.o -lportaudio -o libmmsportaudio.jnilib"/>
         </exec>
+    </target>
 
+    <target name="doWindows" if="isWindows">
+      <echo message="Came into the Windows target" />
+    	
+        <exec executable="cl">
+          <arg line="-I%JAVA_HOME%\include -I%JAVA_HOME%\include\win32 -I&quot;C:\Users\Leandro\Desktop\portaudio\include&quot; &quot;./library/portaudio_x86.lib&quot; -LD mmsportaudio.c"/>
+        </exec>
+
+    </target>
+
+    <target name="doUnix" if="isUnix">
+      <echo message="Came into the Unix target" />
+    </target>
+
+    <!-- define our main/default target -->
+    <target name="OS-TEST" depends="doMac, doWindows, doUnix">
+      <echo message="Running OS-TEST target" />
     </target>
 
   	<!-- - - - - - - - - - - - - - - - - - 
           target: compile_java                      
          - - - - - - - - - - - - - - - - - -->
-    <target name="compile_java" depends="compile_native">
+    <target name="compile_java" depends="">
 		<javac srcdir="${src.dir}"
          destdir="${classes.dir}"
          classpath="${cp}"
