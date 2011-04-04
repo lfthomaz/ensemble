@@ -4,8 +4,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/libaubio.jar"/>
 	<classpathentry kind="lib" path="lib/libxtract.jar"/>
-	<classpathentry kind="lib" path="E:/Eclipse/agents/jade/lib/jade.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/portaudio"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/javaosc"/>
+	<classpathentry kind="lib" path="lib/jade.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
