@@ -26,9 +26,9 @@ public class AudioOutputReasoning extends Reasoning {
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	// PortAudio
-	HashMap<Long, StreamInfo> 	streamInfos = new HashMap<Long, StreamInfo>(4);
-	HashMap<Long, String> 		streams_sensors = new HashMap<Long, String>(4);
-	HashMap<String, Long> 		sensors_streams = new HashMap<String, Long>(4);
+	HashMap<Long, StreamInfo> 	streamInfos = new HashMap<Long, StreamInfo>(2);
+	HashMap<Long, String> 		streams_sensors = new HashMap<Long, String>(2);
+	HashMap<String, Long> 		sensors_streams = new HashMap<String, Long>(2);
 	double 						callbackStartTime, period;
 	double 						step = 1/44100.0;
 	
@@ -36,7 +36,6 @@ public class AudioOutputReasoning extends Reasoning {
 	int 					default_device;
 	HashMap<String,Integer> devices = new HashMap<String, Integer>();
 	HashMap<String,Integer> channels = new HashMap<String, Integer>();
-	int 					maxChannels;
 	
 	// Sensor
 	HashMap<String,Memory> 	earMemories = new HashMap<String, Memory>(2);
@@ -56,27 +55,6 @@ public class AudioOutputReasoning extends Reasoning {
 		// Initializes PortAudio
 		System.out.println("Starting portaudio...");
 		int err = portaudio.Pa_Initialize();
-
-//		if (device != -1) {
-//			System.out.println("Opening stream...");
-//			// Gets DeviceInfo
-//			PaDeviceInfo info = portaudio.Pa_GetDeviceInfo(device);
-//			double sr = info.getDefaultSampleRate();
-//			maxChannels = info.getMaxOutputChannels();
-//			// Sets Parameters
-//			PaStreamParameters outputParameters = new PaStreamParameters();
-//			outputParameters.setDevice(device);
-//			outputParameters.setChannelCount(maxChannels);
-//			outputParameters.setHostApiSpecificStreamInfo(null);
-//			outputParameters.setSampleFormat(portaudio.SIGNED_INTEGER_16);
-//			outputParameters.setSuggestedLatency(info.getDefaultLowOutputLatency());
-//			// Opens the stream
-//			stream = portaudio.Pa_OpenStream(null, outputParameters, sr, 4410, 0, new Callback());
-//			System.out.println("Java::stream = " + stream);
-//		} else {
-//			stream = portaudio.Pa_OpenDefaultStream(0, 1, portaudio.SIGNED_INTEGER_16, 44100.0, 256, new Callback());
-//			System.out.println("Java::stream (default) = " + stream);
-//		}
 
 		return true;
 		
@@ -108,11 +86,11 @@ public class AudioOutputReasoning extends Reasoning {
 				int device = devices.get(sensorName);
 				PaDeviceInfo info = portaudio.Pa_GetDeviceInfo(device);
 				double sr = info.getDefaultSampleRate();
-				maxChannels = info.getMaxOutputChannels();
+				int channelCount = info.getMaxOutputChannels();
 				// Sets Parameters
 				PaStreamParameters outputParameters = new PaStreamParameters();
 				outputParameters.setDevice(device);
-				outputParameters.setChannelCount(maxChannels);
+				outputParameters.setChannelCount(channelCount);
 				outputParameters.setHostApiSpecificStreamInfo(null);
 				outputParameters.setSampleFormat(portaudio.SIGNED_INTEGER_16);
 				outputParameters.setSuggestedLatency(info.getDefaultLowOutputLatency());
@@ -122,10 +100,11 @@ public class AudioOutputReasoning extends Reasoning {
 				// Stores Stream parameters
 				StreamInfo streamInfo = new StreamInfo();
 				streamInfo.stream = stream;
-				streamInfo.sensorName = sensorName;
+				streamInfo.evtHdlName = sensorName;
 				streamInfo.device = device;
 				streamInfo.channel = channels.get(sensorName);
-				streamInfo.outputLatency = portaudio.Pa_GetStreamInfo(stream).getOutputLatency();
+				streamInfo.channelCount = channelCount;
+				streamInfo.latency = portaudio.Pa_GetStreamInfo(stream).getOutputLatency();
 				streamInfos.put(stream, streamInfo);
 //			} else {
 //				devices.put(evtHdl.getName(), -1);
@@ -170,10 +149,11 @@ public class AudioOutputReasoning extends Reasoning {
 
 	class StreamInfo {
 		long 	stream;
-		String 	sensorName;
+		String 	evtHdlName;
 		int 	device;
 		int 	channel;
-		double 	outputLatency;
+		int 	channelCount;
+		double 	latency;
 		boolean firstCall = true;
 		double 	instant = 0.0;
 	}
@@ -189,7 +169,7 @@ public class AudioOutputReasoning extends Reasoning {
 			
 			// If it's the first call, sets the startTime based in the mms's clock
 			if (info.firstCall) {
-				info.instant = getAgent().getClock().getCurrentTime(TimeUnit.SECONDS) - info.outputLatency;
+				info.instant = getAgent().getClock().getCurrentTime(TimeUnit.SECONDS) - info.latency;
 				info.firstCall = false;
 			}
 
@@ -197,15 +177,14 @@ public class AudioOutputReasoning extends Reasoning {
 			
 			double duration = (double)(frameCount) * step;
 //			System.out.println("vou ler de instant = " + instant + " até " + (instant+duration));
-			int channel = channels.get(info.sensorName); 
-			Memory earMemory = earMemories.get(info.sensorName);
+			Memory earMemory = earMemories.get(info.evtHdlName);
 			double[] buf = (double[])earMemory.readMemory(info.instant, duration, TimeUnit.SECONDS);
 			byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
 			int ptr = 0;
 			while (output.remaining() > 0) {
-				for (int i = 0; i < maxChannels; i++) {
+				for (int i = 0; i < info.channelCount; i++) {
 					// If it is the chosen channel
-					if (i == channel) {
+					if (i == info.channel) {
 						output.put(buffer[ptr++]);
 						output.put(buffer[ptr++]);
 					}
