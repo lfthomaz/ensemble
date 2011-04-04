@@ -8,6 +8,7 @@ import jade.util.Logger;
 
 import portaudio.PaCallback;
 import portaudio.PaDeviceInfo;
+import portaudio.PaStreamInfo;
 import portaudio.PaStreamParameters;
 import portaudio.portaudio;
 
@@ -95,9 +96,9 @@ public class AudioInputReasoning extends Reasoning {
 				inputParameters.setChannelCount(channelCount);
 				inputParameters.setHostApiSpecificStreamInfo(null);
 				inputParameters.setSampleFormat(portaudio.SIGNED_INTEGER_16);
-				inputParameters.setSuggestedLatency(info.getDefaultLowOutputLatency());
+				inputParameters.setSuggestedLatency(info.getDefaultLowInputLatency());
 				// Opens the stream
-				stream = portaudio.Pa_OpenStream(null, inputParameters, sr, 256, 0, new Callback());
+				stream = portaudio.Pa_OpenStream(inputParameters, null, sr, 256, 0, new Callback());
 				System.out.println(actuatorName + " stream = " + stream);
 				// Stores Stream parameters
 				StreamInfo streamInfo = new StreamInfo();
@@ -106,7 +107,8 @@ public class AudioInputReasoning extends Reasoning {
 				streamInfo.device = device;
 				streamInfo.channel = channels.get(actuatorName);
 				streamInfo.channelCount = channelCount;
-				streamInfo.latency = portaudio.Pa_GetStreamInfo(stream).getOutputLatency();
+				PaStreamInfo bla = portaudio.Pa_GetStreamInfo(stream);
+				streamInfo.latency = portaudio.Pa_GetStreamInfo(stream).getInputLatency();
 				streamInfos.put(stream, streamInfo);
 			}
 			if (stream != 0) {
