@@ -206,10 +206,11 @@ int callback(const void * input, void * output, unsigned long frame_count, const
 		data->attached = 1;
 		(*virtual_machine)->AttachCurrentThreadAsDaemon(virtual_machine, (void **) &data->env, NULL);
 		data->cls = (*data->env)->FindClass(data->env, "portaudio/PaCallback");
-		data->mid = (*data->env)->GetMethodID(data->env, data->cls, "callback", "(Ljava/nio/ByteBuffer;Ljava/nio/ByteBuffer;JDDD)I");
+		data->mid = (*data->env)->GetMethodID(data->env, data->cls, "callback", "(JLjava/nio/ByteBuffer;Ljava/nio/ByteBuffer;JDDD)I");
 	}
 
 	ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
+								data->stream,
 								(*data->env)->NewDirectByteBuffer(data->env, (void *) input, (jint) frame_count * data->input_frame_size),
 								(*data->env)->NewDirectByteBuffer(data->env, output, (jint) frame_count * data->output_frame_size),
 								frame_count,
@@ -223,7 +224,7 @@ int callback(const void * input, void * output, unsigned long frame_count, const
 
 void hook(void * user_data) {
 	UserData * data = (UserData *) user_data;
-	(*data->env)->CallVoidMethod(data->env, data->obj_callback, (*data->env)->GetMethodID(data->env, data->cls, "hook", "()V"));
+	(*data->env)->CallVoidMethod(data->env, data->obj_callback, (*data->env)->GetMethodID(data->env, data->cls, "hook", "(J)V"), data->stream);
 	(*data->env)->DeleteGlobalRef(data->env, data->obj_callback);
 	free(data);
 }

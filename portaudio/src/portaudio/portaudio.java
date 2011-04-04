@@ -4,13 +4,28 @@ public class portaudio {
 
 	// Loads the portaudio JNI interface
 	static {
-		// TODO Vai ter que verificar aqui qual sistema est‡ rodando
-		System.out.println("OS = " + System.getProperty("os.name"));
-		System.out.println("OS = " + System.getProperty("os.arch"));
-		System.out.println("OS = " + System.getProperty("sun.arch.data.model"));
-				
-		System.loadLibrary("mmsportaudio");
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			if (System.getProperty("sun.arch.data.model").equals("32")) {
+				System.loadLibrary("portaudio_x86");
+				System.loadLibrary("mmsportaudio_x86");
+			} else {
+				System.loadLibrary("portaudio_x64");
+				System.loadLibrary("mmsportaudio_x64");
+			}
+		}
+		else if (System.getProperty("os.name").startsWith("Mac OS X")) {
+			System.loadLibrary("mmsportaudio");
+		}
+		else if (System.getProperty("os.name").startsWith("Unix??!?!")) {
+		}		
 	}
+	
+	public final static int FLOAT_32 = 0x00000001;
+	public final static int SIGNED_INTEGER_8 = 0x00000010;
+	public final static int UNSIGNED_INTEGER_8 = 0x00000020;
+	public final static int SIGNED_INTEGER_16 = 0x00000008;
+	public final static int SIGNED_INTEGER_24 = 0x00000004;
+	public final static int SIGNED_INTEGER_32 = 0x00000002;
 	
   public static int Pa_GetVersion() {
     return portaudioJNI.Pa_GetVersion();
