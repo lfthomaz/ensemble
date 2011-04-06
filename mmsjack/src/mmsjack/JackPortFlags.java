@@ -14,6 +14,6 @@ public final class JackPortFlags {
   public final static int JackPortIsPhysical = mmsjackJNI.JackPortIsPhysical_get();
   public final static int JackPortCanMonitor = mmsjackJNI.JackPortCanMonitor_get();
   public final static int JackPortIsTerminal = mmsjackJNI.JackPortIsTerminal_get();
-  public final static int JackPortIsActive = mmsjackJNI.JackPortIsActive_get();
+//  public final static int JackPortIsActive = mmsjackJNI.JackPortIsActive_get();
 }
 

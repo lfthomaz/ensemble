@@ -172,7 +172,7 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 #define SWIG_contract_assert(nullreturn, expr, msg) if (!(expr)) {SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, msg); return nullreturn; } else
 
 
-#include "jack.h"
+#include "jack/jack.h"
 
 	float phase = 0.0f;
 
@@ -231,6 +231,7 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		return ret;
 	}
 
+	/*
 	void shutdown (void * arg) {
 		UserData * data;
 		printf("C::shutdown()\n"); fflush(stdout);
@@ -240,6 +241,7 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		}
 		(*data->env)->DeleteGlobalRef(data->env, data->obj_callback);
 	}
+	*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -331,16 +333,16 @@ SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_JackPortIsTerminal_1get(JNIEnv *
 }
 
 
-SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_JackPortIsActive_1get(JNIEnv *jenv, jclass jcls) {
-  jint jresult = 0 ;
-  enum JackPortFlags result;
-  
-  (void)jenv;
-  (void)jcls;
-  result = (enum JackPortFlags)JackPortIsActive;
-  jresult = (jint)result; 
-  return jresult;
-}
+//SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_JackPortIsActive_1get(JNIEnv *jenv, jclass jcls) {
+//  jint jresult = 0 ;
+//  enum JackPortFlags result;
+//
+//  (void)jenv;
+//  (void)jcls;
+//  result = (enum JackPortFlags)JackPortIsActive;
+//  jresult = (jint)result;
+//  return jresult;
+//}
 
 
 SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_JackNullOption_1get(JNIEnv *jenv, jclass jcls) {
@@ -662,12 +664,13 @@ SWIGEXPORT jobject JNICALL Java_mmsjack_mmsjackJNI_jack_1port_1get_1buffer(JNIEn
   jack_port_t *arg1 = (jack_port_t *) 0 ;
   jack_nframes_t arg2 ;
   void *result = 0 ;
+  jack_default_audio_sample_t * sampleBuffer;
 
   (void)jenv;
   (void)jcls;
   arg1 = *(jack_port_t **)&jarg1;
   arg2 = (jack_nframes_t)jarg2;
-  jack_default_audio_sample_t * sampleBuffer = (jack_default_audio_sample_t *) jack_port_get_buffer(arg1,arg2);
+  sampleBuffer = (jack_default_audio_sample_t *) jack_port_get_buffer(arg1,arg2);
   *(void **)&jresult = result;
 
   return (*jenv)->NewDirectByteBuffer(jenv, sampleBuffer, (jint) jarg2 * sizeof(jack_default_audio_sample_t));

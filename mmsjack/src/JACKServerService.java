@@ -27,7 +27,7 @@ public class JACKServerService {
 //	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	//----------------------------------------------------------
-	// Nome do servio
+	// Nome do serviï¿½o
 	public static final String NAME = "JACKServer";
 
 	//----------------------------------------------------------
@@ -183,7 +183,7 @@ class ServerCallback implements JACKCallback {
 
 	@Override
 	public int process(ByteBuffer buffer, int nframes, double time) {
-		System.out.printf("Java::callback(%d)\n", nframes);
+//		System.out.printf("Java::callback(%d)\n", nframes);
 		FloatBuffer fOut = buffer.order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
 		while (fOut.remaining() > 0) {
 			double dSample = 0.5 * Math.sin(2 * Math.PI * freq * t);

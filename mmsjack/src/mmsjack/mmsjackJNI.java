@@ -16,7 +16,7 @@ class mmsjackJNI {
   public final static native int JackPortIsPhysical_get();
   public final static native int JackPortCanMonitor_get();
   public final static native int JackPortIsTerminal_get();
-  public final static native int JackPortIsActive_get();
+//  public final static native int JackPortIsActive_get();
   public final static native int JackNullOption_get();
   public final static native int JackNoStartServer_get();
   public final static native int JackUseExactName_get();
