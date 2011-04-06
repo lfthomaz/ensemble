@@ -9,17 +9,13 @@
 package mmsjack;
 
 public class mmsjack implements mmsjackConstants {
-  public static SWIGTYPE_p_jack_client_t jack_client_new(String client_name) {
-    long cPtr = mmsjackJNI.jack_client_new(client_name);
-    return (cPtr == 0) ? null : new SWIGTYPE_p_jack_client_t(cPtr, false);
-  }
 
   public static int jack_client_close(SWIGTYPE_p_jack_client_t client) {
     return mmsjackJNI.jack_client_close(SWIGTYPE_p_jack_client_t.getCPtr(client));
   }
 
-  public static SWIGTYPE_p_jack_client_t jack_client_open(String client_name) {
-    long cPtr = mmsjackJNI.jack_client_open(client_name);
+  public static SWIGTYPE_p_jack_client_t jack_client_open(String client_name, Object callback) {
+    long cPtr = mmsjackJNI.jack_client_open(client_name, callback);
     return (cPtr == 0) ? null : new SWIGTYPE_p_jack_client_t(cPtr, false);
   }
 
@@ -27,8 +23,8 @@ public class mmsjack implements mmsjackConstants {
     return mmsjackJNI.jack_get_sample_rate(SWIGTYPE_p_jack_client_t.getCPtr(arg0));
   }
 
-  public static SWIGTYPE_p_jack_port_t jack_port_register(SWIGTYPE_p_jack_client_t client, String port_name, String port_type, long flags, Object callback) {
-    long cPtr = mmsjackJNI.jack_port_register(SWIGTYPE_p_jack_client_t.getCPtr(client), port_name, port_type, flags, callback);
+  public static SWIGTYPE_p_jack_port_t jack_port_register(SWIGTYPE_p_jack_client_t client, String port_name, String port_type, long flags) {
+    long cPtr = mmsjackJNI.jack_port_register(SWIGTYPE_p_jack_client_t.getCPtr(client), port_name, port_type, flags);
     return (cPtr == 0) ? null : new SWIGTYPE_p_jack_port_t(cPtr, false);
   }
 

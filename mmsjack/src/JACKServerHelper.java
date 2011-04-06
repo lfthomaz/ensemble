@@ -5,9 +5,9 @@ public interface JACKServerHelper {
 
 	public String[] listOutputPorts();
 
-	public int registerInputPort(String portName, String connectPort, JACKCallback cb);
+	public int registerInputPort(String component, String portName, String connectPort, JACKCallback cb);
 	
-	public int registerOutputPort(String portName, String connectPort, JACKCallback cb);
+	public int registerOutputPort(String component, String portName, String connectPort, JACKCallback cb);
 
 	public int unregisterPort(String name);
 

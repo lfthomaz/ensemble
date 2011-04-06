@@ -5,6 +5,7 @@
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.HashMap;
 
 import mmsjack.JackOptions;
 import mmsjack.JackPortFlags;
@@ -33,6 +34,8 @@ public class JACKServerService {
 	// JACK
 	private SWIGTYPE_p_jack_client_t client;
 	
+	private HashMap<String, SWIGTYPE_p_jack_client_t> clients = new HashMap<String, SWIGTYPE_p_jack_client_t>();
+	
 //	@Override
 	public String getName() {
 		
@@ -54,19 +57,6 @@ public class JACKServerService {
 			return;
 		}
 
-		// Starts the JACK client
-		this.client = mmsjack.jack_client_open("mms");
-		if (client == null) {
-			System.err.println("[" + getName() + "] JACK server not running... JACK will not be available!");
-            return;
-		}
-		
-		// Activates the JACK client
-		if (mmsjack.jack_activate(client) != 0) {
-			System.err.println("[" + getName() + "] Cannot activate JACK client... JACK will not be available!");
-            return;
-		}
-		
 		System.out.println("[" + getName() + "] JACK server started");
 		
 	}
@@ -86,13 +76,23 @@ public class JACKServerService {
 	public class JACKServerHelperImp implements JACKServerHelper {
 
 		@Override
-		public int registerOutputPort(String portName, String connectPort, JACKCallback cb) {
-			// Registers the inputport
+		public int registerOutputPort(String component, String portName, String connectPort, JACKCallback cb) {
+			// Starts the JACK client
+			client = mmsjack.jack_client_open("mms_" + component, cb);
+			if (client == null) {
+				System.err.println("[" + getName() + "] JACK server not running... JACK will not be available!");
+	            return -1;
+			}
+			// Activates the JACK client
+			if (mmsjack.jack_activate(client) != 0) {
+				System.err.println("[" + getName() + "] Cannot activate JACK client... JACK will not be available!");
+	            return -1;
+			}
+			// Registers the port
 			SWIGTYPE_p_jack_port_t port = mmsjack.jack_port_register(client, 
-															portName, 
-															mmsjackConstants.JACK_DEFAULT_AUDIO_TYPE, 
-															JackPortFlags.JackPortIsOutput, 
-															cb);
+																	portName, 
+																	mmsjackConstants.JACK_DEFAULT_AUDIO_TYPE, 
+																	JackPortFlags.JackPortIsOutput);
 			// Searches the desired playback port
 			String[] playback_ports = mmsjack.jack_get_ports(client, null, null,JackPortFlags.JackPortIsPhysical|JackPortFlags.JackPortIsInput);
 			if (playback_ports == null) {
@@ -110,8 +110,8 @@ public class JACKServerService {
 		}
 		
 		@Override
-		public int registerInputPort(String portName, String connectPort, JACKCallback cb) {
-			mmsjack.jack_port_register(client, portName, mmsjackConstants.JACK_DEFAULT_AUDIO_TYPE, JackPortFlags.JackPortIsInput, cb);
+		public int registerInputPort(String component, String portName, String connectPort, JACKCallback cb) {
+//			mmsjack.jack_port_register(client, portName, mmsjackConstants.JACK_DEFAULT_AUDIO_TYPE, JackPortFlags.JackPortIsInput);
 			return 0;
 		}	
 
@@ -149,24 +149,26 @@ public class JACKServerService {
 
 		JACKServerHelperImp helper = (JACKServerHelperImp)jack.getHelper();
 		
-		String[] inputs = helper.listInputPorts();
-		System.out.println("Input ports:");
-		for (int i = 0; i < inputs.length; i++) {
-			System.out.printf("[%d] %s\n", i, inputs[i]);
-		}
-		
-		String[] outputs = helper.listOutputPorts();
-		System.out.println("Output ports:");
-		for (int i = 0; i < outputs.length; i++) {
-			System.out.printf("[%d] %s\n", i, outputs[i]);
-		}
+//		String[] inputs = helper.listInputPorts();
+//		System.out.println("Input ports:");
+//		for (int i = 0; i < inputs.length; i++) {
+//			System.out.printf("[%d] %s\n", i, inputs[i]);
+//		}
+//		
+//		String[] outputs = helper.listOutputPorts();
+//		System.out.println("Output ports:");
+//		for (int i = 0; i < outputs.length; i++) {
+//			System.out.printf("[%d] %s\n", i, outputs[i]);
+//		}
 
-		helper.registerOutputPort("ear_left", "", new ServerCallback());
+		helper.registerOutputPort("AudioReasoning", "ear_left", "system:playback_1", new ServerCallback());
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(20000);
 		} catch (Exception e) {
 			System.err.println(e.toString());
 		}
+//		helper.unregisterPort("system:playback_1");
+		
 		jack.shutdown();
 	}
 
@@ -180,8 +182,8 @@ class ServerCallback implements JACKCallback {
 	double step = 1/fs;
 
 	@Override
-	public int process(String portName, ByteBuffer buffer, int nframes, double time) {
-//		System.out.printf("Java::callback(%d) - %s\n", nframes, portName);
+	public int process(ByteBuffer buffer, int nframes, double time) {
+		System.out.printf("Java::callback(%d)\n", nframes);
 		FloatBuffer fOut = buffer.order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
 		while (fOut.remaining() > 0) {
 			double dSample = 0.5 * Math.sin(2 * Math.PI * freq * t);

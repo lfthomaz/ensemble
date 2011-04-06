@@ -183,14 +183,15 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		jmethodID 		mid;
 	    jobject 		obj_callback;
 		int 			attached;
-		jack_port_t *	port;
+		jack_port_t * 	port;
 	} UserData;
 
 	JavaVM * virtual_machine = NULL;
 
 	int callback(jack_nframes_t nframes, void * arg) {
-		int ret = 0;
+		int ret = 0, i;
 		UserData * data;
+		char ** ports;
 		
 		printf("C::callback(%d)\n", nframes); fflush(stdout);
 		
@@ -203,16 +204,29 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 			data->attached = 1;
 			(*virtual_machine)->AttachCurrentThreadAsDaemon(virtual_machine, (void **) &data->env, NULL);
 			data->cls = (*data->env)->FindClass(data->env, "JACKCallback");
-			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(Ljava/lang/String;Ljava/nio/ByteBuffer;ID)I");
-//			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(Ljava/nio/ByteBuffer;ID)I");
+			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(Ljava/nio/ByteBuffer;ID)I");
 		}
 
-		jack_default_audio_sample_t * sampleBuffer = (jack_default_audio_sample_t *) jack_port_get_buffer(data->port,nframes);
-		ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
-													(*data->env)->NewStringUTF(data->env, jack_port_name(data->port)),
-													(*data->env)->NewDirectByteBuffer((data->env), sampleBuffer, nframes * sizeof(jack_default_audio_sample_t)),
-													nframes,
-													0.0);
+		if (data->port == NULL) {
+			ports = jack_get_ports(data->client,jack_get_client_name(data->client),NULL,0);
+//			ports = jack_get_ports(data->client,"system",NULL,0);
+			if (ports != NULL) {
+				printf("ENTROU %s\n", *ports); fflush(stdout);
+				data->port = jack_port_by_name(data->client,ports[0]);
+			}
+//			while (*ports != NULL) {
+//				printf("port = %s\n", *ports); fflush(stdout);
+//				ports++;
+//			}
+		}
+
+		if (data->port != NULL) {
+			jack_default_audio_sample_t * sampleBuffer = (jack_default_audio_sample_t *) jack_port_get_buffer(data->port,nframes);
+			ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
+														(*data->env)->NewDirectByteBuffer((data->env), sampleBuffer, nframes * sizeof(jack_default_audio_sample_t)),
+														nframes,
+														0.0);
+		}
 
 		return ret;
 	}
@@ -401,36 +415,6 @@ SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_JackLoadInit_1get(JNIEnv *jenv, 
 }
 
 
-SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1new(JNIEnv *jenv, jclass jcls, jstring jarg1, jobject jarg2) {
-  jlong jresult = 0 ;
-  char *arg1 = (char *) 0 ;
-  jack_client_t *client = 0 ;
-  
-  (void)jenv;
-  (void)jcls;
-  arg1 = 0;
-  if (jarg1) {
-    arg1 = (char *)(*jenv)->GetStringUTFChars(jenv, jarg1, 0);
-    if (!arg1) return 0;
-  }
-
-  	// Gets the virtual machine
-    if (virtual_machine == NULL) {
-    	(*jenv)->GetJavaVM(jenv, &virtual_machine);
-    }
-
-	// Calls JACK
-	client = (jack_client_t *)jack_client_new((char const *)arg1);
-//	err = jack_set_process_callback(client, callback, (void *)data);
-//	jack_on_shutdown(client, shutdown, (void *)data);
-//	printf("err = %d\n", err); fflush(stdout);
-
-  *(jack_client_t **)&jresult = client;
-  if (arg1) (*jenv)->ReleaseStringUTFChars(jenv, jarg1, (const char *)arg1);
-  return jresult;
-}
-
-
 SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1close(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   jack_client_t *arg1 = (jack_client_t *) 0 ;
@@ -445,10 +429,11 @@ SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1close(JNIEnv *jenv
 }
 
 
-SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1open(JNIEnv *jenv, jclass jcls, jstring jarg1) {
+SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1open(JNIEnv *jenv, jclass jcls, jstring jarg1, jobject jarg2) {
+  UserData * data;
   jlong jresult = 0 ;
   char *arg1 = (char *) 0 ;
-  jack_client_t *result = 0 ;
+  jack_client_t *client = 0 ;
   
   (void)jenv;
   (void)jcls;
@@ -457,8 +442,23 @@ SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1open(JNIEnv *jenv
     arg1 = (char *)(*jenv)->GetStringUTFChars(jenv, jarg1, 0);
     if (!arg1) return 0;
   }
-  result = (jack_client_t *)jack_client_open((char const *)arg1,JackNullOption,NULL);
-  *(jack_client_t **)&jresult = result; 
+
+  client = (jack_client_t *)jack_client_open((char const *)arg1,JackNullOption,NULL);
+  *(jack_client_t **)&jresult = client;
+
+	// Gets the virtual machine
+    if (virtual_machine == NULL) {
+	  (*jenv)->GetJavaVM(jenv, &virtual_machine);
+  	}
+
+    // Creates userData and set parameters
+	data = (UserData *)malloc(sizeof(UserData));
+	data->attached = 0;
+	data->obj_callback = (*jenv)->NewGlobalRef(jenv, jarg2);
+	data->client = client;
+	data->port = NULL;
+	jack_set_process_callback(client,callback,(void *)data);
+
   if (arg1) (*jenv)->ReleaseStringUTFChars(jenv, jarg1, (const char *)arg1);
   return jresult;
 }
@@ -478,7 +478,7 @@ SWIGEXPORT jint JNICALL Java_mmsjack_mmsjackJNI_jack_1get_1sample_1rate(JNIEnv *
 }
 
 
-SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1port_1register(JNIEnv *jenv, jclass jcls, jlong jarg1, jstring jarg2, jstring jarg3, jlong jarg4, jobject jarg5) {
+SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1port_1register(JNIEnv *jenv, jclass jcls, jlong jarg1, jstring jarg2, jstring jarg3, jlong jarg4) {
   UserData * data;
   jlong jresult = 0 ;
   jack_client_t *arg1 = (jack_client_t *) 0 ;
@@ -503,19 +503,7 @@ SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1port_1register(JNIEnv *je
   }
   arg4 = (unsigned long)jarg4; 
 
-	// Creates userData and set parameters
-	data = (UserData *)malloc(sizeof(UserData));
-	data->attached = 0;
-	data->obj_callback = (*jenv)->NewGlobalRef(jenv, jarg5);
-
-	result = (int)jack_set_process_callback(arg1,callback,(void *)data);
-	if (result != 0) {
-		printf("ERROR!!!\n"); fflush(stdout);
-	}
-
   result = (jack_port_t *)jack_port_register(arg1,(char const *)arg2,(char const *)arg3,arg4,0);
-
-  data->port = result;
 
   *(jack_port_t **)&jresult = result; 
   if (arg2) (*jenv)->ReleaseStringUTFChars(jenv, jarg2, (const char *)arg2);

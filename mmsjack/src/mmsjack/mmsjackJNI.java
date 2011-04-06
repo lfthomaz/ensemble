@@ -23,11 +23,10 @@ class mmsjackJNI {
   public final static native int JackServerName_get();
   public final static native int JackLoadName_get();
   public final static native int JackLoadInit_get();
-  public final static native long jack_client_new(String jarg1);
   public final static native int jack_client_close(long jarg1);
-  public final static native long jack_client_open(String jarg1);
+  public final static native long jack_client_open(String jarg1, Object jarg2);
   public final static native int jack_get_sample_rate(long jarg1);
-  public final static native long jack_port_register(long jarg1, String jarg2, String jarg3, long jarg4, Object jarg5);
+  public final static native long jack_port_register(long jarg1, String jarg2, String jarg3, long jarg4);
   public final static native int jack_port_unregister(long jarg1, long jarg2);
   public final static native int jack_activate(long jarg1);
   public final static native String[] jack_get_ports(long jarg1, String jarg2, String jarg3, long jarg4);

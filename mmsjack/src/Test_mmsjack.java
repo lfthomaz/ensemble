@@ -12,13 +12,13 @@ public class Test_mmsjack {
 	public static void main(String[] args) {
 		System.loadLibrary("mmsjack");
 		
-		SWIGTYPE_p_jack_client_t client = mmsjack.jack_client_new("mms/Musician_1/AudioReasoning");
+		SWIGTYPE_p_jack_client_t client = mmsjack.jack_client_open("mms/Musician_1/AudioReasoning");
 		if (client == null) {
 			System.err.println("jack server not running?\n");
             return;
 		}
 
-		SWIGTYPE_p_jack_client_t client2 = mmsjack.jack_client_new("Musician_2");
+		SWIGTYPE_p_jack_client_t client2 = mmsjack.jack_client_open("Musician_2");
 		if (client2 == null) {
 			System.err.println("jack server not running?\n");
             return;
