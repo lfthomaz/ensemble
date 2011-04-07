@@ -1,3 +1,5 @@
+package mmsjack;
+
 import java.nio.ByteBuffer;
 
 public interface JACKCallback {

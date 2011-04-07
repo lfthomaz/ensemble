@@ -192,8 +192,10 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		int ret = 0, i;
 		UserData * data;
 		char ** ports;
+		jack_default_audio_sample_t * sampleBuffer;
+		jobject buffer;
 		
-		printf("C::callback(%d)\n", nframes); fflush(stdout);
+//		printf("C::callback(%d)\n", nframes); fflush(stdout);
 		
 		data = (UserData *) arg;
 		if (data == NULL) {
@@ -203,15 +205,13 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		if (data->attached == 0) {
 			data->attached = 1;
 			(*virtual_machine)->AttachCurrentThreadAsDaemon(virtual_machine, (void **) &data->env, NULL);
-			data->cls = (*data->env)->FindClass(data->env, "JACKCallback");
+			data->cls = (*data->env)->FindClass(data->env, "mmsjack/JACKCallback");
 			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(Ljava/nio/ByteBuffer;ID)I");
 		}
 
 		if (data->port == NULL) {
 			ports = jack_get_ports(data->client,jack_get_client_name(data->client),NULL,0);
-//			ports = jack_get_ports(data->client,"system",NULL,0);
 			if (ports != NULL) {
-				printf("ENTROU %s\n", *ports); fflush(stdout);
 				data->port = jack_port_by_name(data->client,ports[0]);
 			}
 //			while (*ports != NULL) {
@@ -221,9 +221,10 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		}
 
 		if (data->port != NULL) {
-			jack_default_audio_sample_t * sampleBuffer = (jack_default_audio_sample_t *) jack_port_get_buffer(data->port,nframes);
+			sampleBuffer = (jack_default_audio_sample_t *) jack_port_get_buffer(data->port,nframes);
+			buffer = (*data->env)->NewDirectByteBuffer((data->env), sampleBuffer, nframes * sizeof(jack_default_audio_sample_t));
 			ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
-														(*data->env)->NewDirectByteBuffer((data->env), sampleBuffer, nframes * sizeof(jack_default_audio_sample_t)),
+														buffer,
 														nframes,
 														0.0);
 		}
@@ -551,9 +552,6 @@ SWIGEXPORT jobjectArray JNICALL Java_mmsjack_mmsjackJNI_jack_1get_1ports(JNIEnv 
   char *arg3 = (char *) 0 ;
   unsigned long arg4 ;
   char **result = 0 ;
-  
-  (void)jenv;
-  (void)jcls;
   arg1 = *(jack_client_t **)&jarg1; 
   arg2 = 0;
   if (jarg2) {
@@ -567,16 +565,16 @@ SWIGEXPORT jobjectArray JNICALL Java_mmsjack_mmsjackJNI_jack_1get_1ports(JNIEnv 
   }
   arg4 = (unsigned long)jarg4; 
   result = (char **)jack_get_ports(arg1,(char const *)arg2,(char const *)arg3,arg4);
-  {
+  if (result == NULL) {
+	  jresult == NULL;
+  } else {
     int i;
     int len=0;
+    jclass clazz;
     jstring temp_string;
-    const jclass clazz = (*jenv)->FindClass(jenv, "java/lang/String");
-    
-    while (result[len]) len++;    
+    clazz = (*jenv)->FindClass(jenv, "java/lang/String");
+    while (result[len]) len++;
     jresult = (*jenv)->NewObjectArray(jenv, len, clazz, NULL);
-    /* exception checking omitted */
-    
     for (i=0; i<len; i++) {
       temp_string = (*jenv)->NewStringUTF(jenv, *result++);
       (*jenv)->SetObjectArrayElement(jenv, jresult, i, temp_string);
