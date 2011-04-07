@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.clock.TimeUnit;
-import mms.kb.MemoryException;
+import mms.memory.MemoryException;
 
 public class Sensor extends EventHandler implements Sensing {
 

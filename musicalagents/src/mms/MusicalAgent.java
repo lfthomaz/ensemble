@@ -9,7 +9,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
-import mms.kb.KnowledgeBase;
 import mms.router.CommandClientInterface;
 import mms.world.Vector;
 

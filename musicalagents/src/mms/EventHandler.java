@@ -3,7 +3,7 @@ package mms;
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.comm.Comm;
-import mms.kb.Memory;
+import mms.memory.Memory;
 import mms.world.Vector;
 
 import jade.domain.DFService;
