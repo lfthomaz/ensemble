@@ -17,7 +17,7 @@ import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
-import mms.kb.Memory;
+import mms.memory.Memory;
 import mms.tools.AudioTools;
 
 public class RT_ListenerReasoning extends Reasoning {

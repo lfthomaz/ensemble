@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/portaudio"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/javaosc"/>
 	<classpathentry kind="lib" path="lib/jade.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mmsjack"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

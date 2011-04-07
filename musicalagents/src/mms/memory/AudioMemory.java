@@ -1,4 +1,4 @@
-package mms.kb;
+package mms.memory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

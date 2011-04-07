@@ -1,4 +1,4 @@
-package mms.kb;
+package mms.memory;
 
 import jade.util.Logger;
 import mms.MMSAgent;

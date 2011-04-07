@@ -6,7 +6,7 @@ import mms.EventHandler;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
-import mms.kb.Memory;
+import mms.memory.Memory;
 
 public class AudioR extends Reasoning {
 	

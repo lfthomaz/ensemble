@@ -1,4 +1,4 @@
-package mms.kb;
+package mms.memory;
 
 public class MemoryException extends Exception {
 

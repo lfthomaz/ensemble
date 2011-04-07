@@ -6,7 +6,7 @@ import mms.MusicalAgent;
 import mms.Parameters;
 import mms.Reasoning;
 import mms.Sensor;
-import mms.kb.AudioMemory;
+import mms.memory.AudioMemory;
 
 public class RT_MusicalAgent extends MusicalAgent {
 

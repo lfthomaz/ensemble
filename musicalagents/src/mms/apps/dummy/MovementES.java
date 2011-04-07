@@ -4,9 +4,9 @@ import mms.Constants;
 import mms.EventServer;
 import mms.Parameters;
 import mms.clock.TimeUnit;
-import mms.kb.AudioMemory;
-import mms.kb.CircularBufferMemory;
-import mms.kb.Memory;
+import mms.memory.AudioMemory;
+import mms.memory.CircularBufferMemory;
+import mms.memory.Memory;
 import mms.world.EntityState;
 
 public class MovementES extends EventServer {

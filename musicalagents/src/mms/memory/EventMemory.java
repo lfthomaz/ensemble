@@ -1,4 +1,4 @@
-package mms.kb;
+package mms.memory;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

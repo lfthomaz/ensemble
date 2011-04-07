@@ -1,4 +1,4 @@
-package mms.kb;
+package mms.memory;
 
 import mms.Constants;
 import mms.Parameters;

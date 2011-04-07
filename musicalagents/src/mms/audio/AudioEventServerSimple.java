@@ -11,9 +11,9 @@ import mms.EventServer;
 import mms.MusicalAgent;
 import mms.Parameters;
 import mms.clock.TimeUnit;
-import mms.kb.AudioMemory;
-import mms.kb.Memory;
-import mms.kb.MemoryException;
+import mms.memory.AudioMemory;
+import mms.memory.Memory;
+import mms.memory.MemoryException;
 import mms.world.World;
 
 /**

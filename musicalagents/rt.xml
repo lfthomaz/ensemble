@@ -48,7 +48,7 @@
 			<!-- <REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_ListenerReasoning" CYCLIC="false" /> -->
 			<REASONING NAME="AudioReasoning" CLASS="mms.audio.AudioOutputReasoning" CYCLIC="false" />
 			<SENSOR NAME="Ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(-2;0;0)"/>
-			<SENSOR NAME="Ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/>
+			<!-- <SENSOR NAME="Ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/> -->
 			<!-- <ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
 			<!-- <SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" /> -->
 		</COMPONENTS>
@@ -127,10 +127,11 @@
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;-2;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
-		<ARG_COMP COMP="AudioReasoning" NAME="default_device" VALUE="10" />
-		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="Ear_left:10,0;Ear_right:10,1" />
+		<ARG_COMP COMP="AudioReasoning" NAME="default_device" VALUE="2" />
+		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="Ear_left:2,0;Ear_right:2,1" />
 	</MUSICAL_AGENT>
 	
+	<!-- 
 	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;-2;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
@@ -138,7 +139,6 @@
 		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="Mouth:1,0" />
 	</MUSICAL_AGENT>
 
-	<!-- 
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-2;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />

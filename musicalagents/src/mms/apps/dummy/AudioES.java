@@ -7,8 +7,8 @@ import mms.Event;
 import mms.EventServer;
 import mms.Parameters;
 import mms.Sensor;
-import mms.kb.AudioMemory;
-import mms.kb.Memory;
+import mms.memory.AudioMemory;
+import mms.memory.Memory;
 
 public class AudioES extends EventServer {
 

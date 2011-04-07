@@ -4,8 +4,8 @@ import mms.Actuator;
 import mms.Event;
 import mms.EventHandler;
 import mms.Reasoning;
-import mms.kb.Memory;
-import mms.kb.MemoryException;
+import mms.memory.Memory;
+import mms.memory.MemoryException;
 
 public class LM_Reasoning extends Reasoning {
 
