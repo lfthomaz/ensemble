@@ -2,7 +2,6 @@ package mms;
 
 import java.util.Set;
 
-
 public class Command {
 
 	private String 		source;
