@@ -33,7 +33,6 @@ public class AudioOutputReasoning extends Reasoning {
 	double 						step = 1/44100.0;
 	
 	// Parameters
-	int 					default_device;
 	HashMap<String,Integer> devices = new HashMap<String, Integer>();
 	HashMap<String,Integer> channels = new HashMap<String, Integer>();
 	
@@ -43,7 +42,6 @@ public class AudioOutputReasoning extends Reasoning {
 	@Override
 	public boolean init() {
 		
-		default_device = Integer.valueOf(getParameter("default_device", "-1"));
 		String[] str = getParameter("channel", "").split(";");
 		for (int i = 0; i < str.length; i++) {
 			String[] str2 = str[i].split(":");
@@ -173,7 +171,7 @@ public class AudioOutputReasoning extends Reasoning {
 				info.firstCall = false;
 			}
 
-//			System.out.printf(System.currentTimeMillis() + " callback = %f %f %f\n", instant, outputBufferDacTime, portaudio.Pa_GetStreamTime(stream));
+//			System.out.printf(System.currentTimeMillis() + " callback = %f %f %f\n", info.instant, outputBufferDacTime, portaudio.Pa_GetStreamTime(stream));
 			
 			double duration = (double)(frameCount) * step;
 //			System.out.println("vou ler de instant = " + instant + " até " + (instant+duration));
