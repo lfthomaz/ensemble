@@ -215,10 +215,10 @@ int callback(const void * input, void * output, unsigned long frame_count, const
 								(jlong) data->stream,
 								input_buffer = (*data->env)->NewDirectByteBuffer(data->env, (void *) input, (jint) frame_count * data->input_frame_size),
 								output_buffer = (*data->env)->NewDirectByteBuffer(data->env, output, (jint) frame_count * data->output_frame_size),
-								frame_count,
-								time_info->inputBufferAdcTime,
-								time_info->currentTime,
-								time_info->outputBufferDacTime
+								(jlong)frame_count,
+								(jdouble)time_info->inputBufferAdcTime,
+								(jdouble)time_info->currentTime,
+								(jdouble)time_info->outputBufferDacTime
 					);
 
 	return ret;
@@ -1554,7 +1554,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsFormatSupported(JNIEnv
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv, jclass jcls, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jdouble jarg4, jlong jarg5, jlong jarg6, jobject jarg7) {
+SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv, jclass jcls, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jdouble jarg4, jlong jarg5, jlong jarg6, jobject jarg7) {
 	UserData * data;
 	PaError error;
 	PaStream * stream;
