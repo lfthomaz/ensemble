@@ -9,8 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.EA_STATE;
 import mms.clock.TimeUnit;
-import mms.commands.Command;
-import mms.commands.CommandClientInterface;
+import mms.router.CommandClientInterface;
 import mms.world.World;
 
 import jade.core.AID;

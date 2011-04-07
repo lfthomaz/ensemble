@@ -2,12 +2,11 @@ package mms;
 
 import mms.clock.VirtualClockHelper;
 import mms.clock.VirtualClockService;
-import mms.commands.Command;
-import mms.commands.CommandClientInterface;
-import mms.commands.RouterHelper;
-import mms.commands.RouterService;
-import mms.osc.OSCServerHelper;
-import mms.osc.OSCServerService;
+import mms.router.CommandClientInterface;
+import mms.router.RouterHelper;
+import mms.router.RouterService;
+import mms.router.osc.OSCServerHelper;
+import mms.router.osc.OSCServerService;
 import jade.core.Agent;
 import jade.core.ServiceException;
 import jade.util.Logger;

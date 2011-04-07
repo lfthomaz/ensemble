@@ -3,10 +3,10 @@ package mms.kb;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import mms.Command;
 import mms.Constants;
 import mms.MusicalAgent;
 import mms.Parameters;
-import mms.commands.Command;
 
 public class KnowledgeBase {
 

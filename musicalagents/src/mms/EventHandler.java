@@ -3,7 +3,6 @@ package mms;
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.comm.Comm;
-import mms.commands.Command;
 import mms.kb.Memory;
 import mms.world.Vector;
 

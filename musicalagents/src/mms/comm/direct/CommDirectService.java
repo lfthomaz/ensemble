@@ -32,6 +32,8 @@ public class CommDirectService extends BaseService {
 		
 		super.boot(p);
 		
+        System.out.println("[" + getName() + "] CommDirect service started");
+
 	}
 	
 	public CommDirectHelper getHelper(Agent a) {

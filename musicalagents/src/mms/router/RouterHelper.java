@@ -1,8 +1,10 @@
-package mms.commands;
+package mms.router;
 
 import jade.core.ServiceHelper;
 
 import java.util.HashMap;
+
+import mms.Command;
 
 import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;

@@ -1,7 +1,6 @@
 package mms;
 
 import mms.Constants.EA_STATE;
-import mms.commands.Command;
 
 public abstract class MusicalAgentComponent {
 

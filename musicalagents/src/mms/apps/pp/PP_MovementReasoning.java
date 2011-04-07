@@ -7,11 +7,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import mms.Actuator;
+import mms.Command;
 import mms.EventHandler;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
-import mms.commands.Command;
 import mms.kb.Memory;
 import mms.kb.MemoryException;
 import mms.world.Vector;

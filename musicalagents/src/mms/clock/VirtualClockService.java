@@ -66,6 +66,9 @@ public class VirtualClockService extends BaseService {
 			referenceNanoStartTime = System.nanoTime();
 			MusicalAgent.logger.info("[" + NAME + "] " + "Reference Time = " + referenceStartTime);
 		}
+		
+        System.out.println("[" + getName() + "] VirtualClock service started");
+
 	}
 	
 	public VirtualClockHelper getHelper(Agent a) {

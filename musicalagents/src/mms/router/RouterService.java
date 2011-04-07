@@ -1,7 +1,8 @@
-package mms.commands;
+package mms.router;
 
 import java.util.HashMap;
 
+import mms.Command;
 import mms.MusicalAgent;
 
 import jade.core.Agent;
@@ -40,6 +41,8 @@ public class RouterService extends BaseService {
         new Thread(console).start();
         
         // Console GUI
+
+        System.out.println("[" + getName() + "] Router service started");
 		
 	}
 	
@@ -60,7 +63,7 @@ public class RouterService extends BaseService {
 	       
 			if (list.containsKey(cmdInterface.getAddress())) {
 				
-	            System.err.println("[ROUTER] Client already exists!");
+	            System.err.println("[" + getName() + "] Client already exists!");
 	            return null;
 	            
 	        } else {
@@ -69,7 +72,7 @@ public class RouterService extends BaseService {
 	            list.put(cmdInterface.getAddress(), cmdInterface);
 	            // Makes the returning connection
 //	            cmdInterface.connect(getAddress(), this);
-	            System.out.println("[ROUTER] Command interface " + cmdInterface.getAddress() + " connected.");
+	            System.out.println("[" + getName() + "] Command interface " + cmdInterface.getAddress() + " connected.");
 	            return this;
 	            
 	        }
@@ -80,7 +83,7 @@ public class RouterService extends BaseService {
 		public boolean disconnect(CommandClientInterface cmdInterface) {
 			
 	        list.remove(cmdInterface.getAddress());
-	        System.out.println("[ROUTER] Command interface " + cmdInterface.getAddress() + " disconnected.");
+	        System.out.println("[" + getName() + "] Command interface " + cmdInterface.getAddress() + " disconnected.");
 	        return true;
 	        
 		}
@@ -91,7 +94,7 @@ public class RouterService extends BaseService {
 	        // Verifies the destination of the command
 	        String[] recipient = cmd.getRecipient().split(":");
 	        if (recipient.length < 2) {
-	            System.out.println("[ROUTER] Malformed address: " + cmd.getRecipient());
+	            System.out.println("[" + getName() + "] Malformed address: " + cmd.getRecipient());
 	            return;
 	        }
 	        
@@ -126,7 +129,7 @@ public class RouterService extends BaseService {
             	CommandClientInterface recipientInterface = list.get(key);
             	recipientInterface.input(recipientInterface, cmd);
             } else {
-            	System.out.println("[ROUTER] Address " + key + " is not registered.");
+            	System.out.println("[" + getName() + "] Address " + key + " is not registered.");
             }
 
 		}

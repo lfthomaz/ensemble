@@ -1,6 +1,8 @@
-package mms.commands;
+package mms.router;
 
 import java.util.Scanner;
+
+import mms.Command;
 
 /**
  *

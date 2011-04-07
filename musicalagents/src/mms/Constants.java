@@ -13,6 +13,7 @@ public final class Constants {
 	public static final String 	MODE_REAL_TIME			= "REAL_TIME";
 	
 	public static final String 	OSC						= "OSC";
+	public static final String 	JACK					= "JACK";
 
 	public static final String 	WAIT_TIME_TURN 			= "WAIT_TIME_TURN";
 	public static final String 	WAIT_ALL_AGENTS 		= "WAIT_ALL_AGENTS";

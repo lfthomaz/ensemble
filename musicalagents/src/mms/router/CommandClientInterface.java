@@ -1,4 +1,6 @@
-package mms.commands;
+package mms.router;
+
+import mms.Command;
 
 /**
  *

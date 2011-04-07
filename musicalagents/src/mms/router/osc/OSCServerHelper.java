@@ -1,4 +1,4 @@
-package mms.osc;
+package mms.router.osc;
 
 import jade.core.ServiceHelper;
 

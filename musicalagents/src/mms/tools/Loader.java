@@ -24,7 +24,7 @@ import mms.Constants;
 import mms.EnvironmentAgent;
 import mms.MusicalAgent;
 import mms.Parameters;
-import mms.commands.Console;
+import mms.router.Console;
 import mms.world.Vector;
 
 /**
@@ -77,18 +77,30 @@ public class Loader {
 		rt = Runtime.instance();
 		p = new ProfileImpl();
 		p.setParameter(Profile.MAIN_HOST, "localhost");
-		p.setParameter(Profile.SERVICES, "mms.clock.VirtualClockService;mms.comm.direct.CommDirectService;mms.commands.RouterService;mms.osc.OSCServerService");
+		String services = "mms.clock.VirtualClockService;" +
+							"mms.comm.direct.CommDirectService;" +
+							"mms.router.RouterService;";
 
 		// Load Global Parameters	
 		NodeList nl = elem_mms.getElementsByTagName(CONF_GLOBAL_PARAMETERS);
 		if (nl.getLength() == 1) {
 			Element elem_gp = (Element)nl.item(0);
-			
 			p.setParameter(Constants.CLOCK_MODE, readAttribute(elem_gp, Constants.CLOCK_MODE, Constants.CLOCK_CPU));
 			p.setParameter(Constants.PROCESS_MODE, readAttribute(elem_gp, Constants.PROCESS_MODE, Constants.MODE_REAL_TIME));
-			p.setParameter(Constants.OSC, readAttribute(elem_gp, Constants.OSC, "FALSE"));
+			String osc = readAttribute(elem_gp, Constants.OSC, "FALSE");
+			p.setParameter(Constants.OSC, osc);
+			if (Boolean.valueOf(osc)) {
+				services += "mms.router.osc.OSCServerService;";
+			}
+			String jack = readAttribute(elem_gp, Constants.JACK, "FALSE");
+			p.setParameter(Constants.JACK, jack);
+			if (Boolean.valueOf(jack)) {
+				services += "mms.audio.jack.JACKServerService;";
+			}
 		}
-		
+	
+		p.setParameter(Profile.SERVICES, services);
+
 		cc = rt.createMainContainer(p);
 		
 	}

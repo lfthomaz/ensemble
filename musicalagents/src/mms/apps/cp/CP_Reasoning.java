@@ -3,6 +3,7 @@ package mms.apps.cp;
 import java.util.ArrayList;
 
 import mms.Actuator;
+import mms.Command;
 import mms.Constants;
 import mms.EventHandler;
 import mms.MusicalAgent;
@@ -10,7 +11,6 @@ import mms.Parameters;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
-import mms.commands.Command;
 import mms.kb.Memory;
 import mms.kb.MemoryException;
 import mms.processing.Process;

@@ -1,4 +1,4 @@
-package console;
+package mms.router;
 
 /*
  * To change this template, choose Tools | Templates

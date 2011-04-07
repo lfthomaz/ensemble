@@ -1,4 +1,4 @@
-package mms.osc;
+package mms.router.osc;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -62,12 +62,12 @@ public class OSCServerService extends BaseService {
 			
 			sender = new OSCPortOut();
 			
-			
-			
 		} catch (SocketException e) {
 			e.printStackTrace();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+		} finally {
+	        System.out.println("[" + getName() + "] OSC service started");
 		}
 		
 	}

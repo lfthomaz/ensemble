@@ -1,4 +1,4 @@
-package mms.commands;
+package mms.router;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;

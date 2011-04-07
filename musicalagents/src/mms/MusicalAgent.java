@@ -9,12 +9,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
-import mms.commands.Command;
-import mms.commands.CommandClientInterface;
 import mms.kb.KnowledgeBase;
+import mms.router.CommandClientInterface;
 import mms.world.Vector;
-//import mms.osc.OSCServerHelper;
-//import mms.osc.OSCServerService;
 
 import jade.core.AID;
 import jade.core.Agent;

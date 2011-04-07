@@ -10,13 +10,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
 
+import mms.Command;
 import mms.Constants;
 import mms.Event;
 import mms.EventHandlerInfo;
 import mms.EventServer;
 import mms.Parameters;
 import mms.clock.TimeUnit;
-import mms.commands.Command;
 import mms.kb.EventMemory;
 import mms.kb.Memory;
 import mms.kb.MemoryException;

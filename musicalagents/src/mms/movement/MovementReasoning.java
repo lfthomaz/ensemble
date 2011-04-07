@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.activity.ActivityRequiredException;
 
 import mms.Actuator;
+import mms.Command;
 import mms.Constants;
 import mms.Event;
 import mms.EventHandler;
@@ -12,7 +13,6 @@ import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
-import mms.commands.Command;
 import mms.kb.Memory;
 import mms.kb.MemoryException;
 import mms.world.Vector;

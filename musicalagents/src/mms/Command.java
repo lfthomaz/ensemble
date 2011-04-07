@@ -1,8 +1,7 @@
-package mms.commands;
+package mms;
 
 import java.util.Set;
 
-import mms.Parameters;
 
 public class Command {
 

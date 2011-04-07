@@ -16,7 +16,6 @@ import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import mms.comm.Comm;
-import mms.commands.Command;
 
 public abstract class EventServer implements Sensing, Acting {
 
