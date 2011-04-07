@@ -38,7 +38,7 @@
       <echo message="Came into the Windows target" />
     	
         <exec executable="cl">
-          <arg line="-I%JAVA_HOME%\include -I%JAVA_HOME%\include\win32 -I&quot;C:\Users\Leandro\Desktop\portaudio\include&quot; &quot;./library/portaudio_x86.lib&quot; -LD mmsportaudio.c"/>
+          <arg line="-I%JAVA_HOME%\include -I%JAVA_HOME%\include\win32 -I&quot;./include&quot; &quot;./lib/portaudio_x86.lib&quot; -LD mmsportaudio.c"/>
         </exec>
 
     </target>

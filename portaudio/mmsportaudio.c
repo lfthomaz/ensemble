@@ -196,7 +196,9 @@ JavaVM * virtual_machine;
 
 int callback(const void * input, void * output, unsigned long frame_count, const PaStreamCallbackTimeInfo * time_info, PaStreamCallbackFlags status_flags, void * user_data) {
 	int ret;
-	
+	jobject input_buffer = NULL;
+	jobject output_buffer = NULL;
+		
 	UserData * data = (UserData *) user_data;
 	if (data == NULL) {
 		printf("portaudio: there is no user data...\n"); fflush(stdout);
@@ -210,9 +212,9 @@ int callback(const void * input, void * output, unsigned long frame_count, const
 	}
 
 	ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
-								data->stream,
-								(*data->env)->NewDirectByteBuffer(data->env, (void *) input, (jint) frame_count * data->input_frame_size),
-								(*data->env)->NewDirectByteBuffer(data->env, output, (jint) frame_count * data->output_frame_size),
+								(jlong) data->stream,
+								input_buffer = (*data->env)->NewDirectByteBuffer(data->env, (void *) input, (jint) frame_count * data->input_frame_size),
+								output_buffer = (*data->env)->NewDirectByteBuffer(data->env, output, (jint) frame_count * data->output_frame_size),
 								frame_count,
 								time_info->inputBufferAdcTime,
 								time_info->currentTime,
@@ -1697,7 +1699,6 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1StartStream(JNIEnv *jenv
   (void)jcls;
   arg1 = *(PaStream **)&jarg1;
   result = (PaError)Pa_StartStream(arg1);
-//  printf("StartStream()::result = %d\n", result); fflush(stdout);
   jresult = (jint)result; 
   return jresult;
 }
