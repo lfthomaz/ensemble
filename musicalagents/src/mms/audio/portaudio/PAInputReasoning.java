@@ -6,11 +6,6 @@ import java.util.Set;
 
 import jade.util.Logger;
 
-import portaudio.PaCallback;
-import portaudio.PaDeviceInfo;
-import portaudio.PaStreamInfo;
-import portaudio.PaStreamParameters;
-import portaudio.portaudio;
 
 import mms.Actuator;
 import mms.Constants;
@@ -22,6 +17,11 @@ import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
 import mms.tools.AudioTools;
+import mmsportaudio.PaCallback;
+import mmsportaudio.PaDeviceInfo;
+import mmsportaudio.PaStreamInfo;
+import mmsportaudio.PaStreamParameters;
+import mmsportaudio.portaudio;
 
 public class PAInputReasoning extends Reasoning {
 
@@ -29,6 +29,7 @@ public class PAInputReasoning extends Reasoning {
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	// PortAudio
+	portaudio 					pa;
 	HashMap<Long, StreamInfo> 	streamInfos = new HashMap<Long, StreamInfo>(2);
 	HashMap<Long, String> 		streams_sensors = new HashMap<Long, String>(2);
 	HashMap<String, Long> 		sensors_streams = new HashMap<String, Long>(2);
@@ -54,8 +55,7 @@ public class PAInputReasoning extends Reasoning {
 		}
 		
 		// Initializes PortAudio
-		System.out.println("Starting portaudio...");
-		int err = portaudio.Pa_Initialize();
+		pa = portaudio.getInstance();
 
 		return true;
 		
@@ -64,7 +64,7 @@ public class PAInputReasoning extends Reasoning {
 	@Override
 	public boolean finit() {
 
-		portaudio.Pa_Terminate();
+		portaudio.deleteInstance();
 		
 		return true;
 		
@@ -85,7 +85,7 @@ public class PAInputReasoning extends Reasoning {
 				System.out.println("Opening stream...");
 				// Gets DeviceInfo
 				int device = devices.get(actuatorName);
-				PaDeviceInfo info = portaudio.Pa_GetDeviceInfo(device);
+				PaDeviceInfo info = pa.Pa_GetDeviceInfo(device);
 				if (info == null) {
 					System.err.println("[PORTAUDIO] Audio device '" + device + "' not available...");
 					return;
@@ -104,7 +104,7 @@ public class PAInputReasoning extends Reasoning {
 				inputParameters.setSampleFormat(portaudio.SIGNED_INTEGER_16);
 				inputParameters.setSuggestedLatency(info.getDefaultLowInputLatency());
 				// Opens the stream
-				stream = portaudio.Pa_OpenStream(inputParameters, null, sr, 256, 0, new Callback());
+				stream = pa.Pa_OpenStream(inputParameters, null, sr, 256, 0, new Callback());
 				if (stream == 0) {
 					System.err.println("[PORTAUDIO] Stream not available for audio device '" + device + "'");
 					return;
@@ -116,11 +116,12 @@ public class PAInputReasoning extends Reasoning {
 				streamInfo.device = device;
 				streamInfo.channel = channels.get(actuatorName);
 				streamInfo.channelCount = channelCount;
-				streamInfo.latency = portaudio.Pa_GetStreamInfo(stream).getInputLatency();
+				streamInfo.latency = pa.Pa_GetStreamInfo(stream).getInputLatency();
+//				System.out.println("Input latency = " + streamInfo.latency);
 				streamInfos.put(stream, streamInfo);
 				streams_sensors.put(stream, actuatorName);
 				sensors_streams.put(actuatorName, stream);
-				portaudio.Pa_StartStream(stream);
+				pa.Pa_StartStream(stream);
 			}
 		}
 		
@@ -133,9 +134,9 @@ public class PAInputReasoning extends Reasoning {
 		if (sensors_streams.containsKey(sensorName)) {
 			long stream = sensors_streams.get(sensorName);
 			System.out.println("Stoping stream " + stream);
-			portaudio.Pa_StopStream(stream);
+			pa.Pa_StopStream(stream);
 			System.out.println("Closing stream " + stream);
-			portaudio.Pa_CloseStream(stream);
+			pa.Pa_CloseStream(stream);
 			streams_sensors.remove(stream);
 			sensors_streams.remove(sensorName);
 			streamInfos.remove(sensorName);
