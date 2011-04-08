@@ -207,7 +207,7 @@ int callback(const void * input, void * output, unsigned long frame_count, const
 	if (data->attached == 0) {
 		data->attached = 1;
 		(*virtual_machine)->AttachCurrentThreadAsDaemon(virtual_machine, (void **) &data->env, NULL);
-		data->cls = (*data->env)->FindClass(data->env, "portaudio/PaCallback");
+		data->cls = (*data->env)->FindClass(data->env, "mmsportaudio/PaCallback");
 		data->mid = (*data->env)->GetMethodID(data->env, data->cls, "callback", "(JLjava/nio/ByteBuffer;Ljava/nio/ByteBuffer;JDDD)I");
 	}
 
@@ -235,7 +235,7 @@ void hook(void * user_data) {
 extern "C" {
 #endif
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1structVersion_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1structVersion_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   int arg2 ;
   
@@ -249,7 +249,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1structVersion
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1structVersion_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1structVersion_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   int result;
@@ -264,7 +264,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1structVersion
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1type_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1type_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   PaHostApiTypeId arg2 ;
   PaHostApiTypeId *argp2 ;
@@ -284,7 +284,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1type_1set(JNI
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1type_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1type_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jlong jresult = 0 ;
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   PaHostApiTypeId result;
@@ -303,7 +303,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1type_1get(JN
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1name_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1name_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   char *arg2 = (char *) 0 ;
   
@@ -329,7 +329,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1name_1set(JNI
 }
 
 
-SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1name_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jstring JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1name_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jstring jresult = 0 ;
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   char *result = 0 ;
@@ -344,7 +344,7 @@ SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1name_1get(
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1deviceCount_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1deviceCount_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   int arg2 ;
   
@@ -358,7 +358,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1deviceCount_1
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1deviceCount_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1deviceCount_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   int result;
@@ -373,7 +373,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1deviceCount_1
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultInputDevice_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1defaultInputDevice_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   PaDeviceIndex arg2 ;
   
@@ -387,7 +387,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultInputD
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultInputDevice_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1defaultInputDevice_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   PaDeviceIndex result;
@@ -402,7 +402,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultInputD
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultOutputDevice_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1defaultOutputDevice_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   PaDeviceIndex arg2 ;
   
@@ -416,7 +416,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultOutput
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultOutputDevice_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaHostApiInfo_1defaultOutputDevice_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   PaDeviceIndex result;
@@ -431,7 +431,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostApiInfo_1defaultOutput
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaHostApiInfo(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_new_1PaHostApiInfo(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaHostApiInfo *result = 0 ;
   
@@ -443,7 +443,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaHostApiInfo(JNIEnv *
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaHostApiInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_delete_1PaHostApiInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   PaHostApiInfo *arg1 = (PaHostApiInfo *) 0 ;
   
   (void)jenv;
@@ -454,7 +454,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaHostApiInfo(JNIEnv
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1hostApiType_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostErrorInfo_1hostApiType_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   PaHostApiTypeId arg2 ;
   PaHostApiTypeId *argp2 ;
@@ -474,7 +474,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1hostApiType
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1hostApiType_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_PaHostErrorInfo_1hostApiType_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jlong jresult = 0 ;
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   PaHostApiTypeId result;
@@ -493,7 +493,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1hostApiTyp
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorCode_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostErrorInfo_1errorCode_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   long arg2 ;
   
@@ -507,7 +507,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorCode_1
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorCode_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaHostErrorInfo_1errorCode_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   long result;
@@ -522,7 +522,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorCode_1
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorText_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaHostErrorInfo_1errorText_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   char *arg2 = (char *) 0 ;
   
@@ -548,7 +548,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorText_1
 }
 
 
-SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorText_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jstring JNICALL Java_mmsportaudio_portaudioJNI_PaHostErrorInfo_1errorText_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jstring jresult = 0 ;
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   char *result = 0 ;
@@ -563,7 +563,7 @@ SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_PaHostErrorInfo_1errorTex
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaHostErrorInfo(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_new_1PaHostErrorInfo(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaHostErrorInfo *result = 0 ;
   
@@ -575,7 +575,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaHostErrorInfo(JNIEnv
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaHostErrorInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_delete_1PaHostErrorInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   PaHostErrorInfo *arg1 = (PaHostErrorInfo *) 0 ;
   
   (void)jenv;
@@ -586,7 +586,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaHostErrorInfo(JNIE
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1structVersion_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1structVersion_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   int arg2 ;
   
@@ -600,7 +600,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1structVersion_
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1structVersion_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1structVersion_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   int result;
@@ -615,7 +615,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1structVersion_
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1name_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1name_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jstring jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   char *arg2 = (char *) 0 ;
   
@@ -641,7 +641,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1name_1set(JNIE
 }
 
 
-SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1name_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jstring JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1name_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jstring jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   char *result = 0 ;
@@ -656,7 +656,7 @@ SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1name_1get(J
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1hostApi_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1hostApi_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaHostApiIndex arg2 ;
   
@@ -670,7 +670,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1hostApi_1set(J
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1hostApi_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1hostApi_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaHostApiIndex result;
@@ -685,7 +685,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1hostApi_1get(J
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxInputChannels_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1maxInputChannels_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   int arg2 ;
   
@@ -699,7 +699,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxInputChanne
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxInputChannels_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1maxInputChannels_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   int result;
@@ -714,7 +714,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxInputChanne
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxOutputChannels_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1maxOutputChannels_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   int arg2 ;
   
@@ -728,7 +728,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxOutputChann
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxOutputChannels_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1maxOutputChannels_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   int result;
@@ -743,7 +743,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1maxOutputChann
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowInputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultLowInputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime arg2 ;
   
@@ -757,7 +757,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowInpu
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowInputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultLowInputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime result;
@@ -772,7 +772,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowI
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowOutputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultLowOutputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime arg2 ;
   
@@ -786,7 +786,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowOutp
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowOutputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultLowOutputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime result;
@@ -801,7 +801,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultLowO
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHighInputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultHighInputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime arg2 ;
   
@@ -815,7 +815,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHighInp
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHighInputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultHighInputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime result;
@@ -830,7 +830,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHigh
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHighOutputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultHighOutputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime arg2 ;
   
@@ -844,7 +844,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHighOut
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHighOutputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultHighOutputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   PaTime result;
@@ -859,7 +859,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultHigh
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultSampleRate_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultSampleRate_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   double arg2 ;
   
@@ -873,7 +873,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultSampleR
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultSampleRate_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaDeviceInfo_1defaultSampleRate_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   double result;
@@ -888,7 +888,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaDeviceInfo_1defaultSamp
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaDeviceInfo(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_new_1PaDeviceInfo(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaDeviceInfo *result = 0 ;
   
@@ -900,7 +900,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaDeviceInfo(JNIEnv *j
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaDeviceInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_delete_1PaDeviceInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   PaDeviceInfo *arg1 = (PaDeviceInfo *) 0 ;
   
   (void)jenv;
@@ -911,7 +911,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaDeviceInfo(JNIEnv 
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1device_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1device_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaDeviceIndex arg2 ;
   
@@ -925,7 +925,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1device_1
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1device_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1device_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaDeviceIndex result;
@@ -940,7 +940,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1device_1
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1channelCount_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1channelCount_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   int arg2 ;
   
@@ -954,7 +954,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1channelC
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1channelCount_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1channelCount_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   int result;
@@ -969,7 +969,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1channelC
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1sampleFormat_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1sampleFormat_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaSampleFormat arg2 ;
   
@@ -983,7 +983,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1sampleFo
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1sampleFormat_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1sampleFormat_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jlong jresult = 0 ;
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaSampleFormat result;
@@ -998,7 +998,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1sampleF
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1suggestedLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1suggestedLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaTime arg2 ;
   
@@ -1012,7 +1012,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1suggeste
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1suggestedLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1suggestedLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaTime result;
@@ -1027,7 +1027,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1sugge
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1hostApiSpecificStreamInfo_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1hostApiSpecificStreamInfo_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2) {
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   void *arg2 = (void *) 0 ;
   
@@ -1041,7 +1041,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1hostApiS
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1hostApiSpecificStreamInfo_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_PaStreamParameters_1hostApiSpecificStreamInfo_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jlong jresult = 0 ;
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   void *result = 0 ;
@@ -1056,7 +1056,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_PaStreamParameters_1hostApi
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaStreamParameters(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_new_1PaStreamParameters(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaStreamParameters *result = 0 ;
   
@@ -1068,7 +1068,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaStreamParameters(JNI
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaStreamParameters(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_delete_1PaStreamParameters(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   
   (void)jenv;
@@ -1079,7 +1079,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaStreamParameters(J
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1inputBufferAdcTime_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamCallbackTimeInfo_1inputBufferAdcTime_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   PaTime arg2 ;
   
@@ -1093,7 +1093,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1in
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1inputBufferAdcTime_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamCallbackTimeInfo_1inputBufferAdcTime_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   PaTime result;
@@ -1108,7 +1108,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1currentTime_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamCallbackTimeInfo_1currentTime_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   PaTime arg2 ;
   
@@ -1122,7 +1122,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1cu
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1currentTime_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamCallbackTimeInfo_1currentTime_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   PaTime result;
@@ -1137,7 +1137,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1outputBufferDacTime_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamCallbackTimeInfo_1outputBufferDacTime_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   PaTime arg2 ;
   
@@ -1151,7 +1151,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1ou
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_1outputBufferDacTime_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamCallbackTimeInfo_1outputBufferDacTime_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   PaTime result;
@@ -1166,7 +1166,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamCallbackTimeInfo_
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaStreamCallbackTimeInfo(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_new_1PaStreamCallbackTimeInfo(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaStreamCallbackTimeInfo *result = 0 ;
   
@@ -1178,7 +1178,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaStreamCallbackTimeIn
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaStreamCallbackTimeInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_delete_1PaStreamCallbackTimeInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   PaStreamCallbackTimeInfo *arg1 = (PaStreamCallbackTimeInfo *) 0 ;
   
   (void)jenv;
@@ -1189,7 +1189,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaStreamCallbackTime
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1structVersion_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1structVersion_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jint jarg2) {
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   int arg2 ;
   
@@ -1203,7 +1203,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1structVersion_
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1structVersion_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1structVersion_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jint jresult = 0 ;
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   int result;
@@ -1218,7 +1218,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1structVersion_
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1inputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1inputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   PaTime arg2 ;
   
@@ -1232,7 +1232,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1inputLatency_1
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1inputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1inputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   PaTime result;
@@ -1247,7 +1247,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1inputLatenc
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1outputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1outputLatency_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   PaTime arg2 ;
   
@@ -1261,7 +1261,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1outputLatency_
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1outputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1outputLatency_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   PaTime result;
@@ -1276,7 +1276,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1outputLaten
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1sampleRate_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1sampleRate_1set(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jdouble jarg2) {
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   double arg2 ;
   
@@ -1290,7 +1290,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1sampleRate_1se
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1sampleRate_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_PaStreamInfo_1sampleRate_1get(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_) {
   jdouble jresult = 0 ;
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   double result;
@@ -1305,7 +1305,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_PaStreamInfo_1sampleRate_
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaStreamInfo(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_new_1PaStreamInfo(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaStreamInfo *result = 0 ;
   
@@ -1317,7 +1317,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_new_1PaStreamInfo(JNIEnv *j
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaStreamInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_delete_1PaStreamInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   PaStreamInfo *arg1 = (PaStreamInfo *) 0 ;
   
   (void)jenv;
@@ -1328,7 +1328,7 @@ SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_delete_1PaStreamInfo(JNIEnv 
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetVersion(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetVersion(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   int result;
   
@@ -1340,7 +1340,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetVersion(JNIEnv *jenv,
 }
 
 
-SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_Pa_1GetVersionText(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jstring JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetVersionText(JNIEnv *jenv, jclass jcls) {
   jstring jresult = 0 ;
   char *result = 0 ;
   
@@ -1352,7 +1352,7 @@ SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_Pa_1GetVersionText(JNIEnv
 }
 
 
-SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_Pa_1GetErrorText(JNIEnv *jenv, jclass jcls, jint jarg1) {
+SWIGEXPORT jstring JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetErrorText(JNIEnv *jenv, jclass jcls, jint jarg1) {
   jstring jresult = 0 ;
   PaError arg1 ;
   char *result = 0 ;
@@ -1366,7 +1366,7 @@ SWIGEXPORT jstring JNICALL Java_portaudio_portaudioJNI_Pa_1GetErrorText(JNIEnv *
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1Initialize(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1Initialize(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaError result;
   
@@ -1386,7 +1386,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1Initialize(JNIEnv *jenv,
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1Terminate(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1Terminate(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaError result;
   
@@ -1398,7 +1398,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1Terminate(JNIEnv *jenv, 
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetHostApiCount(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetHostApiCount(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaHostApiIndex result;
   
@@ -1410,7 +1410,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetHostApiCount(JNIEnv *
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDefaultHostApi(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetDefaultHostApi(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaHostApiIndex result;
   
@@ -1422,7 +1422,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDefaultHostApi(JNIEnv
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetHostApiInfo(JNIEnv *jenv, jclass jcls, jint jarg1) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetHostApiInfo(JNIEnv *jenv, jclass jcls, jint jarg1) {
   jlong jresult = 0 ;
   PaHostApiIndex arg1 ;
   PaHostApiInfo *result = 0 ;
@@ -1436,7 +1436,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetHostApiInfo(JNIEnv *
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1HostApiTypeIdToHostApiIndex(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1HostApiTypeIdToHostApiIndex(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaHostApiTypeId arg1 ;
   PaHostApiIndex result;
@@ -1456,7 +1456,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1HostApiTypeIdToHostApiIn
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1HostApiDeviceIndexToDeviceIndex(JNIEnv *jenv, jclass jcls, jint jarg1, jint jarg2) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1HostApiDeviceIndexToDeviceIndex(JNIEnv *jenv, jclass jcls, jint jarg1, jint jarg2) {
   jint jresult = 0 ;
   PaHostApiIndex arg1 ;
   int arg2 ;
@@ -1472,7 +1472,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1HostApiDeviceIndexToDevi
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetLastHostErrorInfo(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetLastHostErrorInfo(JNIEnv *jenv, jclass jcls) {
   jlong jresult = 0 ;
   PaHostErrorInfo *result = 0 ;
   
@@ -1484,7 +1484,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetLastHostErrorInfo(JN
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDeviceCount(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetDeviceCount(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaDeviceIndex result;
   
@@ -1496,7 +1496,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDeviceCount(JNIEnv *j
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDefaultInputDevice(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetDefaultInputDevice(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaDeviceIndex result;
   
@@ -1508,7 +1508,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDefaultInputDevice(JN
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDefaultOutputDevice(JNIEnv *jenv, jclass jcls) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetDefaultOutputDevice(JNIEnv *jenv, jclass jcls) {
   jint jresult = 0 ;
   PaDeviceIndex result;
   
@@ -1520,7 +1520,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetDefaultOutputDevice(J
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetDeviceInfo(JNIEnv *jenv, jclass jcls, jint jarg1) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetDeviceInfo(JNIEnv *jenv, jclass jcls, jint jarg1) {
   jlong jresult = 0 ;
   PaDeviceIndex arg1 ;
   PaDeviceInfo *result = 0 ;
@@ -1534,7 +1534,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetDeviceInfo(JNIEnv *j
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsFormatSupported(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jdouble jarg3) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1IsFormatSupported(JNIEnv *jenv, jclass jcls, jlong jarg1, jobject jarg1_, jlong jarg2, jobject jarg2_, jdouble jarg3) {
   jint jresult = 0 ;
   PaStreamParameters *arg1 = (PaStreamParameters *) 0 ;
   PaStreamParameters *arg2 = (PaStreamParameters *) 0 ;
@@ -1554,7 +1554,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsFormatSupported(JNIEnv
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv, jclass jcls, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jdouble jarg4, jlong jarg5, jlong jarg6, jobject jarg7) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv, jclass jcls, jlong jarg2, jobject jarg2_, jlong jarg3, jobject jarg3_, jdouble jarg4, jlong jarg5, jlong jarg6, jobject jarg7) {
 	UserData * data;
 	PaError error;
 	PaStream * stream;
@@ -1612,7 +1612,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenStream(JNIEnv *jenv
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenDefaultStream(JNIEnv *jenv, jclass jcls, jint jarg2, jint jarg3, jlong jarg4, jdouble jarg5, jlong jarg6, jobject jarg7) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_Pa_1OpenDefaultStream(JNIEnv *jenv, jclass jcls, jint jarg2, jint jarg3, jlong jarg4, jdouble jarg5, jlong jarg6, jobject jarg7) {
 	UserData * data;
 	PaError error;
 	PaStream * stream;
@@ -1660,7 +1660,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1OpenDefaultStream(JNIEn
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1CloseStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1CloseStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaError result;
@@ -1674,7 +1674,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1CloseStream(JNIEnv *jenv
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1SetStreamFinishedCallback(JNIEnv *jenv, jclass jcls, jlong jarg1, jlong jarg2) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1SetStreamFinishedCallback(JNIEnv *jenv, jclass jcls, jlong jarg1, jlong jarg2) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaStreamFinishedCallback *arg2 = (PaStreamFinishedCallback *) 0 ;
@@ -1690,7 +1690,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1SetStreamFinishedCallbac
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1StartStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1StartStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaError result;
@@ -1704,7 +1704,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1StartStream(JNIEnv *jenv
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1StopStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1StopStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaError result;
@@ -1718,7 +1718,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1StopStream(JNIEnv *jenv,
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1AbortStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1AbortStream(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaError result;
@@ -1732,7 +1732,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1AbortStream(JNIEnv *jenv
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsStreamStopped(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1IsStreamStopped(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaError result;
@@ -1746,7 +1746,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsStreamStopped(JNIEnv *
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsStreamActive(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1IsStreamActive(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaError result;
@@ -1760,7 +1760,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1IsStreamActive(JNIEnv *j
 }
 
 
-SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jlong JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetStreamInfo(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jlong jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaStreamInfo *result = 0 ;
@@ -1774,7 +1774,7 @@ SWIGEXPORT jlong JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamInfo(JNIEnv *j
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamTime(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetStreamTime(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jdouble jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   PaTime result;
@@ -1788,7 +1788,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamTime(JNIEnv 
 }
 
 
-SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamCpuLoad(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jdouble JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetStreamCpuLoad(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jdouble jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   double result;
@@ -1802,7 +1802,7 @@ SWIGEXPORT jdouble JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamCpuLoad(JNIE
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1ReadStream(JNIEnv *jenv, jclass jcls, jlong jarg1, jlong jarg2, jlong jarg3) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1ReadStream(JNIEnv *jenv, jclass jcls, jlong jarg1, jlong jarg2, jlong jarg3) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   void *arg2 = (void *) 0 ;
@@ -1820,7 +1820,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1ReadStream(JNIEnv *jenv,
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1WriteStream(JNIEnv *jenv, jclass jcls, jlong jarg1, jlong jarg2, jlong jarg3) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1WriteStream(JNIEnv *jenv, jclass jcls, jlong jarg1, jlong jarg2, jlong jarg3) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   void *arg2 = (void *) 0 ;
@@ -1838,7 +1838,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1WriteStream(JNIEnv *jenv
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamReadAvailable(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetStreamReadAvailable(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   long result;
@@ -1852,7 +1852,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamReadAvailable(J
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamWriteAvailable(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetStreamWriteAvailable(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaStream *arg1 = (PaStream *) 0 ;
   long result;
@@ -1866,7 +1866,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetStreamWriteAvailable(
 }
 
 
-SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetSampleSize(JNIEnv *jenv, jclass jcls, jlong jarg1) {
+SWIGEXPORT jint JNICALL Java_mmsportaudio_portaudioJNI_Pa_1GetSampleSize(JNIEnv *jenv, jclass jcls, jlong jarg1) {
   jint jresult = 0 ;
   PaSampleFormat arg1 ;
   PaError result;
@@ -1880,7 +1880,7 @@ SWIGEXPORT jint JNICALL Java_portaudio_portaudioJNI_Pa_1GetSampleSize(JNIEnv *je
 }
 
 
-SWIGEXPORT void JNICALL Java_portaudio_portaudioJNI_Pa_1Sleep(JNIEnv *jenv, jclass jcls, jint jarg1) {
+SWIGEXPORT void JNICALL Java_mmsportaudio_portaudioJNI_Pa_1Sleep(JNIEnv *jenv, jclass jcls, jint jarg1) {
   long arg1 ;
   
   (void)jenv;
