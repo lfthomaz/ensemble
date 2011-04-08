@@ -176,7 +176,7 @@ public class Loader {
 		
 		Document doc = null;
 		
-		System.out.println("Loading configuration file for MMS: " + xmlFile);
+		System.out.println("[Loader] Loading configuration file for MMS: " + xmlFile);
 		
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -317,9 +317,7 @@ public class Loader {
 							arguments[0] = parameters;
 							ma.setArguments(arguments);
 							
-							if (qty == 1) {
-								System.out.println("Class " + ma_class_name);
-							}
+							System.out.println("[Loader] Class " + ma_class_name);
 							
 							// Preenche a KB do agente
 							NodeList nl_ma_class_kb = elem_ma_class.getElementsByTagName(CONF_KB);
@@ -412,20 +410,20 @@ public class Loader {
 					}
 
 					if (!found_class) {
-						System.out.println("ERROR: there is no " + ma_class + " class defined");
+						System.out.println("[Loader] ERROR: there is no " + ma_class + " class defined");
 					}
 					
 				} catch (ClassNotFoundException e) {
-					System.err.println("FATAL ERROR: Class " + ma_class + " not found");
+					System.err.println("[Loader] FATAL ERROR: Class " + ma_class + " not found");
 					System.exit(-1);
 				} catch (InstantiationException e) {
-					System.err.println("FATAL ERROR: Not possible to create an instance of " + ma_class);
+					System.err.println("[Loader] FATAL ERROR: Not possible to create an instance of " + ma_class);
 					System.exit(-1);
 				} catch (IllegalAccessException e) {
-					System.err.println("FATAL ERROR: Not possible to create an instance of " + ma_class);
+					System.err.println("[Loader] FATAL ERROR: Not possible to create an instance of " + ma_class);
 					System.exit(-1);
 				} catch (StaleProxyException e) {
-					System.err.println("FATAL ERROR: Not possible to insert agent " + ma_class + " in JADE");
+					System.err.println("[Loader] FATAL ERROR: Not possible to insert agent " + ma_class + " in JADE");
 					System.exit(-1);
 				}
 				
@@ -440,7 +438,7 @@ public class Loader {
 	 */
 	private void terminate() {
 		stopJADE();
-		System.out.println("Exiting MMS...");
+		System.out.println("[Loader] Exiting MMS...");
 		System.exit(0);
 	}
 	
@@ -508,10 +506,10 @@ public class Loader {
 			properties.load(in);
 			in.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("Loader: file '" + args[0] + "' not found!");
+			System.out.println("[Loader] file '" + args[0] + "' not found!");
 			System.exit(-1);
 		} catch (IOException e) {
-			System.out.println("Loader: problems reading file '" + args[0] + "'!");
+			System.out.println("[Loader] problems reading file '" + args[0] + "'!");
 			System.exit(-1);
 		}
 				
