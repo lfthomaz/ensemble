@@ -45,7 +45,7 @@
 	<MUSICAL_AGENT_CLASS NAME="PLAYER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
 			<REASONING NAME="AudioReasoning" CLASS="mms.audio.jack.JACKInputReasoning" CYCLIC="false" />
-			<SENSOR NAME="mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/>
+			<SENSOR NAME="mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(0;0;0)"/>
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 
@@ -63,7 +63,7 @@
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
-		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth" />
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;system:capture_1" />
 	</MUSICAL_AGENT>
 
 </MMS>
