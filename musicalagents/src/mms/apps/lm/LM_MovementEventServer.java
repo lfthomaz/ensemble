@@ -52,7 +52,7 @@ public class LM_MovementEventServer extends EventServer {
 		for (String sensor : set) {
 
 			String[] str = sensor.split(":");
-			Hashtable<String,String> param = sensors.get(str[0] + ":" + str[1]);
+			Parameters param = sensors.get(str[0] + ":" + str[1]);
 
 			Position agent = (Position)world.getEntityStateAttribute(str[0], "POSITION");
 			if (agent != null) {

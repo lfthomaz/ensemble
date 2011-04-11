@@ -130,7 +130,7 @@ public class VirtualClockService extends BaseService {
 					//System.out.println("ERRO!");
 					scheduler.execute(b);
 				}
-		//			System.out.println("(" + now + ") " + a.getLocalName() + " vai acordar em \t" + (wakeupMili - now) + "\t(" + System.currentTimeMillis() + ")");
+		//			System.out.println("(" + now + ") " + a.getAgentName() + " vai acordar em \t" + (wakeupMili - now) + "\t(" + System.currentTimeMillis() + ")");
 			}
 			
 		}

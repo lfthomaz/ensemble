@@ -2,8 +2,6 @@ package mms.router;
 
 import java.util.Scanner;
 
-import mms.Command;
-
 /**
  *
  * @author lfthomaz
@@ -37,7 +35,7 @@ public class Console implements Runnable, CommandClientInterface {
 		return myAddress;
 	}
 
-    public void input(CommandClientInterface cmdInterface, Command cmd) {
+    public void input(CommandClientInterface cmdInterface, String cmd) {
         System.out.println("[CONSOLE] Command received: " + cmd);
     }
 
@@ -57,7 +55,7 @@ public class Console implements Runnable, CommandClientInterface {
             String address = str[0];
             // Se tivermos um endereço e algum comando após
             if (address.length() > 0 && str.length > 1) {
-	            Command cmd = Command.parse(getAddress(), address, line.substring(address.length()+1));
+	            String cmd = String.parse(getAddress(), address, line.substring(address.length()+1));
 	            if (cmd != null) {
 	                if (cmd.getCommand().equals("EXIT")) {
 	                    router.disconnect(this);
@@ -66,7 +64,7 @@ public class Console implements Runnable, CommandClientInterface {
 	                else {
 	                    System.out.println("[CONSOLE] Sending to '" + address + "' command '" + cmd + "'");
 	                    if (router != null) {
-	                        router.sendCommand(this, cmd);
+	                        router.sendCommand(cmd);
 	                    }
 	                }
 	            }

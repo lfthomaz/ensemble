@@ -65,7 +65,7 @@ public class AudioFileOutputReasoning extends Reasoning {
 			// Stores ear's memory
 			Sensor ear = (Sensor)evtHdl;
 			ear.registerListener(this);
-			earMemories.put(ear.getName(), getAgent().getKB().getMemory(ear.getName()));
+			earMemories.put(ear.getComponentName(), getAgent().getKB().getMemory(ear.getComponentName()));
 		
 			// Assigns a channel in the audio interface to this ear
 			if (ear.getParameters().containsKey("channel")) {
@@ -74,7 +74,7 @@ public class AudioFileOutputReasoning extends Reasoning {
 				// Creates a file
 				try {
 					FileOutputStream file = new FileOutputStream(getAgent().getAgentName()+"_"+channel_param+"_out.dat");
-					outFiles.put(ear.getName(), file);
+					outFiles.put(ear.getComponentName(), file);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
@@ -93,7 +93,7 @@ public class AudioFileOutputReasoning extends Reasoning {
 
 		if (sourceSensor.getEventType().equals("AUDIO")) {
 			
-			String earName = sourceSensor.getName();
+			String earName = sourceSensor.getComponentName();
 			Memory earMemory = earMemories.get(earName);
 			FileOutputStream file = outFiles.get(earName);
 			if (file != null) {

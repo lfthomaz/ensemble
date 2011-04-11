@@ -8,12 +8,13 @@ import mms.Sensor;
 public class LM_TentacleSensor extends Sensor {
 
 	@Override
-	protected void configure(Parameters parameters) {
+	public boolean configure() {
 		setEventType("MOVEMENT");
+		return true;
 	}
 
 	@Override
-	protected boolean init() {
+	public boolean init() {
 		getAgent().getKB().updateFact("SpeciePresent", "0");
 		return true;
 	}
@@ -21,7 +22,7 @@ public class LM_TentacleSensor extends Sensor {
 	@Override
 	protected void process(Event evt) {
 		
-		System.out.println(getAgent().getLocalName() + ":" + getName() + " recebeu um evento: " + (String)evt.objContent);
+		System.out.println(getAgent().getAgentName() + ":" + getComponentName() + " recebeu um evento: " + (String)evt.objContent);
 		//int note = Integer.parseInt(evt.content);
 		//getAgent().getKB().writeFact("SpeciePresent", note);
 		

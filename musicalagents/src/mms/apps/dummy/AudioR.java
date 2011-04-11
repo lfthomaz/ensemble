@@ -22,13 +22,13 @@ public class AudioR extends Reasoning {
 		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals("AUDIO")) {
 			mouth = (Actuator)evtHdl;
 			mouth.registerListener(this);
-			mouthMemory = getAgent().getKB().getMemory(evtHdl.getName());
+			mouthMemory = getAgent().getKB().getMemory(evtHdl.getComponentName());
 			chunk_size = Integer.parseInt(mouth.getParameter(Constants.PARAM_CHUNK_SIZE, "0"));
 		}
 		else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals("AUDIO")) {
 			ear = (Sensor)evtHdl;
 			ear.registerListener(this);
-			earMemory = getAgent().getKB().getMemory(ear.getName());
+			earMemory = getAgent().getKB().getMemory(ear.getComponentName());
 		}
 	}
 	

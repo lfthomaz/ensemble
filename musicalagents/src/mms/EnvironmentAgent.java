@@ -31,7 +31,7 @@ import jade.wrapper.ContainerController;
  * @author Leandro Ferrari Thomaz
  *
  */
-public class EnvironmentAgent extends MMSAgent {
+public class EnvironmentAgent extends MMSAgent implements CommandClientInterface {
 	
 	// ---------------------------------------------- 
 	// General variables 
@@ -137,9 +137,10 @@ public class EnvironmentAgent extends MMSAgent {
 	/**
 	 * Inicializa o Agente Ambiente
 	 */
-	protected void start() {
+	@Override
+	public boolean start() {
 
-		logger.info("[" + this.getAID().getLocalName() + "] " + "Starting initialization...");
+		logger.info("[" + getAgentName() + "] " + "Starting initialization...");
 //		System.out.println("EA start()");
 		
 		lock.lock();
@@ -149,6 +150,9 @@ public class EnvironmentAgent extends MMSAgent {
 			waitAllAgents = Boolean.valueOf(getParameters().get(Constants.WAIT_ALL_AGENTS, "TRUE"));
 			waitTimeTurn = Long.valueOf(getParameters().get(Constants.WAIT_TIME_TURN, "100"));
 	
+			// Conecta-se ao roteador de comandos
+			getRouter().connect(this);
+
 			// 2. Cria um mundo genérico
 			Class worldClass;
 			try {
@@ -173,16 +177,17 @@ public class EnvironmentAgent extends MMSAgent {
 			for (Iterator<EventServer> iterator = servers.iterator(); iterator.hasNext();) {
 				EventServer eventServer = iterator.next();
 				eventServer.start(this, parameters);
+				getRouter().connect(eventServer);
 			}
 	
 			// 3. Registra o Ambiente no DS
-			this.registerService(this.getLocalName(), Constants.EVT_ENVIRONMENT);
+			this.registerService(getAgentName(), Constants.EVT_ENVIRONMENT);
 			
 			// 7. Fim da inicialização do Agente Ambiente
 			// TODO Deveria vir após o init()
 			state = EA_STATE.INITIALIZED;
-			logger.info("[" + this.getAID().getLocalName() + "] " + "Initialized");
-//			System.out.println("[" + this.getAID().getLocalName() + "] " + "Initialized");
+			logger.info("[" + getAgentName() + "] " + "Initialized");
+//			System.out.println("[" + this.getAID().getAgentName() + "] " + "Initialized");
 		
 		} finally {
 			lock.unlock();
@@ -198,6 +203,8 @@ public class EnvironmentAgent extends MMSAgent {
 				this.addBehaviour(new CheckEndTurn(this));
 			}
 		}
+		
+		return true;
 		
 	}
 	
@@ -222,7 +229,7 @@ public class EnvironmentAgent extends MMSAgent {
 				dfd.addServices(sd);
 				DFService.modify(this, dfd);
 			}
-			logger.info("[" + this.getAID().getLocalName() + "] " + "Event type " + type + " registered in the DS");
+			logger.info("[" + getAgentName() + "] " + "Event type " + type + " registered in the DS");
 		} catch (FIPAException fe) {
 			System.out.println("ERROR: It was not possible to register the service '" + type + "'");
 			System.out.println(fe.toString());
@@ -256,6 +263,7 @@ public class EnvironmentAgent extends MMSAgent {
 				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o EventServer
 				if (state == EA_STATE.INITIALIZED) {
 					es.start(this, arguments);
+					getRouter().connect(es);
 				}
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -283,7 +291,7 @@ public class EnvironmentAgent extends MMSAgent {
 			EventServer server = eventServers.remove(eventType);
 			server.end();
 		} else {
-			System.err.println("["+getLocalName()+"] Event server " + eventType + " does not exist.");
+			System.err.println("["+getAgentName()+"] Event server " + eventType + " does not exist.");
 		}
 		
 	}
@@ -310,39 +318,6 @@ public class EnvironmentAgent extends MMSAgent {
 	 * @param receiver agentes destino do comando
 	 * @param command comando a ser enviado
 	 */
-	
-	@Override
-	public void input(CommandClientInterface cmdInterface, Command cmd) {
-		
-        System.out.println("[" + getAddress() +"] Command received: " + cmd);
-        // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
-        String[] recipient = cmd.getRecipient().split(":");
-        if (recipient.length == 2) {
-        	processMessage(cmd.getSource(), cmd);
-        } 
-        else if (recipient.length == 3) {
-        	if (eventServers.containsKey(recipient[2])) {
-        		EventServer es = eventServers.get(recipient[2]);
-        		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
-        		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
-        			String param = cmd.getParameter("NAME");
-        			String value = cmd.getParameter("VALUE");
-        			if (param != null && value != null) {
-        				es.addParameter(param, value);
-        				es.parameterUpdated(param);
-        			}
-        		}
-        		else {
-        			es.processCommand(cmd);
-        		}
-        	} 
-        	else {
-        		System.out.println("[" + getAddress() +"] EventServer does not exist: " + recipient[2]);
-        	}
-        }
-		
-	}
-
 	protected final void sendMessage(String[] receiver, Command command) {
 		
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -355,7 +330,7 @@ public class EnvironmentAgent extends MMSAgent {
 		msg.setContent(command.toString());
 		this.send(msg);
 
-		MusicalAgent.logger.info("[" + this.getAID().getLocalName() + "] " + "Message sent to " + receivers + "(" + msg.getContent() + ")");
+		MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message sent to " + receivers + "(" + msg.getContent() + ")");
 		
 	}
 	
@@ -397,7 +372,7 @@ public class EnvironmentAgent extends MMSAgent {
 			if (evtServer != null) {
 				evtServer.registerEventHandler(sender, componentName, eventHandlerType, userParam);
 			} else {
-				logger.info("[" + getAID().getLocalName() + "] " + "EventServer " + eventType + " not found");
+				logger.info("[" + getAgentName() + "] " + "EventServer " + eventType + " not found");
 			}
 			
 		}
@@ -416,26 +391,26 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else if (command.equals(Constants.CMD_AGENT_REGISTER)) {
 
-			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Recebi pedido de registro de " + sender);
+			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Recebi pedido de registro de " + sender);
 			registerAgent(sender, cmd.getParameters());
 
 		}
 		else if (command.equals(Constants.CMD_AGENT_DEREGISTER)) {
 
-			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Recebi pedido de desregistro de " + sender);
+			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Recebi pedido de desregistro de " + sender);
 			deregisterAgent(sender);
 
 		}
 		else if (command.equals(Constants.CMD_AGENT_READY)) {
 
-			MusicalAgent.logger.info("[" + getLocalName() + "] " + "Agent " + sender + " ready for the simulation");
+			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Agent " + sender + " ready for the simulation");
 			prepareAgent(sender);
 
 		}
 		else if (command.equals(Constants.CMD_BATCH_TURN)) {
 		
 			if (isBatch) {
-				MusicalAgent.logger.info("[" + getLocalName() + "] " + "End of turn message received from " + sender);
+				MusicalAgent.logger.info("[" + getAgentName() + "] " + "End of turn message received from " + sender);
 				int numberEventsSent = Integer.valueOf(cmd.getParameter(Constants.PARAM_NUMBER_EVT_SENT));
 				agentProcessed(numberEventsSent);
 			}
@@ -457,7 +432,7 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else {
 			
-			System.out.println("[" + getLocalName() + "] " + "Command not recognized: " + command);
+			System.out.println("[" + getAgentName() + "] " + "Command not recognized: " + command);
 			
 		}
 		
@@ -480,7 +455,7 @@ public class EnvironmentAgent extends MMSAgent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				
-				MusicalAgent.logger.info("[" + getAID().getLocalName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
+				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
 
 				// TODO switch com os possíveis comandos
 				String sender = msg.getSender().getLocalName();
@@ -498,6 +473,52 @@ public class EnvironmentAgent extends MMSAgent {
 			
 		}
 	
+	}
+
+	// ---------------------------------------------- 
+	// Command Interface 
+	// ---------------------------------------------- 
+
+	@Override
+	public final String getAddress() {
+		return "/" + Constants.FRAMEWORK_NAME + "/" + getAgentName();
+	}
+
+	@Override
+	public final void sendCommand(String recipient, Command cmd) {
+//		getRouter().sendCommand(cmd);
+	}
+	
+	@Override
+	public final void receiveCommand(String recipient, Command cmd) {
+		
+        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), recipient, cmd);
+        // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
+        String[] str = recipient.split("/");
+        if (str.length == 3) {
+        	processCommand(recipient, cmd);
+        } 
+        else if (str.length > 3) {
+        	if (eventServers.containsKey(str[3])) {
+        		EventServer es = eventServers.get(str[3]);
+        		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
+//        		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
+//        			String param = cmd.getParameter("NAME");
+//        			String value = cmd.getParameter("VALUE");
+//        			if (param != null && value != null) {
+//        				comp.addParameter(param, value);
+//        				comp.parameterUpdated(param);
+//        			}
+//        		}
+//        		else {
+        		es.receiveCommand(recipient, cmd);
+//       		}
+        	} 
+        	else {
+        		System.out.println("[" + getAddress() +"] Component does not exist: " + str[2]);
+        	}
+        }
+
 	}
 
 	//--------------------------------------------------------------------------------
@@ -532,7 +553,7 @@ public class EnvironmentAgent extends MMSAgent {
 			return null;
 		}
 		
-		logger.info("[" + this.getAID().getLocalName() + "] " + "Created a new agent named " + agentName);
+		logger.info("[" + getAgentName() + "] " + "Created a new agent named " + agentName);
 
 		return agentName;
 		
@@ -548,7 +569,7 @@ public class EnvironmentAgent extends MMSAgent {
 		Command cmd = new Command(Constants.CMD_KILL_AGENT);
 		sendMessage(agentName, cmd);
 		
-//		MusicalAgent.logger.info("[" + this.getAID().getLocalName() + "] Sent KILL_AGENT to " + agentName);
+//		MusicalAgent.logger.info("[" + this.getAID().getAgentName() + "] Sent KILL_AGENT to " + agentName);
 
 	}
 	
@@ -796,6 +817,10 @@ public class EnvironmentAgent extends MMSAgent {
 	/**
 	 * Método executado pelo Ambiente, quando em modo BATCH, imediatamente antes de alterar o turno.
 	 */
-	protected void preUpdateClock() {};
-	
+	protected void preUpdateClock() {}
+
+	@Override
+	public void processCommand(String recipient, Command cmd) {
+	}
+
 }

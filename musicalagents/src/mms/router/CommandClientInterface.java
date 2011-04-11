@@ -10,6 +10,11 @@ public interface CommandClientInterface {
 
     public String getAddress();
 
-    public void input(CommandClientInterface cmdInterface, Command cmd);
+    public void processCommand(String recipient, Command cmd);
+    
+    public void receiveCommand(String recipient, Command cmd);
+
+    public void sendCommand(String recipient, Command cmd);
+    
 
 }

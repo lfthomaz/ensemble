@@ -7,12 +7,13 @@ import mms.Parameters;
 public class LM_SoundActuator extends Actuator {
 
 	@Override
-	protected void configure(Parameters parameters) {
+	public boolean configure() {
 		setEventType("SOUND");
+		return true;
 	}
 
 	@Override
-	protected boolean init() {
+	public boolean init() {
 		//getAgent().getKB().writeEventRepository(getEventType(), new String());
 		return true;
 	}

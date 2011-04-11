@@ -48,7 +48,7 @@ public class JACKInputReasoning extends Reasoning {
 		try {
 			jack = (JACKServerHelper)getAgent().getHelper(JACKServerService.NAME);
 		} catch (ServiceException e) {
-			System.err.println("[" + this.getAgent().getAgentName() + ":" + getName()+ "] " + "JACK not available!");
+			System.err.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()+ "] " + "JACK not available!");
 			return false;
 		}
 
@@ -60,7 +60,7 @@ public class JACKInputReasoning extends Reasoning {
 			mapping.put(str[0], str[1]);
 		} 
 		else {
-			System.err.println("[" + this.getAgent().getAgentName() + ":" + getName()+ "] " + "no mapping in parameters!");
+			System.err.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()+ "] " + "no mapping in parameters!");
 		}
 		
 		return true;
@@ -78,14 +78,14 @@ public class JACKInputReasoning extends Reasoning {
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		
 		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
-			String actuatorName = evtHdl.getName();
+			String actuatorName = evtHdl.getComponentName();
 			if (mapping.containsKey(actuatorName)) {
 				mouth = (Actuator)evtHdl;
 				mouth.registerListener(this);
 				period = Double.valueOf(mouth.getParameter("PERIOD"))/1000.0;
-				mouthMemory = getAgent().getKB().getMemory(mouth.getName());
+				mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
 				// Creats a JACK client
-				jack.registerInputPort(getName(), actuatorName, mapping.get(actuatorName), new Process());
+				jack.registerInputPort(getComponentName(), actuatorName, mapping.get(actuatorName), new Process());
 			}
 		}
 		
@@ -93,7 +93,7 @@ public class JACKInputReasoning extends Reasoning {
 
 	@Override
 	protected void eventHandlerDeregistered(EventHandler evtHdl) {
-		String actuatorName = evtHdl.getName();
+		String actuatorName = evtHdl.getComponentName();
 		if (mapping.containsKey(actuatorName)) {
 //			helper.unregisterPort("system:playback_1");
 		}

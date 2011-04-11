@@ -6,7 +6,7 @@ import mms.Parameters;
 
 public class RT_ListenerMusicalAgent extends MusicalAgent {
 
-	public void configure() {
+	public boolean configure() {
 		
 		Parameters args = new Parameters();
 		args.put(Constants.PARAM_EVT_TYPE, Constants.EVT_AUDIO);
@@ -26,10 +26,8 @@ public class RT_ListenerMusicalAgent extends MusicalAgent {
 
 		addComponent("player", "rt.RT_ListenerReasoning", null);
 		
-	}
-	
-	@Override
-	protected void init() {
+		return true;
+		
 	}
 
 }

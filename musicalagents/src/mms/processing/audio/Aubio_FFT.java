@@ -134,7 +134,7 @@ public class Aubio_FFT extends Process {
 	}
 
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 		
 		aubiowrapper.del_aubio_mfft(mfft_t);
 		

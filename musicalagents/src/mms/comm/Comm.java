@@ -2,12 +2,13 @@ package mms.comm;
 
 import mms.Acting;
 import mms.Event;
+import mms.MMSAgent;
 import mms.Sensing;
 import jade.core.Agent;
 
 public abstract class Comm {
 	
-	protected Agent 		myAgent;
+	protected MMSAgent 		myAgent;
 	// TODO nome do ponto de acesso desse comm, pare ser utilizado na troca de eventos
 	protected String 		myAccessPoint;
 	protected Sensing 		mySensor;
@@ -22,7 +23,7 @@ public abstract class Comm {
 	 */
 	public boolean actuating 	= true;					
 	
-	public void configure(Agent myAgent, Sensing mySensor, Acting myActuator, String myAccessPoint) {
+	public void configure(MMSAgent myAgent, Sensing mySensor, Acting myActuator, String myAccessPoint) {
 		this.myAgent 		= myAgent;
 		this.mySensor 		= mySensor;
 		this.myActuator 	= myActuator;

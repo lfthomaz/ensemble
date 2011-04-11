@@ -7,8 +7,9 @@ import mms.Sensor;
 public class LM_SoundSensor extends Sensor {
 
 	@Override
-	protected void configure(Parameters parameters) {
+	public boolean configure() {
 		setEventType("SOUND");
+		return true;
 	}
 	
 	@Override
@@ -45,7 +46,7 @@ public class LM_SoundSensor extends Sensor {
 	}
 
 	@Override
-	protected boolean init() {
+	public boolean init() {
 		
 		getAgent().getKB().updateFact("LastNoteListened", "0");
 		return true;

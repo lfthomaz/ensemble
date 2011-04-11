@@ -44,7 +44,7 @@ public class PP_ListenerReasoning extends Reasoning {
 		format = new AudioFormat(44100f, 16, 1, true, false);
 		info = new DataLine.Info(SourceDataLine.class, format);
 		if (!AudioSystem.isLineSupported(info)) {
-			logger.severe("[" + getName() + "] " + "Line not supported");
+			logger.severe("[" + getComponentName() + "] " + "Line not supported");
 			return false;
 		}
 		
@@ -71,7 +71,7 @@ public class PP_ListenerReasoning extends Reasoning {
 			// Stores ear's memory
 			Sensor ear = (Sensor)evtHdl;
 			ear.registerListener(this);
-			earMemories.put(ear.getName(), getAgent().getKB().getMemory(ear.getName()));
+			earMemories.put(ear.getComponentName(), getAgent().getKB().getMemory(ear.getComponentName()));
 		
 			// Assigns a channel in the audio interface to this ear
 			int channel = 0;
@@ -83,7 +83,7 @@ public class PP_ListenerReasoning extends Reasoning {
 				} else if (channel_param.equals("RIGHT")) {
 					channel = 1;
 				}
-				earChannels.put(ear.getName(), channel);
+				earChannels.put(ear.getComponentName(), channel);
 			} else {
 				// Gets the next available channel
 				// TODO O QUE FAZER AQUI? TEMOS QUE TER UMA LISTA dos canais já utilizados!
@@ -107,9 +107,9 @@ public class PP_ListenerReasoning extends Reasoning {
 				}
 			    line.start();
 			    // Stores the line
-			    lines.put(ear.getName(), line);
+			    lines.put(ear.getComponentName(), line);
 			} catch (LineUnavailableException ex) {
-				logger.severe("[" + getName() + "] " + "Line Unavailable");
+				logger.severe("[" + getComponentName() + "] " + "Line Unavailable");
 			}
 			
 		}
@@ -123,7 +123,7 @@ public class PP_ListenerReasoning extends Reasoning {
 
 		if (sourceSensor.getEventType().equals("AUDIO")) {
 			
-			String earName = sourceSensor.getName();
+			String earName = sourceSensor.getComponentName();
 			Memory earMemory = earMemories.get(earName);
 			SourceDataLine line = lines.get(earName);
 			if (line != null) {
@@ -132,7 +132,7 @@ public class PP_ListenerReasoning extends Reasoning {
 				byte[] buffer = AudioTools.convertDoubleByte(buf, 0, buf.length);
 				line.write(buffer, 0, buffer.length);
 	
-	//			logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Inseri chunk " + instant + " na fila para tocar");
+	//			logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Inseri chunk " + instant + " na fila para tocar");
 			}
 			
 		}

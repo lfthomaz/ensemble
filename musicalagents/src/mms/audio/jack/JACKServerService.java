@@ -11,6 +11,7 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import mms.MMSAgent;
 import mms.MusicalAgent;
 import mms.audio.jack.JACKInfo.PortType;
 import mmsjack.JACKCallback;
@@ -83,7 +84,7 @@ public class JACKServerService extends BaseService {
 		
 		@Override
 		public void init(Agent arg0) {
-			agentName = arg0.getLocalName();
+			agentName = ((MMSAgent)arg0).getAgentName();
 		}
 
 		@Override

@@ -45,7 +45,7 @@ public class RT_Reasoning extends Reasoning {
 		try {
 			in = new AudioInputFile(filename, true);
 		} catch (Exception e) {
-			getAgent().logger.severe("[" + getName() + "] " + "Error in opening the file " + filename);
+			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + filename);
 			return false;
 		}
 		
@@ -65,7 +65,7 @@ public class RT_Reasoning extends Reasoning {
 		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			mouth = (Actuator)evtHdl;
 			mouth.registerListener(this);
-			mouthMemory = getAgent().getKB().getMemory(mouth.getName());
+			mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
 			chunk_size = Integer.parseInt(mouth.getParameter(Constants.PARAM_CHUNK_SIZE, "0"));
 		}
 
@@ -73,7 +73,7 @@ public class RT_Reasoning extends Reasoning {
 		if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			ear = (Sensor)evtHdl;
 			ear.registerListener(this);
-			earMemory = getAgent().getKB().getMemory(ear.getName());
+			earMemory = getAgent().getKB().getMemory(ear.getComponentName());
 		}
 
 	}
@@ -81,7 +81,7 @@ public class RT_Reasoning extends Reasoning {
 	@Override
 	public void needAction(Actuator sourceActuator, double instant, double duration) {
 
-//		System.out.println(System.currentTimeMillis() + " " + getAgent().getLocalName() + " Entrei no needAction() - instant " + instant);
+//		System.out.println(System.currentTimeMillis() + " " + getAgent().getAgentName() + " Entrei no needAction() - instant " + instant);
 
 		// Le o fragmento do arquivo e transformas em float
 		chunk = in.readNextChunk(chunk_size);
@@ -98,7 +98,7 @@ public class RT_Reasoning extends Reasoning {
 			mouthMemory.writeMemory(chunk, instant, duration, TimeUnit.SECONDS);
 //			System.out.println("Guardei na memória um evento no instante " + instant + " de duração " + duration);
 		} catch (MemoryException e1) {
-			MusicalAgent.logger.warning("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Não foi possível armazenar na memória");
+			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 		}
 
 		// Adicionar atrasos aleatórios para ver o que acontece!!
@@ -113,7 +113,7 @@ public class RT_Reasoning extends Reasoning {
 		mouth.act();
 
 //			System.out.println(System.currentTimeMillis() + " MusicalAgent: enviei chunk de tamanho " + chunk.length);
-//		System.out.println(System.currentTimeMillis() + " " + getAgent().getLocalName() + " Sai do needAction() - " + num);
+//		System.out.println(System.currentTimeMillis() + " " + getAgent().getAgentName() + " Sai do needAction() - " + num);
 
 	}
 

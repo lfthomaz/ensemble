@@ -43,7 +43,7 @@ public class LibXtract_FFT extends Process {
 	}
 
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 		
 		xtract.xtract_free_fft();
 		return true;

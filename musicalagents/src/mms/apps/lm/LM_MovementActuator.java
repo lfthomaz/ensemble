@@ -6,8 +6,9 @@ import mms.Parameters;
 public class LM_MovementActuator extends Actuator {
 
 	@Override
-	protected void configure(Parameters parameters) {
+	public boolean configure() {
 		setEventType("MOVEMENT");
+		return true;
 	}
 
 }

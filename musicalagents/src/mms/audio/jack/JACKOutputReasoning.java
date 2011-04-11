@@ -41,7 +41,7 @@ public class JACKOutputReasoning extends Reasoning {
 		try {
 			jack = (JACKServerHelper)getAgent().getHelper(JACKServerService.NAME);
 		} catch (ServiceException e) {
-			System.err.println("[" + this.getAgent().getAgentName() + ":" + getName()+ "] " + "JACK not available!");
+			System.err.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()+ "] " + "JACK not available!");
 			return false;
 		}
 
@@ -53,7 +53,7 @@ public class JACKOutputReasoning extends Reasoning {
 			mapping.put(str[0], str[1]);
 		} 
 		else {
-			System.err.println("[" + this.getAgent().getAgentName() + ":" + getName()+ "] " + "no mapping in parameters!");
+			System.err.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()+ "] " + "no mapping in parameters!");
 		}
 		
 		return true;
@@ -72,13 +72,13 @@ public class JACKOutputReasoning extends Reasoning {
 		
 		if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			Sensor ear = (Sensor)evtHdl;
-			String sensorName = ear.getName();
+			String sensorName = ear.getComponentName();
 			if (mapping.containsKey(sensorName)) {
 				ear.registerListener(this);
 				period = Double.valueOf(ear.getParameter("PERIOD"))/1000.0;
-				earMemory = getAgent().getKB().getMemory(ear.getName());
+				earMemory = getAgent().getKB().getMemory(ear.getComponentName());
 				// Creats a JACK client
-				jack.registerOutputPort(getName(), sensorName, mapping.get(sensorName), new Process());
+				jack.registerOutputPort(getComponentName(), sensorName, mapping.get(sensorName), new Process());
 			}
 		}
 		
@@ -86,7 +86,7 @@ public class JACKOutputReasoning extends Reasoning {
 
 	@Override
 	protected void eventHandlerDeregistered(EventHandler evtHdl) {
-		String sensorName = evtHdl.getName();
+		String sensorName = evtHdl.getComponentName();
 		if (mapping.containsKey(sensorName)) {
 ////		helper.unregisterPort("system:playback_1");
 		}

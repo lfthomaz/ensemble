@@ -5,13 +5,11 @@ import mms.clock.VirtualClockService;
 import mms.router.CommandClientInterface;
 import mms.router.RouterHelper;
 import mms.router.RouterService;
-import mms.router.osc.OSCServerHelper;
-import mms.router.osc.OSCServerService;
 import jade.core.Agent;
 import jade.core.ServiceException;
 import jade.util.Logger;
 
-public abstract class MMSAgent extends Agent implements CommandClientInterface {
+public abstract class MMSAgent extends Agent implements LifeCycle {
 
 	/**
 	 *  Log
@@ -27,8 +25,18 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 	 * Parameters getter
 	 * @return initialized parameters
 	 */
-	public Parameters getParameters() {
+	@Override
+	public final Parameters getParameters() {
 		return parameters;
+	}
+
+	/**
+	 * Parameters setter
+	 * @return initialized parameters
+	 */
+	@Override
+	public final void setParameters(Parameters parameters) {
+		this.parameters = parameters;
 	}
 	
 	/** 
@@ -37,23 +45,19 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 	private VirtualClockHelper clock;
 	
 	/** 
+	 * Gets agent's name
+	 * @return 
+	 */
+	public final String getAgentName() {
+		return getLocalName();
+	}
+	
+	/** 
 	 * Clock getter
 	 * @return mms clock service
 	 */
 	public final VirtualClockHelper getClock() {
 		return clock;
-	}
-	
-	/**
-	 * OSC Service
-	 */
-	private OSCServerHelper osc;
-	
-	/**
-	 * OSC getter
-	 */
-	public final OSCServerHelper getOSC() {
-		return osc;
 	}
 	
 	/**
@@ -72,7 +76,7 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 	 */
 	protected void setup() {
 		
-//		System.out.println("[" + getLocalName() + "] MMSAgent setup()");
+		System.out.println("[" + getAgentName() + "] MMSAgent setup()");
 		
 		// 1. Obtém os parâmetros de entrada do Agente
 		Object[] arguments = getArguments();
@@ -84,11 +88,9 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 		// 2. Inicializa os serviços básicos do agente
 		try {
 			clock = (VirtualClockHelper)getHelper(VirtualClockService.NAME);
-			osc = (OSCServerHelper)getHelper(OSCServerService.NAME);
 			router = (RouterHelper)getHelper(RouterService.NAME);
-			router.connect(this);
 		} catch (ServiceException e) {
-			logger.severe("[" + this.getLocalName() + "] " + "Service not available");
+			logger.severe("[" + this.getAgentName() + "] " + "Service not available");
 			this.doDelete();
 		}
 		
@@ -107,15 +109,6 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 		System.out.println("takeDown()");
 	}
 
-	// ---------------------------------------------- 
-	// Command Interface 
-	// ---------------------------------------------- 
-
-	@Override
-	public String getAddress() {
-		return "MMS:"+getLocalName();
-	}
-
 	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
@@ -123,36 +116,41 @@ public abstract class MMSAgent extends Agent implements CommandClientInterface {
 	/**
 	 * 
 	 */
-	protected void configure() {
-//		System.out.println("[" + getLocalName() + "] MMSAgent configure()");
+	public boolean configure() {
+//		System.out.println("[" + getAgentName() + "] MMSAgent configure()");
+		return true;
 	}
 	
 	/**
 	 * 
 	 */
-	protected void start() {
-//		System.out.println("[" + getLocalName() + "] MMSAgent start()");
+	public boolean start() {
+//		System.out.println("[" + getAgentName() + "] MMSAgent start()");
+		return true;
 	}
 	
 	/**
 	 * 
 	 */
-	protected void init() {
-//		System.out.println("[" + getLocalName() + "] MMSAgent init()");
+	public boolean init() {
+//		System.out.println("[" + getAgentName() + "] MMSAgent init()");
+		return true;
 	}
 	
 	/**
 	 * 
 	 */
-	protected void finit() {
-//		System.out.println("[" + getLocalName() + "] MMSAgent finit()");
+	public boolean finit() {
+//		System.out.println("[" + getAgentName() + "] MMSAgent finit()");
+		return true;
 	}
 
 	/**
 	 * 
 	 */
-	protected void stop() {
-//		System.out.println("[" + getLocalName() + "] MMSAgent finit()");
+	public boolean stop() {
+//		System.out.println("[" + getAgentName() + "] MMSAgent finit()");
+		return true;
 	}
 
 }

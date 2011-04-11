@@ -6,8 +6,9 @@ import mms.Parameters;
 public class LM_FoodActuator extends Actuator {
 
 	@Override
-	protected void configure(Parameters parameters) {
+	public boolean configure() {
 		setEventType("ENERGY");
+		return true;
 	}
 
 }

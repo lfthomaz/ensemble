@@ -75,14 +75,14 @@ public class PAInputReasoning extends Reasoning {
 		
 		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			Actuator mouth = (Actuator)evtHdl;
-			String actuatorName = evtHdl.getName();
+			String actuatorName = evtHdl.getComponentName();
 			mouth.registerListener(this);
 			period = Double.valueOf(mouth.getParameter("PERIOD"))/1000.0;
-			mouthMemories.put(actuatorName, getAgent().getKB().getMemory(mouth.getName()));
+			mouthMemories.put(actuatorName, getAgent().getKB().getMemory(mouth.getComponentName()));
 			// Creates a portaudio stream
 			long stream = 0;
 			if (devices.containsKey(actuatorName)) {
-				System.out.println("Opening stream...");
+//				System.out.println("[PORTAUDIO] Opening stream...");
 				// Gets DeviceInfo
 				int device = devices.get(actuatorName);
 				PaDeviceInfo info = pa.Pa_GetDeviceInfo(device);
@@ -117,7 +117,7 @@ public class PAInputReasoning extends Reasoning {
 				streamInfo.channel = channels.get(actuatorName);
 				streamInfo.channelCount = channelCount;
 				streamInfo.latency = pa.Pa_GetStreamInfo(stream).getInputLatency();
-//				System.out.println("Input latency = " + streamInfo.latency);
+//				System.out.println("[PORTAUDIO] Input latency = " + streamInfo.latency);
 				streamInfos.put(stream, streamInfo);
 				streams_sensors.put(stream, actuatorName);
 				sensors_streams.put(actuatorName, stream);
@@ -130,12 +130,12 @@ public class PAInputReasoning extends Reasoning {
 	@Override
 	protected void eventHandlerDeregistered(EventHandler evtHdl)
 			throws Exception {
-		String sensorName = evtHdl.getName();
+		String sensorName = evtHdl.getComponentName();
 		if (sensors_streams.containsKey(sensorName)) {
 			long stream = sensors_streams.get(sensorName);
-			System.out.println("Stoping stream " + stream);
+//			System.out.println("[PORTAUDIO] Stoping stream " + stream);
 			pa.Pa_StopStream(stream);
-			System.out.println("Closing stream " + stream);
+//			System.out.println("[PORTAUDIO] Closing stream " + stream);
 			pa.Pa_CloseStream(stream);
 			streams_sensors.remove(stream);
 			sensors_streams.remove(sensorName);

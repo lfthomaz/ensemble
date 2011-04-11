@@ -89,9 +89,9 @@ public class Loader {
 			p.setParameter(Constants.PROCESS_MODE, readAttribute(elem_gp, Constants.PROCESS_MODE, Constants.MODE_REAL_TIME));
 			String osc = readAttribute(elem_gp, Constants.OSC, "FALSE");
 			p.setParameter(Constants.OSC, osc);
-			if (Boolean.valueOf(osc)) {
-				services += "mms.router.osc.OSCServerService;";
-			}
+//			if (Boolean.valueOf(osc)) {
+//				services += "mms.router.osc.OSCServerService;";
+//			}
 			String jack = readAttribute(elem_gp, Constants.JACK, "FALSE");
 			p.setParameter(Constants.JACK, jack);
 			if (Boolean.valueOf(jack)) {

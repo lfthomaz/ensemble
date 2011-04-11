@@ -87,6 +87,7 @@ public class AudioEventServer extends EventServer {
 			setCommType("mms.comm.direct.CommDirect");
 		}
 		if (parameters.containsKey(Constants.PARAM_COMM_CLASS)) {
+			System.out.println("PARAMETERS = " + parameters);
 			String[] str = (parameters.get(Constants.PARAM_PERIOD)).split(" ");
 			setEventExchange(Integer.valueOf(str[0]), Integer.valueOf(str[1]), Integer.valueOf(str[2]), Integer.valueOf(str[3]));
 		} else {
@@ -385,7 +386,7 @@ public class AudioEventServer extends EventServer {
 			
 		}
 		
-		System.out.printf("AS time = %.3f \t(t = %.3f)\n", ((double)(System.nanoTime()-time_process)/1000000), instant);
+//		System.out.printf("AS time = %.3f \t(t = %.3f)\n", ((double)(System.nanoTime()-time_process)/1000000), instant);
 
 	}
 

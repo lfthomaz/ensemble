@@ -40,7 +40,7 @@ public class Aubio_Onset extends Process {
 	}
 
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 
 		aubiowrapper.del_fvec(ibuf);
 		aubiowrapper.del_fvec(onset);

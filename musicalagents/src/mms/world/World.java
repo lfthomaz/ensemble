@@ -100,7 +100,7 @@ public class World {
 		}
 		
 //		System.out.println("[WORLD] " + "Initialized");
-		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":WORLD] " + "Initialized");
+		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":WORLD] " + "Initialized");
 	
     }
     
@@ -124,7 +124,7 @@ public class World {
 		    	// Checks for defaults attributes for an entity
 		    	// TODO ISSO NÃO VALE PARA O LM!!!
 		    	Vector position = null;
-		    	if (parameters.contains("POSITION")) {
+		    	if (parameters.containsKey("POSITION")) {
 		    		position = Vector.parse(parameters.get("POSITION"));
 		    	} else {
 		    		position = new Vector(dimensions);
@@ -201,7 +201,7 @@ public class World {
     	if (laws.containsKey(type)) {
 			laws.remove(type);
 		} else {
-			System.err.println("["+envAgent.getLocalName()+"] Law " + type + " does not exist.");
+			System.err.println("["+envAgent.getAgentName()+"] Law " + type + " does not exist.");
 		}
     }
     
@@ -293,7 +293,7 @@ public class World {
 	 * @throws Exception
 	 */
 	protected void init() throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "init()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
 	}
 	
 	/**
@@ -301,7 +301,7 @@ public class World {
 	 * @param entityName
 	 */
 	protected void entityAdded(String entityName) {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "entityAdded()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "entityAdded()");
 	}
 
 	/**
@@ -309,7 +309,7 @@ public class World {
 	 * @param entityName
 	 */
 	protected void entityRemoved(String entityName) {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "entityRemoved()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "entityRemoved()");
 	}
 
 }

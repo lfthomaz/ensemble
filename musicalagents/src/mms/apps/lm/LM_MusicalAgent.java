@@ -108,7 +108,7 @@ public class LM_MusicalAgent extends MusicalAgent {
 	}
 	
 	@Override
-	protected void configure() {
+	public boolean configure() {
 		
 		String pos_x = parameters.get("pos_x");
 		String pos_y = parameters.get("pos_y");
@@ -143,10 +143,11 @@ public class LM_MusicalAgent extends MusicalAgent {
 		frontParameters.put("position", "FRONT");
 		this.addComponent("Tentacle_front", "mms.apps.lm.LM_TentacleSensor", frontParameters);
 		
+		return true;
 	}
 	
 	@Override
-	protected void init() {
+	public boolean init() {
 		
 		// Agente rand�mico criado na inicializa��o
 		getKB().registerFact("SoundGenoma", parameters.get("SoundGenoma", randomizeSoundGenoma()), true);
@@ -155,7 +156,9 @@ public class LM_MusicalAgent extends MusicalAgent {
 		getKB().registerFact("Age", "0", true);
 		getKB().registerFact("ListeningPleasure", "0.0", true);
 
-		System.out.println(getLocalName() + ": "  + getKB().readFact("SoundGenoma") + "\t" + getKB().readFact("ProceduralGenoma"));
+		System.out.println(getAgentName() + ": "  + getKB().readFact("SoundGenoma") + "\t" + getKB().readFact("ProceduralGenoma"));
+		
+		return true;
 
 	}
 

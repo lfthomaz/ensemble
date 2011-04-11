@@ -8,8 +8,9 @@ import mms.Sensor;
 public class LM_FoodSensor extends Sensor {
 
 	@Override
-	protected void configure(Parameters parameters) {
+	public boolean configure() {
 		setEventType("ENERGY");
+		return true;
 	}
 
 	@Override

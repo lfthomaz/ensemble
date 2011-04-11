@@ -96,12 +96,12 @@ public class MovementReasoning extends Reasoning {
 		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals("MOVEMENT")) {
 			legs = (Actuator)evtHdl;
 			legs.registerListener(this);
-			legsMemory = getAgent().getKB().getMemory(legs.getName());
+			legsMemory = getAgent().getKB().getMemory(legs.getComponentName());
 		}
 		else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals("MOVEMENT")) {
 			eyes = (Sensor)evtHdl;
 			eyes.registerListener(this);
-			eyesMemory = getAgent().getKB().getMemory(eyes.getName());
+			eyesMemory = getAgent().getKB().getMemory(eyes.getComponentName());
 		}
 	}
 

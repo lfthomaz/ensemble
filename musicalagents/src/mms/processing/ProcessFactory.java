@@ -102,7 +102,8 @@ public class ProcessFactory {
 		}
 		
 		// Initializes de Process object
-		proc.configure(arguments);
+		proc.setParameters(arguments);
+		proc.configure();
 		proc.start();
 		proc.init();
 
@@ -110,8 +111,8 @@ public class ProcessFactory {
 	}
 	
 	public static void deleteAudioProcessor(Process proc) {
-		proc.fini();
-		proc.end();
+		proc.finit();
+		proc.stop();
 	}
 
 	

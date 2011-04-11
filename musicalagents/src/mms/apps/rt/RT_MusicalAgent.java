@@ -11,7 +11,7 @@ import mms.memory.AudioMemory;
 public class RT_MusicalAgent extends MusicalAgent {
 
 	@Override
-	protected void configure() {
+	public boolean configure() {
 	
 		// Raciocínios
 //		addComponent(new RT_Reasoning("Reasoning", this));
@@ -34,15 +34,19 @@ public class RT_MusicalAgent extends MusicalAgent {
 //		addComponent(new Sensor("Ear", this, Constants.EVT_AUDIO));
 //		addComponent(new Actuator("Mouth", this, Constants.EVT_AUDIO));
 
+		return true;
+		
 	}
 	
 	@Override
-	protected void init() {
+	public boolean init() {
 
 		System.out.println("Recebu o filename = " + parameters.get("filename"));
 		
 		// Fatos necessários na base de conhecimento
 		getKB().updateFact("filename", parameters.get("filename"));
+		
+		return true;
 		
 	}
 

@@ -2,6 +2,8 @@ package mms;
 
 public final class Constants {
 
+	public static final String  FRAMEWORK_NAME 			= "mms";
+	
 	// Modos do Clock
 	public static final String 	CLOCK_MODE 				= "CLOCK_MODE";
 	public static final String 	CLOCK_USER	 			= "CLOCK_USER";

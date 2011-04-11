@@ -7,9 +7,6 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.illposed.osc.OSCListener;
-import com.illposed.osc.OSCMessage;
-
 import mms.Command;
 import mms.Constants;
 import mms.Event;
@@ -38,7 +35,7 @@ public class MovementEventServer extends EventServer {
 
 	private static Lock lock = new ReentrantLock();
 
-	private boolean osc = false;
+	private boolean osc = true;
 	
 	private World 	world;
 	private Law 	movLaw;
@@ -64,13 +61,9 @@ public class MovementEventServer extends EventServer {
 	@Override
 	protected boolean init(Parameters parameters) {
 		
-		this.osc = Boolean.parseBoolean(envAgent.getProperty(Constants.OSC, "FALSE"));
-		
 		this.world = envAgent.getWorld();
 		this.movLaw = world.getLaw("MOVEMENT");
 
-		envAgent.getOSC().registerListener(new Listener(), "/mms/movement");
-		
 		return true;
 		
 	}
@@ -341,14 +334,18 @@ public class MovementEventServer extends EventServer {
 		// Mensagem OSC
     	if (osc) {
     		// Register the agent
-    		Object[] args = new Object[6];
-    		args[0] = new String("agent");
-    		args[1] = new String(agentName);
-    		args[2] = new String("src");
-    		args[3] = new Float(movState.position.getValue(0));
-    		args[4] = new Float(movState.position.getValue(1));
-    		args[5] = new Float(movState.position.getValue(2));
-    		envAgent.getOSC().send(args);
+//    		Command cmd = new Command("REGISTER_AGENT");
+//    		cmd.addParameter("NAME", agentName);
+//    		cmd.addParameter("TYPE", "src");
+//    		cmd.addParameter("POS", movState.position.toString());
+//    		cmd.addParameter("BLA", ".,<>/?]~}{[^jkh;/;");
+    		String str = "agent " + agentName + " src";
+    		for (int i = 0; i < movState.position.dimensions; i++) {
+				str += " " + movState.position.getValue(i);
+			}
+    		Command cmd = new Command("OSC");
+    		cmd.addParameter("CONTENT", str);
+    		sendCommand("/pd", cmd); 
     	}
 
 		return userParam;
@@ -376,77 +373,71 @@ public class MovementEventServer extends EventServer {
 	private void sendOSCPosition(String entityName, MovementState state) {
 
 		// Envia a nova posição via OSC
-		Object[] args = new Object[5];
-		args[0] = new String("pos");
-		args[1] = new String(entityName);
-		args[2] = new Float(state.position.getValue(0));
-		args[3] = new Float(state.position.getValue(1));
-		args[4] = new Float(state.position.getValue(2));
-		envAgent.getOSC().send(args);
+//		Command cmd = new Command("MOVEMENT_UPDATE");
+//		cmd.addParameter("NAME", entityName);
+//		cmd.addParameter("POS", state.position.toString());
+//		cmd.addParameter("VEL", state.velocity.toString());
+//		cmd.addParameter("ACC", state.acceleration.toString());
+		String str = "pos " + entityName;
+		for (int i = 0; i < state.position.dimensions; i++) {
+			str += " " + state.position.getValue(i);
+		}
+		Command cmd = new Command("OSC");
+		cmd.addParameter("CONTENT", str);
+		sendCommand("/pd", cmd);
 
 	}
 	
-	class Listener implements OSCListener {
+	@Override
+	public void processCommand(String recipient, Command cmd) {
 
-		@Override
-		public void acceptMessage(Date time, OSCMessage message) {
-
-			// Obtém os argumentos
-			System.out.println(message.toString());
-			Object[] arguments = message.getArguments();
-			// TODO Problemas com a conversão de arguments para Float
-			// TODO Se eu mudar a posição aqui, vai mandar uma atualizaçai de volta para o gui??
-			if (arguments[0].equals("pos")) {
-				String agentName = (String)arguments[1];
-
-				System.out.println("OSC args count(" + arguments.length + "): ");
-
-				//recupera a nova posicao
-				float x = Float.parseFloat(arguments[2].toString());
-				float y = Float.parseFloat(arguments[3].toString());
-				float z = Float.parseFloat(arguments[4].toString());
-				
-				System.out.printf("Incoming OSC: pos %s %f %f %f\n", agentName, x, y, z);
-				//System.out.println("pos " + x);
-				
-				//acc_command.put(agentName,new Vector(x,y,z));
-				Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
-				
-				MovementState movState = new MovementState(world.dimensions);
-				movState.position = new Vector(x,y,z);
-				movState.acceleration = new Vector(world.dimensions);
-				
-				try {
-		              movMemory.writeMemory(movState);
-		         } catch (MemoryException e) {
-		              e.printStackTrace();
-		         }
-				
-				
-			}
-			else if (arguments[0].equals("mouse")) {
-				String agentName = (String)arguments[1];
-				int delta_x = (Integer)arguments[2];
-				int delta_y = (Integer)arguments[3];
-	//			System.out.printf("frame: %d - recebi dx=%d dy=%d\n", workingFrame, delta_x, delta_y);
-				if (Math.abs(delta_y) > 50) {
-					dx = (-delta_y);
-				}
-				if (Math.abs(delta_x) > 50) {
-					dy = (-delta_x);
-				}
-				
-				// TODO Vai mudar a força do próximo frame, mas não diretamente no process()
-//				world.getEntityState(state, agentName);
-				if (dx != 0 || dy != 0) {
-					System.out.printf("dx=%d dy=%d\n", dx, dy);
-					acc_command.put(agentName, new Vector(dx*coeficient, dy*coeficient, 0.0));
-	//				System.out.println("Acc = " + state.acceleration);
-				}
-			}
-
-		}
+		System.out.println("[MOVEMENT] ENTROU NO processCommand()");
 		
+		// TODO Problemas com a conversão de arguments para Float
+		// TODO Se eu mudar a posição aqui, vai mandar uma atualizaçai de volta para o gui??
+		if (cmd.getCommand().equals("MOVEMENT_UPDATE")) {
+			String agentName = cmd.getParameter("NAME");
+
+			//recupera a nova posicao
+			Vector pos = Vector.parse(cmd.getParameter("POS"));
+			
+			System.out.printf("Incoming OSC: pos %s %s\n", agentName, pos);
+			
+			//acc_command.put(agentName,new Vector(x,y,z));
+			Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
+			
+			MovementState movState = new MovementState(world.dimensions);
+			movState.position = pos;
+			movState.acceleration = new Vector(world.dimensions);
+			
+			try {
+	              movMemory.writeMemory(movState);
+	         } catch (MemoryException e) {
+	              e.printStackTrace();
+	         }
+			
+			
+		}
+//		else if (arguments[0].equals("mouse")) {
+//			String agentName = (String)arguments[1];
+//			int delta_x = (Integer)arguments[2];
+//			int delta_y = (Integer)arguments[3];
+////			System.out.printf("frame: %d - recebi dx=%d dy=%d\n", workingFrame, delta_x, delta_y);
+//			if (Math.abs(delta_y) > 50) {
+//				dx = (-delta_y);
+//			}
+//			if (Math.abs(delta_x) > 50) {
+//				dy = (-delta_x);
+//			}
+//			
+//			// TODO Vai mudar a força do próximo frame, mas não diretamente no process()
+////			world.getEntityState(state, agentName);
+//			if (dx != 0 || dy != 0) {
+//				System.out.printf("dx=%d dy=%d\n", dx, dy);
+//				acc_command.put(agentName, new Vector(dx*coeficient, dy*coeficient, 0.0));
+////				System.out.println("Acc = " + state.acceleration);
+//			}
+//		}
 	}
 	
 }

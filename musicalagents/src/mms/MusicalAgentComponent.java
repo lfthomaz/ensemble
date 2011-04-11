@@ -1,8 +1,9 @@
 package mms;
 
 import mms.Constants.EA_STATE;
+import mms.router.CommandClientInterface;
 
-public abstract class MusicalAgentComponent {
+public abstract class MusicalAgentComponent implements LifeCycle, CommandClientInterface {
 
 	private String 			myName;
 	private MusicalAgent 	myAgent;
@@ -11,11 +12,11 @@ public abstract class MusicalAgentComponent {
 	
 	protected Parameters parameters = new Parameters();
 	
-	public final String getName() {
+	public final String getComponentName() {
 		return myName;
 	}
 	
-	protected final void setName(String myName) {
+	protected final void setComponentName(String myName) {
 		if (myState == EA_STATE.CREATED) {
 			this.myName = myName;
 		} else {
@@ -77,59 +78,66 @@ public abstract class MusicalAgentComponent {
  		}
 	}
 
+	//--------------------------------------------------------------------------------
+	// Life Cycle
+	//--------------------------------------------------------------------------------
+	
+	@Override
 	public final void setParameters(Parameters parameters) {
-		this.parameters = parameters;
+		addParameters(parameters);
 	}
 	
+	@Override
 	public final Parameters getParameters() {
 		return parameters;
 	}
 	
-	//--------------------------------------------------------------------------------
-	// Life Cicle
-	//--------------------------------------------------------------------------------
-	
-	/**
-	 * Método de configuração do componente, a ser implementado pelo usuário
-	 */
-	protected void configure(Parameters parameters) {}
-	
-	/**
-	 * Inicializa o componente 
-	 */
-	protected abstract boolean start(); 
+	// ---------------------------------------------- 
+	// Command Interface 
+	// ---------------------------------------------- 
 
-	/**
-	 * Inicializa o componente 
-	 */
-	protected abstract boolean stop(); 
+	@Override
+	public final String getAddress() {
+		return "/" + Constants.FRAMEWORK_NAME + "/" + getAgent().getAgentName() + "/" + getComponentName();
+	}
 
-	/**
-	 * Initialization user method
-	 * @return 
-	 */
-	protected boolean init() {
-		return true;
-	};
+	@Override
+	public void receiveCommand(String recipient, Command cmd) {
+        System.out.println("[" + getAddress() +"] Command received: " + cmd);
+        processCommand(recipient, cmd);
+	}
 	
-	/**
-	 * Finalization user method
-	 * @return 
-	 */
-	// TODO Implementar o controle do finalize()
-	protected boolean finit() {
-		return true;
-	};
-	
+	@Override
+	public void sendCommand(String recipient, Command cmd) {
+		getAgent().getRouter().sendCommand(recipient, cmd);
+		
+	}
+
 	//--------------------------------------------------------------------------------
 	// User implemented method
 	//--------------------------------------------------------------------------------
 
+	@Override
+	public boolean configure() {
+		return true;
+	}
+
+	@Override
+	public boolean init() {
+		return true;
+	}
+
+	@Override
+	public boolean finit() {
+		return true;
+	}
+	
 	/**
 	 * 
 	 */
-	public void processCommand(Command cmd) {
-		System.out.println("[" + this.getAgent().getLocalName() + ":" + getName()  +"] " + "User command received: " + cmd);
+	@Override
+	public void processCommand(String recipient, Command cmd) {
+		System.out.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()  +"] " + "User command received: " + cmd);
 	}
 
 	/**

@@ -10,10 +10,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.router.CommandClientInterface;
+import mms.router.RouterHelper;
+import mms.router.RouterService;
 import mms.world.Vector;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.ServiceException;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
@@ -23,7 +26,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-public class MusicalAgent extends MMSAgent {
+public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 
 	//--------------------------------------------------------------------------------
 	// Agent attributes
@@ -92,14 +95,18 @@ public class MusicalAgent extends MMSAgent {
 	/**
 	 * Inicializa o Agente Musical
 	 */
-	protected final void start() {
+	public final boolean start() {
 
 		lock.lock();
 		try {
 
+			// TODO Juntar o processamente de mensagens e de comandos!!!
 			// Inicia a recepção de Mensagens de Controle 
 			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
-	
+
+			// Conecta-se ao roteador de comandos
+			getRouter().connect(this);
+			
 			// Registrar-se no Ambiente (necessário tanto em BATCH como em REAL_TIME)
 			DFAgentDescription template = new DFAgentDescription();
 			ServiceDescription sd = new ServiceDescription();
@@ -116,14 +123,15 @@ public class MusicalAgent extends MMSAgent {
 						sendMessage(cmd);
 					} else {
 						// TODO jeito ruim de ficar tentando registrar o Agente
-						MusicalAgent.logger.info("[" + getAgent().getLocalName() + "] " + "Environment Agent not found! Trying again...");
+						MusicalAgent.logger.info("[" + getAgent().getAgentName() + "] " + "Environment Agent not found! Trying again...");
 						Thread.sleep(500);
 					}
 				}
 			} catch (Exception fe) {
-//				logger.severe("[" + this.getLocalName() + "] " + "Environment Agent not available");
-				System.out.println("[" + this.getLocalName() + "] " + "Environment Agent not available");
+//				logger.severe("[" + this.getAgentName() + "] " + "Environment Agent not available");
+				System.out.println("[" + this.getAgentName() + "] " + "Environment Agent not available");
 				this.doDelete();
+				return false;
 			}
 			
 			// TODO Registras os fatos públicos do KB
@@ -138,8 +146,8 @@ public class MusicalAgent extends MMSAgent {
 				MusicalAgentComponent comp = iterator.next();
 				boolean result = comp.start();
 				if (!result) {
-					System.out.println("[" + this.getLocalName() + "] Component '" + comp.getName() + "' not initialized");
-					removeComponent(comp.getName());
+					System.out.println("[" + this.getAgentName() + "] Component '" + comp.getComponentName() + "' not initialized");
+					removeComponent(comp.getComponentName());
 				} else {
 					// Descobre qual o tipo do componente
 					// Se for EventHandler, deve registrar no Ambiente responsável
@@ -153,6 +161,8 @@ public class MusicalAgent extends MMSAgent {
 					else if (comp instanceof Reasoning) {
 						numberReasoning++;
 					}
+					// Connects de Component to the Rotuer
+					getRouter().connect(comp);
 				}
 			}
 			
@@ -161,19 +171,23 @@ public class MusicalAgent extends MMSAgent {
 			
 			// Fim da inicialização do Agente Musical
 			state = MA_STATE.INITIALIZED;
-//			logger.info("[" + this.getLocalName() + "] " + "Initialized");
-			System.out.println("[" + this.getLocalName() + "] " + "Initialized");
+//			logger.info("[" + this.getAgentName() + "] " + "Initialized");
+			System.out.println("[" + this.getAgentName() + "] " + "Initialized");
 			
 		} finally {
 			lock.unlock();
 		}
+		
+		return true;
 
 	}
 	
 	@Override
-	protected final void stop() {
+	public final boolean stop() {
+		getRouter().disconnect(this);
 		// Calls JADE finalization method
 		this.doDelete();
+		return true;
 	}
 
 	/** 
@@ -196,19 +210,19 @@ public class MusicalAgent extends MMSAgent {
 				if (compName.equals(Constants.COMP_ACTUATOR) || compName.equals(Constants.COMP_SENSOR) || 
 						compName.equals(Constants.COMP_SENSOR) || compName.equals(Constants.COMP_ANALYZER) || 
 						compName.equals(Constants.COMP_REASONING) || compName.equals(Constants.COMP_KB)) {
-					System.out.println("[" + this.getLocalName() + "] Component '" + compName + "' using a reserved name");
+					System.out.println("[" + this.getAgentName() + "] Component '" + compName + "' using a reserved name");
 					return;
 				}
 				if (components.containsKey(compName)) {
-					System.out.println("[" + this.getLocalName() + "] Component '" + compName + "' already exists");
+					System.out.println("[" + this.getAgentName() + "] Component '" + compName + "' already exists");
 					return;
 				}
 				
 				// Configura o componente
-				comp.setName(compName);
+				comp.setComponentName(compName);
 				comp.setAgent(this);
-				comp.addParameters(arguments);
-				comp.configure(arguments);
+				comp.setParameters(arguments);
+				comp.configure();
 
 				// Sets the position of the EventHandler in Agent's "body"
 				if (comp instanceof EventHandler) {
@@ -225,7 +239,7 @@ public class MusicalAgent extends MMSAgent {
 				if (state == MA_STATE.REGISTERED) {
 					boolean result = comp.start();
 					if (!result) {
-						System.out.println("[" + this.getLocalName() + "] Component '" + compName + "' not initialized");
+						System.out.println("[" + this.getAgentName() + "] Component '" + compName + "' not initialized");
 						removeComponent(compName);
 						return;
 					}
@@ -242,6 +256,8 @@ public class MusicalAgent extends MMSAgent {
 						numberReasoning++;
 					}
 					// TODO Broadcast aos componentes existentes sobre o novo componente
+					// Connects de Component to the Rotuer
+					getRouter().connect(comp);
 				}
 //				logger.info("[" + getAgentName() + "] " + "Component " + comp.getName() + " added");
 				
@@ -281,7 +297,7 @@ public class MusicalAgent extends MMSAgent {
 	public final void removeComponent(String compName) {
 
 		if (!components.containsKey(compName)) {
-			System.out.println("[" + this.getLocalName() + "] " + "Component '" + compName + "' does not exists in Agent " + getAgentName());
+			System.out.println("[" + this.getAgentName() + "] " + "Component '" + compName + "' does not exists in Agent " + getAgentName());
 			return;
 		}
 		
@@ -303,7 +319,7 @@ public class MusicalAgent extends MMSAgent {
 			
 			components.remove(compName);
 			
-			System.out.println("[" + this.getLocalName() + "] " + "Component '" + comp.getName() + "' removed");
+			System.out.println("[" + this.getAgentName() + "] " + "Component '" + comp.getComponentName() + "' removed");
 			
 		}
 		
@@ -325,51 +341,54 @@ public class MusicalAgent extends MMSAgent {
 		return environmentAgent;
 	}
 	
-	public final String getAgentName() {
-		return getLocalName();
+	//--------------------------------------------------------------------------------
+	// Command Interface 
+	//--------------------------------------------------------------------------------
+
+	@Override
+	public final String getAddress() {
+		return "/" + Constants.FRAMEWORK_NAME + "/" + getAgentName();
+	}
+
+	@Override
+	public final void receiveCommand(String recipient, Command cmd) {
+        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), recipient, cmd);
+      // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
+      String[] str = recipient.split("/");
+      if (str.length == 3) {
+      	processCommand(recipient, cmd);
+      } 
+      else if (str.length > 3) {
+      	if (components.containsKey(str[3])) {
+      		MusicalAgentComponent comp = components.get(str[3]);
+      		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
+//      		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
+//      			String param = cmd.getParameter("NAME");
+//      			String value = cmd.getParameter("VALUE");
+//      			if (param != null && value != null) {
+//      				comp.addParameter(param, value);
+//      				comp.parameterUpdated(param);
+//      			}
+//      		}
+//      		else {
+      			comp.receiveCommand(recipient, cmd);
+//     		}
+      	} 
+      	else {
+      		System.out.println("[" + getAddress() +"] Component does not exist: " + str[2]);
+      	}
+      }
+	}
+	
+	@Override
+	public final void sendCommand(String recipient, Command cmd) {
+		getRouter().sendCommand(recipient, cmd);
 	}
 	
 	//--------------------------------------------------------------------------------
 	// Agent Message Handling (CommMsg)
 	//--------------------------------------------------------------------------------
-	
-	@Override
-	public void input(CommandClientInterface cmdInterface, Command cmd) {
-        System.out.println("[" + getAddress() +"] Command received: " + cmd);
-        // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
-        String[] recipient = cmd.getRecipient().split(":");
-        if (recipient.length == 2) {
-        	processMessage(cmd.getSource(), cmd);
-        } 
-        else if (recipient.length == 3) {
-        	if (components.containsKey(recipient[2])) {
-        		MusicalAgentComponent comp = components.get(recipient[2]);
-        		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
-        		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
-        			String param = cmd.getParameter("NAME");
-        			String value = cmd.getParameter("VALUE");
-        			if (param != null && value != null) {
-        				comp.addParameter(param, value);
-        				comp.parameterUpdated(param);
-        			}
-        		}
-        		else {
-        			comp.processCommand(cmd);
-        		}
-        	} 
-        	else if (recipient[2].equals(Constants.COMP_KB) && cmd.getCommand().equals(Constants.CMD_FACT)) {
-    			String fact = cmd.getParameter("NAME");
-    			String value = cmd.getParameter("VALUE");
-    			if (fact != null && value != null) {
-    				getKB().updateFact(fact, value);
-    			}
-        	}
-        	else {
-        		System.out.println("[" + getAddress() +"] Component does not exist: " + recipient[2]);
-        	}
-        }
-	}
-	
+
 	/**
 	 * Responsible for validating the commands and their obligatory arguments and executing it.
 	 * @param sender
@@ -387,7 +406,7 @@ public class MusicalAgent extends MMSAgent {
 			if (compName != null && compClass != null) {
 				addComponent(compName, compClass, parameters);
 			} else {
-				System.out.println("[" + this.getLocalName() + "] Command " + Constants.CMD_ADD_COMPONENT + " does not have obligatory arguments (NAME, CLASS)");
+				System.out.println("[" + this.getAgentName() + "] Command " + Constants.CMD_ADD_COMPONENT + " does not have obligatory arguments (NAME, CLASS)");
 			}
 
 		}
@@ -397,7 +416,7 @@ public class MusicalAgent extends MMSAgent {
 			if (compName != null) {
 				removeComponent(compName);
 			} else {
-				System.out.println("[" + this.getLocalName() + "] Command " + Constants.CMD_ADD_COMPONENT + " does not have obligatory arguments (NAME)");
+				System.out.println("[" + this.getAgentName() + "] Command " + Constants.CMD_ADD_COMPONENT + " does not have obligatory arguments (NAME)");
 			}
 			
 		}
@@ -441,7 +460,7 @@ public class MusicalAgent extends MMSAgent {
 				}
 			}
 
-			MusicalAgent.logger.info("[" + getAgentName() + "] " + "EventHandler '" + comp.getName() + "' registered");
+			MusicalAgent.logger.info("[" + getAgentName() + "] " + "EventHandler '" + comp.getComponentName() + "' registered");
 
 			
 		} else if (command.equals(Constants.CMD_EVENT_DEREGISTER_ACK)) {
@@ -487,7 +506,7 @@ public class MusicalAgent extends MMSAgent {
 		}
 		else {
 				
-			System.out.println("[" + getLocalName() + "] " + "Command not recognized: " + command);
+			System.out.println("[" + getAgentName() + "] " + "Command not recognized: " + command);
 				
 		}
 
@@ -504,7 +523,7 @@ public class MusicalAgent extends MMSAgent {
 		msg.setConversationId("CommMsg");
 		msg.setContent(command.toString());
 		this.send(msg);
-		MusicalAgent.logger.info("[" + this.getAID().getLocalName() + "] " + "Message sent to " + environmentAgent + " (" + msg.getContent() + ")");
+		MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message sent to " + environmentAgent + " (" + msg.getContent() + ")");
 		
 	}
 
@@ -524,7 +543,7 @@ public class MusicalAgent extends MMSAgent {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 				
-				MusicalAgent.logger.info("[" + getAID().getLocalName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
+				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
 
 				// TODO switch com os poss�veis comandos
 				String sender = msg.getSender().getLocalName();
@@ -603,7 +622,7 @@ public class MusicalAgent extends MMSAgent {
 				numberReasoningReady = 0;
 				numberEventsSent = 0;
 				
-				MusicalAgent.logger.info("[" + getLocalName() + "] " + "Enviei fim de turno");
+				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Enviei fim de turno");
 				
 			}
 			
@@ -662,7 +681,7 @@ public class MusicalAgent extends MMSAgent {
 
 		@Override
 		public void action() {
-			MusicalAgent.logger.info("[" + getAgent().getLocalName() + " Killing agent '" + getAgent().getLocalName() + "'");
+			MusicalAgent.logger.info("[" + getAgent().getAgentName() + " Killing agent '" + getAgent().getAgentName() + "'");
 			
 			// Calls the user implemented finalization method
 			finit();
@@ -680,7 +699,7 @@ public class MusicalAgent extends MMSAgent {
 		
 		numberEventHandlersRegistered++;
 		
-		MusicalAgent.logger.info("[" + this.getLocalName() + "] " + "Component " + compName + " registered");
+		MusicalAgent.logger.info("[" + this.getAgentName() + "] " + "Component " + compName + " registered");
 
 	}
 	
@@ -691,7 +710,7 @@ public class MusicalAgent extends MMSAgent {
 		MusicalAgentComponent comp = components.remove(compName);
 		comp.stop();
 		
-		MusicalAgent.logger.info("[" + this.getLocalName() + "] " + "Component " + compName + " deregistered");
+		MusicalAgent.logger.info("[" + this.getAgentName() + "] " + "Component " + compName + " deregistered");
 
 	}
 
@@ -713,5 +732,10 @@ public class MusicalAgent extends MMSAgent {
 	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
+
+	@Override
+	public void processCommand(String recipient, Command cmd) {
+		
+	}
 	
 }

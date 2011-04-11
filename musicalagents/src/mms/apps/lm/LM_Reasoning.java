@@ -28,7 +28,7 @@ public class LM_Reasoning extends Reasoning {
 	private int 		walked 				= 0;
 	
 	@Override
-	protected boolean init() {
+	public boolean init() {
 		proceduralGenoma = getAgent().getKB().readFact("ProceduralGenoma").split(":");
 		return true;
 	}
@@ -37,11 +37,11 @@ public class LM_Reasoning extends Reasoning {
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		if (evtHdl instanceof LM_MovementActuator) {
 			foot = (LM_MovementActuator)evtHdl;
-			footMemory = getAgent().getKB().getMemory(foot.getName());
+			footMemory = getAgent().getKB().getMemory(foot.getComponentName());
 		}
 		else if (evtHdl instanceof LM_SoundActuator) {
 			mouth = (LM_SoundActuator)evtHdl;
-			mouthMemory = getAgent().getKB().getMemory(mouth.getName());
+			mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
 		}
 //		else if (evtHdl instanceof LM_SoundActuator) {
 //			evacuator = (LM_FoodActuator)evtHdl;
@@ -125,7 +125,7 @@ public class LM_Reasoning extends Reasoning {
 		// TODO N�o trata Loops e IFs
 		if (instr.equals("R")) {
 		
-			String cmd = getAgent().getLocalName() + " R";
+			String cmd = getAgent().getAgentName() + " R";
 			try {
 				footMemory.writeMemory(cmd);
 			} catch (MemoryException e) {
@@ -136,7 +136,7 @@ public class LM_Reasoning extends Reasoning {
 		
 		} else if (instr.equals("W")) {
 			
-			String cmd = getAgent().getLocalName() + " W";
+			String cmd = getAgent().getAgentName() + " W";
 			try {
 				footMemory.writeMemory(cmd);
 			} catch (MemoryException e) {
@@ -160,7 +160,7 @@ public class LM_Reasoning extends Reasoning {
 			
 		} else if (instr.equals("T-")) {
 			
-			String cmd = getAgent().getLocalName() + " T-";
+			String cmd = getAgent().getAgentName() + " T-";
 			try {
 				footMemory.writeMemory(cmd);
 			} catch (MemoryException e) {
@@ -171,7 +171,7 @@ public class LM_Reasoning extends Reasoning {
 				
 		} else if (instr.equals("T+")) {
 				
-			String cmd = getAgent().getLocalName() + " T+";
+			String cmd = getAgent().getAgentName() + " T+";
 			try {
 				footMemory.writeMemory(cmd);
 			} catch (MemoryException e) {
@@ -185,7 +185,7 @@ public class LM_Reasoning extends Reasoning {
 			// Verifica o ListeningPleasure, se for maior que 1, vira para o som
 			
 			// Coloca a instru��o no KB para criar o evento
-			String cmd = getAgent().getLocalName() + " Ts";
+			String cmd = getAgent().getAgentName() + " Ts";
 			try {
 				footMemory.writeMemory(cmd);
 			} catch (MemoryException e) {

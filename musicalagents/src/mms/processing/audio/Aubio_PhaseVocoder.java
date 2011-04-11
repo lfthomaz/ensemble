@@ -65,7 +65,7 @@ public class Aubio_PhaseVocoder extends Process {
 	}
 
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 		aubiowrapper.del_aubio_pvoc(pv);
 		return true;
 	}

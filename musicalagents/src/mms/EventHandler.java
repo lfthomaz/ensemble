@@ -40,7 +40,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	protected long happeningFrame;
 		
 	@Override
-	protected boolean start() {
+	public boolean start() {
 		
 		// Define o tipo de evento que o EventHandler irá tratar
 		// TODO Colocar um tratamento de erro aqui!
@@ -53,14 +53,14 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			Class commClass = Class.forName(commType);
 			myComm = (Comm)commClass.newInstance();
 			if (getType().equals(Constants.COMP_SENSOR)) {
-				myComm.configure(getAgent(), (Sensing)this, null, getName());
+				myComm.configure(getAgent(), (Sensing)this, null, getComponentName());
 			} 
 			else if (getType().equals(Constants.COMP_ACTUATOR)) {
-				myComm.configure(getAgent(), null, (Actuator)this, getName());
+				myComm.configure(getAgent(), null, (Actuator)this, getComponentName());
 			}
 			myComm.start();
 		} catch (Exception e) {
-//    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Comm class " + commType + " not found!");
+//    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Comm class " + commType + " not found!");
 			e.printStackTrace();
 			return false;
 		}
@@ -70,7 +70,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	}
 	
 	@Override
-	protected boolean stop() {
+	public boolean stop() {
 		
 		// Terminates de communication channel
 		myComm.stop();
@@ -83,7 +83,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		if (getState() == EA_STATE.CREATED) {
 			this.eventType = eventType;
 		} else {
-    		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Trying to set eventType after initialization!");
+    		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Trying to set eventType after initialization!");
 		}
 	}
 
@@ -134,15 +134,15 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// If found, sends the register command
 		if (es_registered) {
 			Command cmd = new Command(Constants.CMD_EVENT_REGISTER );
-			cmd.addParameter(Constants.PARAM_COMP_NAME, getName());
+			cmd.addParameter(Constants.PARAM_COMP_NAME, getComponentName());
 			cmd.addParameter(Constants.PARAM_COMP_TYPE, getType());
 			cmd.addParameter(Constants.PARAM_EVT_TYPE, getEventType());
 			cmd.addParameter(Constants.PARAM_REL_POS, getRelativePosition().toString());
 			cmd.addUserParameters(getParameters());
 			getAgent().sendMessage(cmd);
 		} else {
-//			MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "EventServer " + eventType + " not found");
-			System.out.println("[" + getAgent().getLocalName() + ":" + getName() + "] " + "EventServer " + eventType + " not registered");
+//			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "EventServer " + eventType + " not found");
+			System.out.println("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "EventServer " + eventType + " not registered");
 		}
 
 	}
@@ -176,11 +176,11 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// Cria a memória relativa a esse EventHandler
 		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
 		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
-		myMemory = getAgent().getKB().createMemory(getName(), eventType, 5.0, getParameters());
+		myMemory = getAgent().getKB().createMemory(getComponentName(), eventType, 5.0, getParameters());
 		if (myMemory == null) {
 			System.err.println("Não foi possível criar a memória");
 		}
-//		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
+//		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
 
 		// No caso de ser uma troca de evento frequente, armazena os parÃ¢metros
 		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC) && getType().equals(Constants.COMP_ACTUATOR)) {
@@ -189,9 +189,9 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		}
 		
 		// Avisa o agente do novo EventHandler registrado
-		getAgent().eventHandlerRegistered(getName());
+		getAgent().eventHandlerRegistered(getComponentName());
 		
-		MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Register of '" + getName() + "' confirmed");
+		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Register of '" + getComponentName() + "' confirmed");
 		
 	}
 	
@@ -202,7 +202,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		
 		// Envia mensagem para tirar o EventHandler do registro
 		Command cmd = new Command(Constants.CMD_EVENT_DEREGISTER );
-		cmd.addParameter(Constants.PARAM_COMP_NAME, getName());
+		cmd.addParameter(Constants.PARAM_COMP_NAME, getComponentName());
 		cmd.addParameter(Constants.PARAM_COMP_TYPE, getType());
 		cmd.addParameter(Constants.PARAM_EVT_TYPE, getEventType());
 		getAgent().sendMessage(cmd);
@@ -213,7 +213,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		
 		this.status = EH_STATUS.NOT_REGISTERED;
 		
-		getAgent().eventHandlerDeregistered(getName());
+		getAgent().eventHandlerDeregistered(getComponentName());
 		
 	}
 	

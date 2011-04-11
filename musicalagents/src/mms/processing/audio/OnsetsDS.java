@@ -740,7 +740,7 @@ public class OnsetsDS extends Process {
 
 	}
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 		
 		return true;
 		

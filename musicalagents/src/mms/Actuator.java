@@ -8,6 +8,7 @@ import mms.Constants.EH_STATUS;
 import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
+import mms.router.CommandClientInterface;
 
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
@@ -39,7 +40,7 @@ public class Actuator extends EventHandler implements Acting {
 	protected boolean automaticAction 	= false;
 		
 	@Override
-	protected final boolean start() {
+	public final boolean start() {
 	
 		// Sets component type
 		setType(Constants.COMP_ACTUATOR);
@@ -65,9 +66,11 @@ public class Actuator extends EventHandler implements Acting {
 	}
 	
 	@Override
-	protected final boolean stop() {
+	public final boolean stop() {
 		return super.stop();
 	}
+	
+	//--------------------------------------------------------------------------------
 	
 	// TODO Em que momento esses métodos seriam chamados pelo usuário?!?!
 	protected void setNeedActionTime(long needActionTime) {
@@ -122,7 +125,7 @@ public class Actuator extends EventHandler implements Acting {
 			
 			case INITIALIZED:
 				frameTime = startTime + ((workingFrame-1) * period);
-				System.out.println("frameTime = " + frameTime);
+//				System.out.println("frameTime = " + frameTime);
 				actuatorState = AC_STATE.WAITING_BEGIN;
 //				System.out.println(System.currentTimeMillis() + "*** estado 1 ***");
 				nextStateChange = frameTime;
@@ -233,8 +236,8 @@ public class Actuator extends EventHandler implements Acting {
 			
 //			// Se for uma troca de evento frequente, só envia se for o frame correto
 //			if (eventExchange.equals(Constants.EVT_EXC_FREQUENT) && evt.frame != workingFrame) {
-//				System.out.println("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Frame n�o corresponde ao atual");
-//				MusicalAgent.logger.warning("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Frame n�o corresponde ao atual");
+//				System.out.println("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Frame n�o corresponde ao atual");
+//				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Frame n�o corresponde ao atual");
 //				return;
 //			}
 			
@@ -256,8 +259,8 @@ public class Actuator extends EventHandler implements Acting {
 			e.printStackTrace();
 		}
 		
-		evt.oriAgentName 		= getAgent().getLocalName();
-		evt.oriAgentCompName	= this.getName();
+		evt.oriAgentName 		= getAgent().getAgentName();
+		evt.oriAgentCompName	= this.getComponentName();
 		evt.destAgentName 		= getAgent().environmentAgent;
 		evt.destAgentCompName	= eventType;
 		evt.eventType 			= eventType;
@@ -266,11 +269,11 @@ public class Actuator extends EventHandler implements Acting {
 			evt.frame = workingFrame;
 			evt.instant = (double)(startTime + (workingFrame * period))/1000;
 			evt.duration = (double)period/1000;
-//			System.out.println(clock.getCurrentTime() + "\t [" + getAgent().getLocalName() + ":" + getName() + "] Atuei - frame = " + workingFrame);
+//			System.out.println(clock.getCurrentTime() + "\t [" + getAgent().getAgentName() + ":" + getName() + "] Atuei - frame = " + workingFrame);
 		}
 		if (status.equals(EH_STATUS.REGISTERED)) {
-//			MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Gerei um evento");
-//			System.out.println(clock.getCurrentTime() + " [" + getAgent().getLocalName() + ":" + getName() + "] " + "Gerei um evento");
+//			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Gerei um evento");
+//			System.out.println(clock.getCurrentTime() + " [" + getAgent().getAgentName() + ":" + getName() + "] " + "Gerei um evento");
 			
 			super.myComm.send(evt);
 			
@@ -278,7 +281,7 @@ public class Actuator extends EventHandler implements Acting {
 			getAgent().eventSent();
 		} 
 		else {
-//			MusicalAgent.logger.warning("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Componente n�o registrado em um Ambiente!");
+//			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Componente n�o registrado em um Ambiente!");
 		}
 		
 	}
@@ -291,7 +294,7 @@ public class Actuator extends EventHandler implements Acting {
 	 * Método que pode ser implementado pelo usário para fazer alguma alteração no Evento
 	 */
 	public void process(Event evt) throws Exception {
-//		System.out.println(getAgent().getClock().getCurrentTime() + "\t ["+ getAgent().getLocalName() + ":" + getName() + "] \t Entrei no process()");
+//		System.out.println(getAgent().getClock().getCurrentTime() + "\t ["+ getAgent().getAgentName() + ":" + getName() + "] \t Entrei no process()");
 	}
 
 }

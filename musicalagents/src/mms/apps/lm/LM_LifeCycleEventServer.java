@@ -102,7 +102,7 @@ public class LM_LifeCycleEventServer extends EventServer {
 			String proceduralGenoma = envAgent.agentsPublicFacts.get(agent + ":ProceduralGenoma");
 			String[] instr = proceduralGenoma.split(":");
 			if (age > LM_Constants.MaxAge || energy < LM_Constants.MinEnergy || instr.length > LM_Constants.DeathLength) {
-				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Agent '" + agent + "' has died");
+				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Agent '" + agent + "' has died");
 				envAgent.destroyAgent(agent);
 			}
 		}

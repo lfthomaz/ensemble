@@ -14,7 +14,7 @@ public class Sensor extends EventHandler implements Sensing {
 	ArrayList<Reasoning> listeners = new ArrayList<Reasoning>();
 	
 	@Override
-	protected final boolean start() {
+	public final boolean start() {
 
 		// Sets component type
 		setType(Constants.COMP_SENSOR);
@@ -38,7 +38,7 @@ public class Sensor extends EventHandler implements Sensing {
 	}
 	
 	@Override
-	protected final boolean stop() {
+	public final boolean stop() {
 		return super.stop();
 	}
 	
@@ -51,9 +51,9 @@ public class Sensor extends EventHandler implements Sensing {
 	public void sense(Event evt) {
 
 		if (status == EH_STATUS.REGISTERED && evt.eventType.equals(eventType)) {
-			MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Event received");
+			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Event received");
 			
-//			System.out.println(getAgent().getClock().getCurrentTime() + " [" + getAgent().getLocalName() + ":" + getName() + "] " + " Recebi um evento frame = " + evt.frame);
+//			System.out.println(getAgent().getClock().getCurrentTime() + " [" + getAgent().getAgentName() + ":" + getName() + "] " + " Recebi um evento frame = " + evt.frame);
 			
 			// Chama o método do usuário
 			// TODO Melhor antes ou depois? Ou ter os dois?
@@ -64,16 +64,16 @@ public class Sensor extends EventHandler implements Sensing {
 			}
 			
 			// Armazenar o evento na Base de Conhecimentos
-			getAgent().getKB().writeEventRepository(Constants.REP_TYPE_INPUT, eventType, getName(), evt);
+			getAgent().getKB().writeEventRepository(Constants.REP_TYPE_INPUT, eventType, getComponentName(), evt);
 			try {
 				if (myMemory == null) {
 					System.err.println("ERROR: no memory registered");
 				} else {
 					myMemory.writeMemory(evt.objContent, evt.instant, evt.duration, TimeUnit.SECONDS);
 				}
-//				System.out.println("[" + getAgent().getLocalName() + "] Guardei na memória um evento no instante " + evt.instant + " de duração " + evt.duration);
+//				System.out.println("[" + getAgent().getAgentName() + "] Guardei na memória um evento no instante " + evt.instant + " de duração " + evt.duration);
 			} catch (MemoryException e1) {
-				MusicalAgent.logger.warning("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Não foi possível armazenar na memória");
+				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 			}
 			
 			// Avisar os raciocínios registrados
@@ -91,7 +91,7 @@ public class Sensor extends EventHandler implements Sensing {
 				getAgent().sendMessage(cmd);
 			}
 			
-			MusicalAgent.logger.info("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Processei evento " + evt.timestamp);
+			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Processei evento " + evt.timestamp);
 		}
 		
 	}

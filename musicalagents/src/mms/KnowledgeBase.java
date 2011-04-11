@@ -7,7 +7,7 @@ import mms.memory.AudioMemory;
 import mms.memory.EventMemory;
 import mms.memory.Memory;
 
-public class KnowledgeBase {
+public class KnowledgeBase extends MusicalAgentComponent {
 
 	// Agent Musical
 	MusicalAgent myAgent;
@@ -43,6 +43,16 @@ public class KnowledgeBase {
 	// Tabela de Fatos do Agente
 	private HashMap<String, Fact> facts = new HashMap<String, Fact>();
 	private HashMap<String, Object> events = new HashMap<String, Object>();
+	
+	@Override
+	public final boolean start() {
+		return true;
+	}
+
+	@Override
+	public final boolean stop() {
+		return true;
+	}
 	
 	// Eventos
 	// TODO podemos ter 3 tipos de repositórios de eventos (um para recepção do sensor, e outro para envio do atuador, e um com par�metros globais do tipo de evento)
@@ -185,4 +195,10 @@ public class KnowledgeBase {
 		
 	}
 	
+	//--------------------------------------------------------------------------------
+	// User implemented methods
+	//--------------------------------------------------------------------------------
+
+	
+
 }

@@ -21,7 +21,7 @@ public class Reasoning extends MusicalAgentComponent {
 
 	// TODO No caso de batch, que o process é chamado por uma thread, o que acontece com os métodos newSense e needActuatuion nesse caso?!?!
 	@Override
-	protected final boolean start() {
+	public final boolean start() {
 		
 		// Sets component type
 		setType(Constants.COMP_REASONING);
@@ -50,7 +50,7 @@ public class Reasoning extends MusicalAgentComponent {
 	}
 	
 	@Override
-	protected final boolean stop() {
+	public final boolean stop() {
 
 		// Removes the CyclicBehaviour
 		if (cyclicBehaviour != null) {
@@ -82,7 +82,7 @@ public class Reasoning extends MusicalAgentComponent {
 			// Apenas processa o raciocínio se o agente estiver ativo
 			if (getAgent().state == MA_STATE.REGISTERED) {
 			
-				MusicalAgent.logger.info("[" + getAgent().getLocalName() + "] " + "Iniciei o raciocínio");
+				MusicalAgent.logger.info("[" + getAgent().getAgentName() + "] " + "Iniciei o raciocínio");
 				
 				try {
 					process();
@@ -91,13 +91,13 @@ public class Reasoning extends MusicalAgentComponent {
 				}
 				
 //				if (getAgent().getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
-//					//System.out.println(getAgent().getLocalName() + " foi dormir!");
+//					//System.out.println(getAgent().getAgentName() + " foi dormir!");
 //					// TODO E se quiser dormir mais de 1 turno???
 //					long when = (long)clock.getCurrentTime(TimeUnit.TURNS) + 1; 
 //					setWakeUp(when);
 //				}
 //				
-				getAgent().reasoningProcessDone(getName());
+				getAgent().reasoningProcessDone(getComponentName());
 				
 			}
 			

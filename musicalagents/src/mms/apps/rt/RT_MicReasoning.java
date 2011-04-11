@@ -49,7 +49,7 @@ public class RT_MicReasoning extends Reasoning {
 		AudioFormat audioFormat = new AudioFormat(44100f, 16, 1, true, false);
 		DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
 		if (!AudioSystem.isLineSupported(info)) {
-			getAgent().logger.severe("[" + getName() + "] " + "Line not supported");
+			getAgent().logger.severe("[" + getComponentName() + "] " + "Line not supported");
 			return false;
 		}
 		try
@@ -60,7 +60,7 @@ public class RT_MicReasoning extends Reasoning {
 		}
 		catch (LineUnavailableException e)
 		{
-			getAgent().logger.severe("[" + getName() + "] " + "Line not available");
+			getAgent().logger.severe("[" + getComponentName() + "] " + "Line not available");
 			return false;
 		}
 		return true;
@@ -82,7 +82,7 @@ public class RT_MicReasoning extends Reasoning {
 		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			mouth = (Actuator)evtHdl;
 			mouth.registerListener(this);
-			mouthMemory = getAgent().getKB().getMemory(mouth.getName());
+			mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
 			chunk_size = Integer.parseInt(mouth.getParameter(Constants.PARAM_CHUNK_SIZE, "0"));
 			buffer = new byte[chunk_size*2];
 		}

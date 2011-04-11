@@ -15,7 +15,7 @@ public class LibXtract_RMS extends Process {
 	}
 
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 		// TODO Auto-generated method stub
 		return true;
 	}

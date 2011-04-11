@@ -26,13 +26,13 @@ public class CommDirect extends Comm {
 //			System.out.println("COMM = " + myAgent.getName());
 			commDirect = (CommDirectHelper)myAgent.getHelper(CommDirectService.NAME);
 		} catch (ServiceException e) {
-//			logger.severe("[" + myAgent.getLocalName() + "] " + "CommDirect service not available");
-			System.err.println("[" + myAgent.getLocalName() + "] " + "CommDirect service not available");
+//			logger.severe("[" + myAgent.getAgentName() + "] " + "CommDirect service not available");
+			System.err.println("[" + myAgent.getAgentName() + "] " + "CommDirect service not available");
 			return false;
 		}
 
 		// registrar Agente/EventHandler no Service CommDirect
-		commDirect.register(myAgent.getLocalName(), myAccessPoint, this);
+		commDirect.register(myAgent.getAgentName(), myAccessPoint, this);
 		
 		return true;
 		
@@ -41,7 +41,7 @@ public class CommDirect extends Comm {
 	@Override
 	public boolean stop() {
 		
-		commDirect.deregister(myAgent.getLocalName(), myAccessPoint);
+		commDirect.deregister(myAgent.getAgentName(), myAccessPoint);
 		
 		return true;
 		
@@ -49,7 +49,7 @@ public class CommDirect extends Comm {
 
 	@Override
 	public void receive(Event evt) {
-//		MusicalAgent.logger.info("[" + myAgent.getAID().getLocalName() + ":" + myAccessPoint + "] " + "Enviei evento via CommDirect");
+//		MusicalAgent.logger.info("[" + myAgent.getAID().getAgentName() + ":" + myAccessPoint + "] " + "Enviei evento via CommDirect");
 		//eventQueue.add(evt);
 		if (mySensor != null) {
 			mySensor.sense(evt);
@@ -60,7 +60,7 @@ public class CommDirect extends Comm {
 
 	@Override
 	public void send(Event evt) {
-//		MusicalAgent.logger.info("[" + myAgent.getAID().getLocalName() + ":" + myAccessPoint + "] " + "Enviei evento via CommDirect");
+//		MusicalAgent.logger.info("[" + myAgent.getAID().getAgentName() + ":" + myAccessPoint + "] " + "Enviei evento via CommDirect");
 		commDirect.send(evt);
 	}
 

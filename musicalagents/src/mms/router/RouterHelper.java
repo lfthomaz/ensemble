@@ -1,17 +1,11 @@
 package mms.router;
 
-import jade.core.ServiceHelper;
-
-import java.util.HashMap;
-
 import mms.Command;
-
-import com.illposed.osc.OSCListener;
-import com.illposed.osc.OSCMessage;
+import jade.core.ServiceHelper;
 
 public interface RouterHelper extends ServiceHelper {
 
-	public void sendCommand(CommandClientInterface cmdInterface, Command cmd);
+	public void sendCommand(String recipient, Command cmd);
 	
 	public RouterHelper connect(CommandClientInterface cmdInterface);
 	

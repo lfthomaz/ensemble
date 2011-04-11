@@ -65,7 +65,7 @@ public class Aubio_PitchDetection extends Process {
 	}
 
 	@Override
-	public boolean fini() {
+	public boolean finit() {
 
 		return true;
 

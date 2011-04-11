@@ -4,8 +4,6 @@ import java.util.Set;
 
 public class Command {
 
-	private String 		source;
-	private String 		recipient;
 	private String 		command;
 	private Parameters	parameters = new Parameters();
 	private Parameters	userParameters = new Parameters();
@@ -14,18 +12,6 @@ public class Command {
 		this.command = command;
 	}
 	
-	public Command(String source, String recipient, String command) {
-		this.source = source;
-		this.recipient = recipient;
-		this.command = command;
-	}
-	
-	public String getSource() {
-		return source;
-	}
-	public String getRecipient() {
-		return recipient;
-	}
 	public String getCommand() {
 		return command;
 	}
@@ -81,17 +67,6 @@ public class Command {
 	
 	public Parameters getUserParameters() {
 		return userParameters;
-	}
-	
-	public static Command parse(String source, String recipient, String str) {
-		Command cmd = Command.parse(str);
-		if (cmd != null) {
-			cmd.source = source;
-			cmd.recipient = recipient;
-			return cmd;
-		} else {
-			return null;
-		}
 	}
 	
 	public static Command parse(String str) {

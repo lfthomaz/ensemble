@@ -16,8 +16,9 @@ import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import mms.comm.Comm;
+import mms.router.CommandClientInterface;
 
-public abstract class EventServer implements Sensing, Acting {
+public abstract class EventServer implements Sensing, Acting, CommandClientInterface {
 
 	/**
 	 * Logger
@@ -116,7 +117,7 @@ public abstract class EventServer implements Sensing, Acting {
 	// TODO colocar um retorno para verificar se a configuração foi bem sucedida
 	protected final boolean start(EnvironmentAgent envAgent, Parameters parameters) {
 		
-		logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Starting initialization...");
+		logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Starting initialization...");
 
 		// TODO Verificar se está configurado, caso contrário, não libera a inicialização 
 		
@@ -139,12 +140,12 @@ public abstract class EventServer implements Sensing, Acting {
 			}
 			
 		} catch (Exception e) {
-//    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Comm class " + commType + " not found!");
+//    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Comm class " + commType + " not found!");
 			return false;
 		}
 		
 		// Registra o tipo de evento no diretório do Jade
-		envAgent.registerService(envAgent.getLocalName()+"-"+getEventType(), getEventType());
+		envAgent.registerService(envAgent.getAgentName()+"-"+getEventType(), getEventType());
 
 		// Cria o arquivo de estatísticas
 		try {
@@ -197,8 +198,8 @@ public abstract class EventServer implements Sensing, Acting {
 			// TODO talvez seja melhor que o waitTime seja um sleep, e n�o um valor adicionado ao currentTime
 			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 			
-			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
-			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
+//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
+//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
 			try {
 				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t waitTime = " + waitTime + "\n");
 				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t startTime = " + nextStateChange + "\n");
@@ -214,8 +215,8 @@ public abstract class EventServer implements Sensing, Acting {
 		}
 		
 		eventServerState = ES_STATE.INITIALIZED;
-		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Initialized");
-//		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Initialized");
+		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
+//		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
 		
 		return true;
 		
@@ -224,7 +225,7 @@ public abstract class EventServer implements Sensing, Acting {
 	// TODO Implementar a finalização segura de um EventServer
 	protected final boolean end() {
 		
-		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Finalizing the Event Server...");
+		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalizing the Event Server...");
 
 		// Chamar o código do usuário
 		try {
@@ -256,7 +257,7 @@ public abstract class EventServer implements Sensing, Acting {
 			e.printStackTrace();
 		}
 		
-		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Finalized");
+		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalized");
 		
 		return true;
 		
@@ -300,7 +301,7 @@ public abstract class EventServer implements Sensing, Acting {
 		if (eventServerState == ES_STATE.CREATED) {
 			this.commType = commType;
 		} else {
-//    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Trying to set commClass after initialization!");
+//    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Trying to set commClass after initialization!");
 		}
 	}
 
@@ -312,7 +313,7 @@ public abstract class EventServer implements Sensing, Acting {
 		if (eventServerState == ES_STATE.CREATED) {
 			this.eventType = eventType;
 		} else {
-//    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Trying to set eventType after initialization!");
+//    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Trying to set eventType after initialization!");
 		}
 	}
 
@@ -324,7 +325,7 @@ public abstract class EventServer implements Sensing, Acting {
 //		if (eventServerState == ES_STATE.CREATED) {
 //			this.eventExchange = eventExchange;
 //		} else {
-////    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Trying to set eventExchange after initialization!");
+////    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Trying to set eventExchange after initialization!");
 //		}
 //	}
 	
@@ -346,7 +347,7 @@ public abstract class EventServer implements Sensing, Acting {
 			this.periodDeadline 	= period;
 			this.waitTime 			= waitTime;
 		} else {
-//    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Trying to set eventExchange after initialization!");
+//    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Trying to set eventExchange after initialization!");
 		}
 	}
 
@@ -394,7 +395,7 @@ public abstract class EventServer implements Sensing, Acting {
 
 	public void registerEventHandler(String agentName, String eventHandlerName, String eventHandlerType, Parameters userParameters) {
 
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
 
 		// Envia os parâmetros necessários
 		Command cmd = new Command(Constants.CMD_EVENT_REGISTER_ACK);
@@ -411,7 +412,7 @@ public abstract class EventServer implements Sensing, Acting {
 				extraParameters = actuatorRegistered(agentName, eventHandlerName, userParameters);
 			} catch (Exception e) {
 				e.printStackTrace();
-//				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + "] " + "Erro ao registrar o atuador");
+//				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + "] " + "Erro ao registrar o atuador");
 			}
 
 		}
@@ -426,12 +427,12 @@ public abstract class EventServer implements Sensing, Acting {
 				extraParameters = sensorRegistered(agentName, eventHandlerName, userParameters);
 			} catch (Exception e) {
 				e.printStackTrace();
-//				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + "] " + "Erro ao registrar o sensor");
+//				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + "] " + "Erro ao registrar o sensor");
 			}
 
 		}
 		else {
-//			MusicalAgent.logger.warning("[" + envAgent.getLocalName() + "] " + "RegisterEventHandler received an strange component!");
+//			MusicalAgent.logger.warning("[" + envAgent.getAgentName() + "] " + "RegisterEventHandler received an strange component!");
 			return;
 		}
 		
@@ -456,7 +457,7 @@ public abstract class EventServer implements Sensing, Acting {
 			cmd.addUserParameters(extraParameters);
 		}
 		
-		System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + " [" + envAgent.getLocalName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
+		System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + " [" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
 		System.out.println("\t"+cmd.getParameters());
 		
 		// Send the message
@@ -475,7 +476,7 @@ public abstract class EventServer implements Sensing, Acting {
 				Command cmd = new Command(Constants.CMD_EVENT_DEREGISTER_ACK);
 				cmd.addParameter(Constants.PARAM_COMP_NAME, eventHandlerName);
 				envAgent.sendMessage(agentName, cmd);
-				System.out.println("[" + envAgent.getLocalName() + "] Actuator " + agentName + ":" + eventHandlerName + " deregistered");
+				System.out.println("[" + envAgent.getAgentName() + "] Actuator " + agentName + ":" + eventHandlerName + " deregistered");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -489,14 +490,14 @@ public abstract class EventServer implements Sensing, Acting {
 				Command cmd = new Command(Constants.CMD_EVENT_DEREGISTER_ACK);
 				cmd.addParameter(Constants.PARAM_COMP_NAME, eventHandlerName);
 				envAgent.sendMessage(agentName, cmd);
-				System.out.println("[" + envAgent.getLocalName() + "] Sensor " + agentName + ":" + eventHandlerName + " deregistered");
+				System.out.println("[" + envAgent.getAgentName() + "] Sensor " + agentName + ":" + eventHandlerName + " deregistered");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 		}
 
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + "] " + "Desregistro de " + agentName + ":" + eventHandlerName);
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + "] " + "Desregistro de " + agentName + ":" + eventHandlerName);
 
 	}
 	
@@ -512,14 +513,14 @@ public abstract class EventServer implements Sensing, Acting {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Processei o evento adiantado de " + evt.oriAgentName + ":" + evt.oriAgentCompName);
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Processei o evento adiantado de " + evt.oriAgentName + ":" + evt.oriAgentCompName);
 	}
 	
 	// TODO Pode ser um problema se o processSense() demorar muito! Mudar para Threads!!
 	public void sense(Event evt) {
 		
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Event received: " + evt);
-//		System.out.println(clock.getCurrentTime() + " [" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Event received: " + evt);
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Event received: " + evt);
+//		System.out.println(clock.getCurrentTime() + " [" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Event received: " + evt);
 
 		if (out != null) {
 			try {
@@ -532,20 +533,20 @@ public abstract class EventServer implements Sensing, Acting {
 		
 		// Verifica se o evento é do mesmo tipo do ES
 		if (!evt.eventType.equals(getEventType())) {
-//			MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Evento não é do tipo correto");
+//			MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Evento não é do tipo correto");
 			return;
 		}
 			
 		// Verifica a que janela pertence o evento
 		if (!isBatch && getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
 			if (evt.frame < workingFrame) {
-//				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame atrasado");
-				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+//				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame atrasado");
+				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if ((evt.frame == workingFrame && eventServerState != ES_STATE.WAITING_AGENTS)) {
-//				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame atrasado");
-				System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
+//				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame atrasado");
+				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if (evt.frame > workingFrame) {
@@ -558,9 +559,9 @@ public abstract class EventServer implements Sensing, Acting {
 				} finally {
 					lock.unlock();
 				}
-//				MusicalAgent.logger.warning("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Frame adiantado");
+//				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame adiantado");
 				if (evt.frame-workingFrame > 1) {
-					System.out.println("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Early frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+					System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Early frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				}
 				return;
 			}
@@ -580,7 +581,7 @@ public abstract class EventServer implements Sensing, Acting {
 			envAgent.eventProcessed();
 		}
 
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Processei o evento");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Processei o evento");
 
 	}
 	
@@ -598,7 +599,7 @@ public abstract class EventServer implements Sensing, Acting {
 			for (Event evt : outputEvents) {
 				
 				// Completa os dados do evento
-				evt.oriAgentName	 	= envAgent.getLocalName();
+				evt.oriAgentName	 	= envAgent.getAgentName();
 				evt.oriAgentCompName 	= getEventType();
 				evt.eventType 		 	= getEventType();
 				if (getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
@@ -625,7 +626,7 @@ public abstract class EventServer implements Sensing, Acting {
 		        // Avisa o Agente Ambiente do evento enviado
 		        envAgent.eventSent();
 
-//		   		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "Gerei um evento");
+//		   		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Gerei um evento");
 			
 			}
 			// Apaga a fila
@@ -728,7 +729,7 @@ public abstract class EventServer implements Sensing, Acting {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-//	    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + ">> 1 - WAITING_BEGIN <<");
+//	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 1 - WAITING_BEGIN <<");
 				nextStateChange = startTime;
 				receivingFrame++;
 				
@@ -759,7 +760,7 @@ public abstract class EventServer implements Sensing, Acting {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-//	    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + ">> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((startTime + (double)(period * workingFrame))/1000) + "s)");;
+//	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((startTime + (double)(period * workingFrame))/1000) + "s)");;
 				nextStateChange = frameTime + receiveDeadline;
 				
 				break;
@@ -796,7 +797,7 @@ public abstract class EventServer implements Sensing, Acting {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-//	    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + ">> 3 - PROCESSING << (" + elapsedTime + ") ");
+//	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 3 - PROCESSING << (" + elapsedTime + ") ");
 				
 //				System.out.println("Entrou no process()\t " + clock.getCurrentTime());
 				long time = (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
@@ -805,7 +806,7 @@ public abstract class EventServer implements Sensing, Acting {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-//	    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "process() demorou " + (clock.getCurrentTime() - time));
+//	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "process() demorou " + (clock.getCurrentTime() - time));
 //				System.out.println(clock.getCurrentTime() + "\t process() demorou " + (clock.getCurrentTime() - time));
 //				System.out.println("Saiu do process()\t " + clock.getCurrentTime());
 				try {
@@ -829,7 +830,7 @@ public abstract class EventServer implements Sensing, Acting {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-//	    		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + ">> 4 - SENDING_RESPONSE << (" + elapsedTime + ") ");
+//	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 4 - SENDING_RESPONSE << (" + elapsedTime + ") ");
 				nextStateChange = frameTime;
 				act();
 		        break;
@@ -861,6 +862,27 @@ public abstract class EventServer implements Sensing, Acting {
 	}
 	
 	//--------------------------------------------------------------------------------
+	// Command Interface
+	//--------------------------------------------------------------------------------
+	
+	@Override
+	public final String getAddress() {
+		return "/" + Constants.FRAMEWORK_NAME + "/" + envAgent.getAgentName() + "/" + getEventType();
+	}
+
+	@Override
+	public final void receiveCommand(String recipient, Command cmd) {
+        System.out.println("[" + getAddress() +"] Command received: " + cmd);
+        processCommand(recipient, cmd);
+	}
+	
+	@Override
+	public final void sendCommand(String recipient, Command cmd) {
+		envAgent.getRouter().sendCommand(recipient, cmd);
+		
+	}
+	
+	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
 	
@@ -875,7 +897,7 @@ public abstract class EventServer implements Sensing, Acting {
 	 * @throws Exception
 	 */
 	protected boolean init(Parameters parameters) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "init()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
 		return true;
 	}
 	
@@ -885,7 +907,7 @@ public abstract class EventServer implements Sensing, Acting {
 	 * @throws Exception
 	 */
 	protected boolean finit() throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "init()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
 		return true;
 	}
 
@@ -893,7 +915,7 @@ public abstract class EventServer implements Sensing, Acting {
 	 * Método chamado ao receber um evento. Deve armazenar os eventos recebidos em uma estrutura de dados, para depois ser processado.
 	 */
 	protected void processSense(Event evt) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "processSense()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "processSense()");
 	}
 
 	/**
@@ -903,7 +925,7 @@ public abstract class EventServer implements Sensing, Acting {
 	 * @throws Exception
 	 */
 	protected Event processAction(Event evt) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "processAction()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "processAction()");
 		return evt;
 	}
 	
@@ -914,32 +936,25 @@ public abstract class EventServer implements Sensing, Acting {
 	 */
 	// TODO Pode lançar um TimeOutException caso não seja executada no tempo necessário!
 	protected void process() throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "process()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "process()");
 	}
 
 	protected Parameters actuatorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "actuatorRegistered()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "actuatorRegistered()");
 		return null;
 	}
 	
 	protected void actuatorDeregistered(String agentName, String eventHandlerName) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "actuatorDeregistered()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "actuatorDeregistered()");
 	}
 	
 	protected Parameters sensorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "sensorRegistered()");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "sensorRegistered()");
 		return null;
 	}
 	
 	protected void sensorDeregistered(String agentName, String eventHandlerName) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getLocalName() + ":" + getEventType() + "] " + "sensorDeregistered()");
-	}
-
-	/**
-	 * 
-	 */
-	public void processCommand(Command cmd) {
-		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType()  +"] " + "User command received: " + cmd);
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "sensorDeregistered()");
 	}
 
 	/**
@@ -947,7 +962,11 @@ public abstract class EventServer implements Sensing, Acting {
 	 * @param paramName
 	 */
 	public void parameterUpdated(String paramName) {
-		System.out.println("[" + envAgent.getLocalName() + ":" + getEventType()  +"] " + "Parameter '" + paramName + "'updated");
+		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType()  +"] " + "Parameter '" + paramName + "'updated");
 	}
-	
+
+	@Override
+	public void processCommand(String recipient, Command cmd) {
+	}
+
 }

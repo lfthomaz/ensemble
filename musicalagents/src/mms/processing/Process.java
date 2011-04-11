@@ -18,8 +18,7 @@ public abstract class Process implements LifeCycle {
 	}
 	
 	@Override
-	public boolean configure(Parameters args) {
-		this.arguments = args;
+	public boolean configure() {
 		return true;
 	}
 	
@@ -41,6 +40,11 @@ public abstract class Process implements LifeCycle {
 		
 	}
 
+	@Override
+	public boolean stop() {
+		return true;
+	}
+	
 	/**
 	 * Process method
 	 * @param arguments
@@ -48,12 +52,6 @@ public abstract class Process implements LifeCycle {
 	 * @return
 	 */
 	public abstract Object process(Parameters arguments, Object in);
-	
-	@Override
-	public boolean end() {
-	
-		return true;
 
-	}
 
 }

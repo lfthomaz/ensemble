@@ -3,7 +3,6 @@ package mms.apps.cp;
 import java.util.ArrayList;
 
 import mms.Actuator;
-import mms.Command;
 import mms.Constants;
 import mms.EventHandler;
 import mms.MusicalAgent;
@@ -79,7 +78,8 @@ public class CP_Reasoning extends Reasoning {
 	// Buffers de trabalho
 	private double[] chunk;
 	
-	protected boolean init() {
+	@Override
+	public boolean init() {
 		
 		// Gets and checks arguments from the KB
 		String arg_filename = getAgent().getKB().readFact("wavetable");
@@ -128,7 +128,7 @@ public class CP_Reasoning extends Reasoning {
 			// TODO Fazer checagens de tamanho do arquivo
 			wavetable = in.readNextChunk((int)samples);
 		} catch (Exception e) {
-			getAgent().logger.severe("[" + getName() + "] " + "Error in opening the file " + arg_filename);
+			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
 			return false;
 		}
 		
@@ -201,7 +201,7 @@ public class CP_Reasoning extends Reasoning {
 			
 			mouth = (Actuator)evtHdl;
 			mouth.registerListener(this);
-			mouthMemory = getAgent().getKB().getMemory(mouth.getName());
+			mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
 			chunk_size = Integer.parseInt(mouth.getParameter(Constants.PARAM_CHUNK_SIZE, "0"));
 			start_time = Integer.parseInt(mouth.getParameter(Constants.PARAM_START_TIME, "0"));
 			chunk = new double[chunk_size];
@@ -213,19 +213,19 @@ public class CP_Reasoning extends Reasoning {
 			
 			ear = (Sensor)evtHdl;
 			ear.registerListener(this);
-			earMemory = getAgent().getKB().getMemory(ear.getName());
+			earMemory = getAgent().getKB().getMemory(ear.getComponentName());
 			
 		} else if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_MOVEMENT)) {
 			
 			legs = (Actuator)evtHdl;
 			legs.registerListener(this);
-			legsMemory = getAgent().getKB().getMemory(legs.getName());
+			legsMemory = getAgent().getKB().getMemory(legs.getComponentName());
 				
 		} else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_MOVEMENT)) {
 			
 			eyes = (Sensor)evtHdl;
 			eyes.registerListener(this);
-			eyesMemory = getAgent().getKB().getMemory(eyes.getName());
+			eyesMemory = getAgent().getKB().getMemory(eyes.getComponentName());
 				
 		}
 		
@@ -340,7 +340,7 @@ public class CP_Reasoning extends Reasoning {
 				mouthMemory.writeMemory(chunk, instant, duration, TimeUnit.SECONDS);
 				mouth.act();
 			} catch (MemoryException e1) {
-				MusicalAgent.logger.warning("[" + getAgent().getLocalName() + ":" + getName() + "] " + "Não foi possível armazenar na memória");
+				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 			}
 			
 			break;

@@ -6,7 +6,7 @@ public interface LifeCycle {
 	 * User-implemented method that configures the component, setting up arguments and essential properties
 	 * @param args
 	 */
-	public boolean configure(Parameters args);
+	public boolean configure();
 	
 	/**
 	 * System-implemented initialization method
@@ -25,13 +25,13 @@ public interface LifeCycle {
 	 * User-implemented finalization method, called by end()
 	 * @return 
 	 */
-	public boolean fini();
+	public boolean finit();
 	
 	/**
 	 * System-implemented finalization method
 	 * @return 
 	 */
-	public boolean end();
+	public boolean stop();
 	
 	public void setParameters(Parameters parameters);
 	

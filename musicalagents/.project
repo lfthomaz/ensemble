@@ -3,7 +3,6 @@
 	<name>musicalagents</name>
 	<comment></comment>
 	<projects>
-		<project>javaosc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

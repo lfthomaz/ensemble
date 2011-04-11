@@ -6,7 +6,7 @@ import mms.Parameters;
 
 public class RT_EnvironmentAgent extends EnvironmentAgent {
 
-	public void configure() {
+	public boolean configure() {
 		
 		Parameters parameters;
 		
@@ -27,10 +27,7 @@ public class RT_EnvironmentAgent extends EnvironmentAgent {
 		parameters.put("es_period", "100 45 90 5000");
 		addEventServer("mms.audio.AudioEventServerSimple", null);
 		
+		return true;
 	}
 	
-	@Override
-	protected void init() {
-	}
-
 }
