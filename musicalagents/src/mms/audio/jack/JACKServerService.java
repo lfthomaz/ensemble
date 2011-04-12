@@ -113,9 +113,8 @@ public class JACKServerService extends BaseService {
 													JackPortFlags.JackPortIsOutput);
 			// If specified, connects the port
 			if (connectPort != null && !connectPort.equals("")) {
-				System.out.println("connectPort = " + connectPort);
 				// Searches the desired playback port
-				String[] playback_ports = mmsjack.jack_get_ports(info.client, connectPort, null,JackPortFlags.JackPortIsPhysical|JackPortFlags.JackPortIsInput);
+				String[] playback_ports = mmsjack.jack_get_ports(info.client, connectPort, null, JackPortFlags.JackPortIsInput);
 				if (playback_ports == null) {
 					System.err.println("[" + getName() + "] Cannot find any physical playback ports");
 					return false;
@@ -164,7 +163,7 @@ public class JACKServerService extends BaseService {
 			// If specified, connects the port
 			if (connectPort != null && !connectPort.equals("")) {
 				// Searches the desired playback port
-				String[] capture_ports = mmsjack.jack_get_ports(info.client, connectPort, null, JackPortFlags.JackPortIsPhysical|JackPortFlags.JackPortIsOutput);
+				String[] capture_ports = mmsjack.jack_get_ports(info.client, connectPort, null, JackPortFlags.JackPortIsOutput);
 				if (capture_ports == null) {
 					System.err.println("[" + getName() + "] Cannot find any physical capture ports");
 					return false;
