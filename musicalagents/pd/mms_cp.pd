@@ -9,7 +9,7 @@
 ;
 #X msg 58 110 send /mmf/environment delete_agent Follower_2;
 #X msg 71 391 send /mmf/Environment/Movement pos \$1 \$2 \$3 \$4;
-#X msg 26 60 send /mmf/Listener add_component Sensor AUDIO (pos (1
+#X msg 26 60 send /mms/Listener add_component Sensor AUDIO (pos (1
 \; 0 \; 0);
 #X connect 0 0 8 0;
 #X connect 1 0 2 0;

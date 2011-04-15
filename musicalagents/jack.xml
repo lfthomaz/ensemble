@@ -28,23 +28,23 @@
 			<FACT NAME="filename" VALUE="" PUBLIC="false" />
 		</KB>
 		<COMPONENTS>
-			<REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_Reasoning" CYCLIC="false" />
+			<REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_Reasoning" />
 			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
 	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
-			<REASONING NAME="AudioReasoning_left" CLASS="mms.audio.jack.JACKOutputReasoning" CYCLIC="false" />
+			<REASONING NAME="AudioReasoning_left" CLASS="mms.audio.jack.JACKOutputReasoning" />
 			<!-- <REASONING NAME="AudioReasoning_right" CLASS="mms.audio.jack.JACKOutputReasoning" CYCLIC="false" /> -->
-			<SENSOR NAME="ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(-2;0;0)"/>
+			<SENSOR NAME="ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(0;0;0)"/>
 			<!-- <SENSOR NAME="ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/> -->
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
 	<MUSICAL_AGENT_CLASS NAME="PLAYER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
-			<REASONING NAME="AudioReasoning" CLASS="mms.audio.jack.JACKInputReasoning" CYCLIC="false" />
+			<REASONING NAME="AudioReasoning" CLASS="mms.audio.jack.JACKInputReasoning" />
 			<SENSOR NAME="mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(0;0;0)"/>
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
@@ -63,7 +63,11 @@
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
-		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;system:capture_1" />
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output1" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Player_2" CLASS="PLAYER">
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output0" />
 	</MUSICAL_AGENT>
 
 </MMS>

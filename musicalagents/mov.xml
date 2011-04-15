@@ -21,7 +21,7 @@
 
 	<MUSICAL_AGENT_CLASS NAME="WALKER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
-			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" CYCLIC="true" />
+			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" REASONING_MODE="CYCLIC" />
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
