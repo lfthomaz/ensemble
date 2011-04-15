@@ -4,8 +4,6 @@ import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
-import aubio.*;
-
 import mms.Parameters;
 import mms.processing.audio.Aubio_FFT;
 import mms.processing.audio.Aubio_Onset;
@@ -45,7 +43,6 @@ public class ProcessFactory {
 
 	// Static initializer code
 	static {
-		
 		// Try to load external libraries
 		for (int i = 0; i < libraries.length; i++) {
 			try {
@@ -105,13 +102,11 @@ public class ProcessFactory {
 		proc.setParameters(arguments);
 		proc.configure();
 		proc.start();
-		proc.init();
 
 		return proc;
 	}
 	
 	public static void deleteAudioProcessor(Process proc) {
-		proc.finit();
 		proc.stop();
 	}
 
@@ -124,7 +119,7 @@ public class ProcessFactory {
 		// Open input file
 		AudioInputFile in_file = null;
 		try {
-			in_file = new AudioInputFile("sine_440_660.wav", true);
+			in_file = new AudioInputFile("media/sine_440_660.wav", true);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(-1);

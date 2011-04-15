@@ -42,6 +42,9 @@ public abstract class Process implements LifeCycle {
 
 	@Override
 	public boolean stop() {
+		
+		finit();
+		
 		return true;
 	}
 	

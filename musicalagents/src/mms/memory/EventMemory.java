@@ -137,6 +137,7 @@ public class EventMemory extends Memory {
 	@Override
 	public void resetMemory() {
 		head = null;
+		size = 0;
 	}
 
 	@Override

@@ -458,7 +458,6 @@ public abstract class EventServer implements Sensing, Acting, CommandClientInter
 		}
 		
 		System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + " [" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
-		System.out.println("\t"+cmd.getParameters());
 		
 		// Send the message
 		envAgent.sendMessage(agentName, cmd);

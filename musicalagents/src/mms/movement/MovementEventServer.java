@@ -78,24 +78,6 @@ public class MovementEventServer extends EventServer {
 			movMemory.start(envAgent, entityName, 5.0, 0, null);
 		}
 
-		// Verifies if there is an initial position for the entity and writes it in the memory
-		MovementState movState = new MovementState(world.dimensions);
-		movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
-		Vector position = (Vector)world.getEntityStateAttribute(entityName, "POSITION");
-		if (position != null) { 
-			movState.position = position;
-		}
-		movState.position = new Vector(world.dimensions);
-		movState.velocity = new Vector(world.dimensions);
-		movState.acceleration = new Vector(world.dimensions);
-		movState.orientation = new Vector(world.dimensions);
-		movState.angularVelocity = new Vector(world.dimensions);
-		try {
-			movMemory.writeMemory(movState);
-		} catch (MemoryException e) {
-			e.printStackTrace();
-		}
-		
 		return movMemory;
 		
 	}
@@ -112,7 +94,6 @@ public class MovementEventServer extends EventServer {
 		}
 
 //		System.out.println(entity + " newState = " + newState.position);
-		
 //		System.out.println("\tpos = " + newState.position);
 //		System.out.println("\tvel = " + newState.velocity);
 //		System.out.println("\tacc = " + newState.acceleration);
@@ -285,12 +266,17 @@ public class MovementEventServer extends EventServer {
 				for (int i = 0; i < world.dimensions; i++) {
 					movState.position.setValue(i, Math.random() * world.form_size - world.form_size_half);
 				}
-				System.out.println(agentName + " position is " + movState.position);
 			} else {
 				movState.position = Vector.parse(pos);
 			}
 		} else {
-			movState.position = new Vector(world.dimensions);
+			// Verifies if there is an initial position for the entity and writes it in the memory
+			Vector position = (Vector)world.getEntityStateAttribute(agentName, "POSITION");
+			if (position != null) { 
+				movState.position = position;
+			} else {
+				movState.position = new Vector(world.dimensions);
+			}
 		}
 		if (userParam.containsKey("vel")) {
 			movState.velocity = Vector.parse(userParam.get("vel"));
@@ -308,7 +294,7 @@ public class MovementEventServer extends EventServer {
 		// Writes the new movement state
 		movMemory.writeMemory(movState);
 
-    	// Inserts an attribute in the Entity State
+		// Inserts an attribute in the Entity State
     	world.addEntityStateAttribute(agentName, "MOVEMENT", movMemory);
     	
 		String[] sensors = searchRegisteredEventHandler(agentName, "", Constants.EVT_MOVEMENT, Constants.COMP_SENSOR);
@@ -347,20 +333,38 @@ public class MovementEventServer extends EventServer {
     		cmd.addParameter("CONTENT", str);
     		sendCommand("/pd", cmd); 
     	}
-
+    	
 		return userParam;
 		
 	}
 	
 	@Override
-	protected Parameters sensorRegistered(String agentName,
-			String eventHandlerName, Parameters userParam) throws Exception {
+	protected Parameters sensorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
 		
 		// Gets the Movement Memory
 		Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
 		// If there is no memory, creates one for this entity
 		if (movMemory == null) {
 			movMemory = createEntityMemory(agentName);
+		}
+
+		// Verifies if there is an initial position for the entity and writes it in the memory
+		MovementState movState = new MovementState(world.dimensions);
+		movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
+		Vector position = (Vector)world.getEntityStateAttribute(agentName, "POSITION");
+		if (position != null) { 
+			movState.position = position;
+		} else {
+			movState.position = new Vector(world.dimensions);
+		}
+		movState.velocity = new Vector(world.dimensions);
+		movState.acceleration = new Vector(world.dimensions);
+		movState.orientation = new Vector(world.dimensions);
+		movState.angularVelocity = new Vector(world.dimensions);
+		try {
+			movMemory.writeMemory(movState);
+		} catch (MemoryException e) {
+			e.printStackTrace();
 		}
 
 		return userParam;
@@ -391,8 +395,6 @@ public class MovementEventServer extends EventServer {
 	@Override
 	public void processCommand(String recipient, Command cmd) {
 
-		System.out.println("[MOVEMENT] ENTROU NO processCommand()");
-		
 		// TODO Problemas com a conversão de arguments para Float
 		// TODO Se eu mudar a posição aqui, vai mandar uma atualizaçai de volta para o gui??
 		if (cmd.getCommand().equals("MOVEMENT_UPDATE")) {

@@ -44,7 +44,7 @@ public final class Constants {
 	public static final String	PARAM_NUMBER_EVT_SENT 	= "PARAM_NUMBER_EVT_SENT";
 	public static final String	PARAM_FACT_NAME			= "FACT_NAME";
 	public static final String	PARAM_FACT_VALUE 		= "FACT_VALUE";
-	public static final String	PARAM_REAS_CYCLIC 		= "CYCLIC";
+	public static final String	PARAM_REASONING_MODE 	= "REASONING_MODE";
 	public static final String 	PARAM_MEMORY	 		= "MEMORY";
 	public static final String 	PARAM_REL_POS 			= "RELATIVE_POSITION";
 	

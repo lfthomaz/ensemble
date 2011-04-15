@@ -65,7 +65,7 @@ public class Aubio_Onset extends Process {
 			}
 			aubiowrapper.aubio_pvoc_do (pv, ibuf, fftgrain);
 			aubiowrapper.aubio_onsetdetection(o, fftgrain, onset);
-		    boolean isonset = aubiowrapper.aubio_peakpick_pimrt(onset, parms);
+		    boolean isonset = aubiowrapper.aubio_peakpick_pimrt(onset, 	);
 			if (isonset) {
 				/* test for silence */
 				if (aubiowrapper.aubio_silence_detection(ibuf, silence)==1) {

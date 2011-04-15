@@ -9,13 +9,20 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
+import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentState;
 
 public class Reasoning extends MusicalAgentComponent {
 
+	enum ReasoningMode {NEED_ACTION, PERIODIC, CYCLIC};
+	
+	private ReasoningMode reasoningMode;
+	private long reasoningPeriod = 0;
+	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 	Behaviour cyclicBehaviour = null;
+//	ReasonCyclic cyclicBehaviour = null;
 	
 	VirtualClockHelper clock;
 
@@ -29,6 +36,22 @@ public class Reasoning extends MusicalAgentComponent {
 		// Gets clock service
 		clock = getAgent().getClock();
 
+		System.out.println("PARAMETERS " + parameters);
+		
+		// Sets reasoning mode
+		String rm = parameters.get(Constants.PARAM_REASONING_MODE, "NEED_ACTION");
+		if (rm.equals("PERIODIC")) {
+			reasoningMode = ReasoningMode.PERIODIC;
+			reasoningPeriod = Long.valueOf(parameters.get(Constants.PARAM_PERIOD, "100"));
+			System.out.println("reasoningPeriod = " + reasoningPeriod);
+		}
+		else if (rm.equals("CYCLIC")) {
+			reasoningMode = ReasoningMode.CYCLIC;
+		}
+		else {
+			reasoningMode = ReasoningMode.NEED_ACTION;
+		}
+		
 		// TODO Verificar quais são os eventHandlers necessários para o funcionamento do raciocinio
 		
 		// Calls user initialization code
@@ -40,9 +63,35 @@ public class Reasoning extends MusicalAgentComponent {
 		setState(EA_STATE.INITIALIZED);
 		
 		// Cycle Behaviour que controla o raciocínio
-		if (parameters.get(Constants.PARAM_REAS_CYCLIC, "false").equals("true")) {
-			cyclicBehaviour = new ReasonCyclic(getAgent()); 
+		switch (reasoningMode) {
+		case PERIODIC:
+			cyclicBehaviour = new TickerBehaviour(getAgent(), reasoningPeriod) {
+				@Override
+				protected void onTick() {
+					try {
+						process();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
 			getAgent().addBehaviour(tbf.wrap(cyclicBehaviour));
+			break;
+		case CYCLIC:
+			cyclicBehaviour = new CyclicBehaviour() {
+				@Override
+				public void action() {
+					try {
+						process();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			getAgent().addBehaviour(tbf.wrap(cyclicBehaviour));
+			break;
+		default:
+			break;
 		}
 
 		return true;
@@ -112,15 +161,14 @@ public class Reasoning extends MusicalAgentComponent {
 	 */
 	private class ReasonCyclic extends CyclicBehaviour {
 
+		protected boolean finished = false;
+		
 		public ReasonCyclic(Agent a) {
 			super(a);
 		}
 		
 		public void action() {
-			try {
-				process();
-			} catch (Exception e) {
-				e.printStackTrace();
+			while (!finished) {
 			}
 		}
 	

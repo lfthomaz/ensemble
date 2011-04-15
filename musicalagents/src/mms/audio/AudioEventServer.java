@@ -57,6 +57,7 @@ public class AudioEventServer extends EventServer {
     private int 	CHUNK_SIZE 			= 4410;
     private int 	NUMBER_OF_POINTS	= 3;
     private PROCESS_MODE mode 			= PROCESS_MODE.POL_INT;
+    private boolean LOOP_HEARING 		= false;
 	
     // Table that stores the last calculated delta of each pair
 //    double[] deltas, deltas_1, deltas_2, deltas_3;
@@ -87,7 +88,6 @@ public class AudioEventServer extends EventServer {
 			setCommType("mms.comm.direct.CommDirect");
 		}
 		if (parameters.containsKey(Constants.PARAM_COMM_CLASS)) {
-			System.out.println("PARAMETERS = " + parameters);
 			String[] str = (parameters.get(Constants.PARAM_PERIOD)).split(" ");
 			setEventExchange(Integer.valueOf(str[0]), Integer.valueOf(str[1]), Integer.valueOf(str[2]), Integer.valueOf(str[3]));
 		} else {
@@ -206,7 +206,7 @@ public class AudioEventServer extends EventServer {
 	@Override
 	public void process() {
 		
-		long time_process = System.nanoTime();
+//		long time_process = System.nanoTime();
 
 		// TODO Ver se vamos trabalhar com milisegundos ou segundos
 		double instant = (double)(startTime + workingFrame * period) / 1000;
@@ -238,11 +238,12 @@ public class AudioEventServer extends EventServer {
 
 				String[] actuator = a_key.split(":");
 				
-				// If it's the same agent, just copy
-				if (actuator[0].equals(sensor[0])) {
-					
-					System.arraycopy((double[])mem.readMemory(instant, (double)(CHUNK_SIZE * STEP), TimeUnit.SECONDS), 0, buf, 0, CHUNK_SIZE);
-					
+				// If it's the same agent, 
+				if (actuator[0].equals(sensor[0]) && LOOP_HEARING) {
+					double[] buf_act = (double[])mem.readMemory(instant, (double)(CHUNK_SIZE * STEP), TimeUnit.SECONDS);
+					for (int i = 0; i < buf.length; i++) {
+						buf[i] =+ buf_act[i];
+					}
 				}
 				// Else, simulates the propagation of sound
 				else {

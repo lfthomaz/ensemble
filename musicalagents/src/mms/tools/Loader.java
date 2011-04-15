@@ -58,7 +58,6 @@ public class Loader {
 	private static final String CONF_FACT = "FACT";
 	private static final String CONF_PUBLIC = "PUBLIC";
 	private static final String CONF_QUANTITY = "QUANTITY";
-	private static final String CONF_REAS_CYCLIC = "CYCLIC";
 	
 //	private Logger logger = Logger.getLogger("");
 
@@ -353,7 +352,10 @@ public class Loader {
 									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
 									args.merge(args_comp);
 									String comp_class = readAttribute(elem_reasoning, CONF_CLASS, null);
-									args.put(Constants.PARAM_REAS_CYCLIC, readAttribute(elem_reasoning, CONF_REAS_CYCLIC, "false"));
+									args.put(Constants.PARAM_REASONING_MODE, readAttribute(elem_reasoning, Constants.PARAM_REASONING_MODE, "NEED_ACTION"));
+									if (args.get(Constants.PARAM_REASONING_MODE).equals("PERIODIC")) {
+										args.put(Constants.PARAM_PERIOD, readAttribute(elem_reasoning, Constants.PARAM_PERIOD, "100"));
+									}
 									ma.addComponent(comp_name, comp_class, args);
 								} 
 								

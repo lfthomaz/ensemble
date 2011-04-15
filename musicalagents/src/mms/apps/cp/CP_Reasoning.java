@@ -129,6 +129,7 @@ public class CP_Reasoning extends Reasoning {
 			wavetable = in.readNextChunk((int)samples);
 		} catch (Exception e) {
 			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
+			System.err.println("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
 			return false;
 		}
 		
@@ -246,7 +247,7 @@ public class CP_Reasoning extends Reasoning {
 			
 			// Calcula os tempos referentes ao ínicio e fim do frame (em ms)
 			if (master) {
-				System.out.println("instant = " + instant);
+//				System.out.println("instant = " + instant);
 			}
 			
 			if (!(start_playing_time > instant * 1000 && start_playing_time > (instant + duration) * 1000)) {
@@ -368,7 +369,9 @@ public class CP_Reasoning extends Reasoning {
 				onset_args.put("start_instant", String.valueOf(instant));
 				
 				if (onsetproc != null) {
+					long now = System.currentTimeMillis();
 					Object out = onsetproc.process(onset_args, buf);
+					System.out.println("time = " + (System.currentTimeMillis() - now));
 					
 					// Beats
 					if (out != null && out instanceof double[]) {
@@ -431,7 +434,7 @@ public class CP_Reasoning extends Reasoning {
 		} else if (sourceSensor == eyes) {
 			
 			String str = (String)eyesMemory.readMemory(instant, duration, TimeUnit.SECONDS);
-			System.out.println("EYES: " + str);
+//			System.out.println("EYES: " + str);
 			
 		}
 		
@@ -486,11 +489,11 @@ public class CP_Reasoning extends Reasoning {
 				if (last_phase != actual_phase) {
 					last_phase = actual_phase;
 					// Ouve mudança de fase -> movimentar
-					String x = actual_phase == 0 || actual_phase == 3 ? "20" : "-20"; 
-					String y = actual_phase == 0 || actual_phase == 1 ? "20" : "-20";
-					String cmd = "TELEPORT :pos ("+x+";"+y+";0)";
-					legsMemory.writeMemory(cmd);
-					legs.act();
+//					String x = actual_phase == 0 || actual_phase == 3 ? "20" : "-20"; 
+//					String y = actual_phase == 0 || actual_phase == 1 ? "20" : "-20";
+//					String cmd = "TELEPORT :pos ("+x+";"+y+";0)";
+//					legsMemory.writeMemory(cmd);
+//					legs.act();
 				}
 			}
 			

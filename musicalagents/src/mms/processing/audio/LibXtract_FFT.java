@@ -1,5 +1,7 @@
 package mms.processing.audio;
 
+import java.util.concurrent.Semaphore;
+
 import xtract.core.floatArray;
 import xtract.core.xtract;
 import xtract.core.xtract_features_;
@@ -9,6 +11,9 @@ import mms.processing.Process;
 
 public class LibXtract_FFT extends Process {
 
+	// Mutex needed for safe threaded FFTW initialization
+	private static final Semaphore mutex = new Semaphore(1);
+	
 	private final String PARAM_SIZE 		= "size";
 	private final String PARAM_SAMPLE_RATE	= "sample_rate";
 	private final String PARAM_OUTPUT_TYPE 	= "output_type";
@@ -22,7 +27,7 @@ public class LibXtract_FFT extends Process {
 	private boolean inverse;
 
 	private floatArray vector;
-	private	floatArray argf = new floatArray(4);
+	private	floatArray argf = new floatArray(3);
 	private floatArray spectrum;
 
 	@Override
@@ -31,13 +36,21 @@ public class LibXtract_FFT extends Process {
 		// Validate arguments
 		fft_size = Integer.valueOf(arguments.get(PARAM_SIZE, "512"));
 		Fs = Double.valueOf(arguments.get(PARAM_SAMPLE_RATE, "44100"));
-		fft_output = arguments.get(PARAM_OUTPUT_TYPE, "polar"); // real, complex, polar
+		fft_output = arguments.get(PARAM_OUTPUT_TYPE, "real"); // real, complex, polar
 		inverse = Boolean.parseBoolean(arguments.get(PARAM_INVERSE, "false"));
 
 		vector = new floatArray(fft_size);
 		spectrum = new floatArray(fft_size);
 		
-		xtract.xtract_init_fft(fft_size, xtract_features_.XTRACT_SPECTRUM.swigValue());
+		try {
+			mutex.acquire();
+			xtract.xtract_init_fft(fft_size, xtract_features_.XTRACT_SPECTRUM.swigValue());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			mutex.release();
+		}
+
 		return true;
 		
 	}
@@ -45,7 +58,15 @@ public class LibXtract_FFT extends Process {
 	@Override
 	public boolean finit() {
 		
-		xtract.xtract_free_fft();
+		try {
+			mutex.acquire();
+			xtract.xtract_free_fft();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			mutex.release();
+		}
+
 		return true;
 		
 	}
@@ -53,12 +74,13 @@ public class LibXtract_FFT extends Process {
 	@Override
 	public Object process(Parameters arguments, Object in) {
 
-		// Valide input data
+		// Validate input data
 		if (!(in instanceof double[])) {
 			System.out.println("SPECTRUM: input must be a double[]");
 			return null;
 		}
 		double[] chunk = (double[])in;
+		
 
 		// Creates fft plan only if needed
 		if (fft_size != default_fft_size) {
@@ -69,7 +91,7 @@ public class LibXtract_FFT extends Process {
 		}
 
 		// Input vector
-		for (int i = 0; i < chunk.length; i++) {
+		for (int i = 0; i < fft_size; i++) {
 			vector.setitem(i, (float)chunk[i]);
 		}
 
@@ -77,8 +99,7 @@ public class LibXtract_FFT extends Process {
 		argf.setitem(0, (float)Fs/fft_size);
 		argf.setitem(1, xtract_spectrum_.XTRACT_MAGNITUDE_SPECTRUM.swigValue());
 		argf.setitem(2, 0.0f);
-		argf.setitem(3, 0.0f);
-		xtract.xtract_spectrum(vector.cast(), fft_size, argf.cast().getVoidPointer(), spectrum.cast());
+		xtract.xtract_spectrum(vector.cast(), fft_size, argf.cast(), spectrum.cast());
 
 		// Results
 		double[] out = new double[fft_size/2];
