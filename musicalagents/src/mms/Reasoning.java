@@ -36,14 +36,11 @@ public class Reasoning extends MusicalAgentComponent {
 		// Gets clock service
 		clock = getAgent().getClock();
 
-		System.out.println("PARAMETERS " + parameters);
-		
 		// Sets reasoning mode
 		String rm = parameters.get(Constants.PARAM_REASONING_MODE, "NEED_ACTION");
 		if (rm.equals("PERIODIC")) {
 			reasoningMode = ReasoningMode.PERIODIC;
 			reasoningPeriod = Long.valueOf(parameters.get(Constants.PARAM_PERIOD, "100"));
-			System.out.println("reasoningPeriod = " + reasoningPeriod);
 		}
 		else if (rm.equals("CYCLIC")) {
 			reasoningMode = ReasoningMode.CYCLIC;

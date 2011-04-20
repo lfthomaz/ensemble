@@ -198,8 +198,8 @@ public abstract class EventServer implements Sensing, Acting, CommandClientInter
 			// TODO talvez seja melhor que o waitTime seja um sleep, e n�o um valor adicionado ao currentTime
 			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 			
-//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
-//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
+			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
+			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
 			try {
 				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t waitTime = " + waitTime + "\n");
 				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t startTime = " + nextStateChange + "\n");

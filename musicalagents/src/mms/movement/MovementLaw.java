@@ -1,9 +1,10 @@
-package mms.world.law;
+package mms.movement;
 
-import mms.movement.MovementState;
 import mms.world.EntityState;
 import mms.world.Vector;
 import mms.world.World;
+import mms.world.law.Law;
+import mms.world.law.State;
 
 public class MovementLaw extends Law {
 
@@ -74,7 +75,7 @@ public class MovementLaw extends Law {
 
 		// Does any necessary calculation
 		double interval = instant - movPrevState.instant;
-//		System.out.printf("instant = %f\n", interval);
+//		System.out.printf("interval = %f\n", interval);
 		if (interval > 0) {
 			
 			double acc = movPrevState.acceleration.magnitude;

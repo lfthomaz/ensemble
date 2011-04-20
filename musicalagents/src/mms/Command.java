@@ -15,7 +15,15 @@ public class Command {
 	public String getCommand() {
 		return command;
 	}
-
+	
+	public boolean containsParameter(String parameter) {	
+		return parameters.containsKey(parameter);
+	}
+	
+	public boolean containsUserParameter(String parameter) {	
+		return userParameters.containsKey(parameter);
+	}
+	
 	public void addParameter(String key, String value) {
 		if (parameters == null) {
 			parameters = new Parameters();	

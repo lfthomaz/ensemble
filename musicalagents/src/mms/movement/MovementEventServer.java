@@ -85,8 +85,11 @@ public class MovementEventServer extends EventServer {
 	private MovementState updateMovementState(String entity, MovementState movState, Memory movMemory, double t) {
 
 		// Updates the movement state
+//		System.out.println("t = " + t);
+//		System.out.println("old state = " + movState.instant + " " + movState.position + " " + movState.velocity + " " + movState.acceleration);
 		MovementState newState = new MovementState(world.dimensions);
 		movLaw.changeState(movState, t, newState);
+//		System.out.println("new state = " + newState.instant + " " + newState.position + " " + newState.velocity + " " + newState.acceleration);
 		try {
 			movMemory.writeMemory(newState);
 		} catch (MemoryException e) {
@@ -202,14 +205,16 @@ public class MovementEventServer extends EventServer {
 	//		System.out.println("[MovementEventServer] processSense() = " + evt.objContent);
 			String strContent = (String)evt.objContent;
 			String entity = evt.oriAgentName;
-//			System.out.println("Processing command of '" + entity + "' at t = " + t + " " + strContent);
+			System.out.println("Processing command of '" + entity + "' at t = " + t + " " + strContent);
 	
 			// Processar novo comando
 			Command cmd = Command.parse(strContent);
 			if (cmd != null) {
 				// Gerar um novo estado
 				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, "MOVEMENT");
-				MovementState movState = (MovementState)movMemory.readMemory(t, TimeUnit.SECONDS);
+				MovementState movState = new MovementState(world.dimensions);
+				((MovementState)movMemory.readMemory(t, TimeUnit.SECONDS)).copy(movState);
+				movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
 				if (movState != null) {
 			//		System.out.println("\tCommand found - " + cmd.toString());
 					if (cmd.getCommand().equals("WALK")) {

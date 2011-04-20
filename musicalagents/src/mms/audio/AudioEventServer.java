@@ -18,10 +18,10 @@ import mms.clock.TimeUnit;
 import mms.memory.AudioMemory;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
+import mms.movement.MovementLaw;
 import mms.movement.MovementState;
 import mms.world.Vector;
 import mms.world.World;
-import mms.world.law.MovementLaw;
 
 public class AudioEventServer extends EventServer {
 
@@ -434,7 +434,7 @@ public class AudioEventServer extends EventServer {
     	fh[0] = f_res[0]; fh[1] = f_res[1];
     	
     	if ((fl[0] > 0.0 && fh[0] > 0.0) || (fl[0] < 0.0 && fh[0] < 0.0)) {		
-    		System.err.println("Root must be bracketed in rtsafe");
+//    		System.err.println("Root must be bracketed in rtsafe");
     		return -1;
     	}
 		if (fl[0] == 0.0) {

@@ -3,6 +3,7 @@ package mms.apps.cp;
 import java.util.ArrayList;
 
 import mms.Actuator;
+import mms.Command;
 import mms.Constants;
 import mms.EventHandler;
 import mms.MusicalAgent;
@@ -16,6 +17,7 @@ import mms.processing.Process;
 import mms.processing.ProcessFactory;
 import mms.processing.ProcessFactory.AudioOperation;
 import mms.tools.AudioInputFile;
+import mms.world.Vector;
 
 public class CP_Reasoning extends Reasoning {
 
@@ -68,6 +70,10 @@ public class CP_Reasoning extends Reasoning {
 	int 		slide = 0;
 	int 		last_phase = 0;
 	int 		actual_phase = 0;
+
+	Vector 		master_position = new Vector(0,0,0);
+	Vector 		start_position;
+	double 		radius;
 	
 	// Listening Variables;
 	ArrayList<Long> detected_beats_time = new ArrayList<Long>();
@@ -207,8 +213,10 @@ public class CP_Reasoning extends Reasoning {
 			start_time = Integer.parseInt(mouth.getParameter(Constants.PARAM_START_TIME, "0"));
 			chunk = new double[chunk_size];
 			frame_duration = (long)Math.floor((float)chunk_size / sampleRate * 1000);
-			start_playing_time = start_time + 2*frame_duration + (long)(Math.random()*(double)frame_duration);
-			System.out.println("start_playing_time = " + start_playing_time);
+			if (getAgent().getKB().readFact("role").equals("master")) {
+				start_playing_time = start_time + 2*frame_duration + (long)(Math.random()*(double)frame_duration);
+				System.out.println("start_playing_time = " + start_playing_time);
+			}
 			
 		} else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
 			
@@ -432,9 +440,16 @@ public class CP_Reasoning extends Reasoning {
 			}
 		
 		} else if (sourceSensor == eyes) {
-			
-			String str = (String)eyesMemory.readMemory(instant, duration, TimeUnit.SECONDS);
-//			System.out.println("EYES: " + str);
+
+			if (start_position == null) {
+				String str = (String)eyesMemory.readMemory(instant, TimeUnit.SECONDS);
+				Command cmd = Command.parse(str);
+				if (cmd != null) {
+					start_position = Vector.parse(cmd.getParameter("pos"));
+					radius = start_position.getDistance(master_position);
+//					System.out.println("start_position: " + start_position);
+				}
+			}
 			
 		}
 		
@@ -489,6 +504,17 @@ public class CP_Reasoning extends Reasoning {
 				if (last_phase != actual_phase) {
 					last_phase = actual_phase;
 					// Ouve mudança de fase -> movimentar
+					Command cmd = new Command("WALK");
+					double angle = actual_phase * 2 * Math.PI / number_beats;
+//					System.out.println(number_beats);
+//					System.out.println(angle);
+//					System.out.println(radius);
+					double x = master_position.getValue(0) + (radius * Math.cos(angle));
+					double y = master_position.getValue(1) + (radius * Math.sin(angle));
+					cmd.addParameter("DESTINATION", "("+x+";"+y+";0)");
+					cmd.addParameter("TIME", "1");
+					sendCommand("/mms/"+getAgent().getAgentName()+"/MovementReasoning", cmd);
+					System.out.println(getAgent().getAgentName() + " new destination =  " + "("+x+";"+y+";0)");
 //					String x = actual_phase == 0 || actual_phase == 3 ? "20" : "-20"; 
 //					String y = actual_phase == 0 || actual_phase == 1 ? "20" : "-20";
 //					String cmd = "TELEPORT :pos ("+x+";"+y+";0)";

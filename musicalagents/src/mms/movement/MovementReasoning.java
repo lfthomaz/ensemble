@@ -31,7 +31,7 @@ public class MovementReasoning extends Reasoning {
 	private Memory 		eyesMemory;
 	
 	// Waypoints
-	private ArrayList<Vector> waypoints = new ArrayList<Vector>();
+	private ArrayList<Vector> 	waypoints = new ArrayList<Vector>();
 	private ArrayList<Double> 	time_constrains = new ArrayList<Double>();
 	private boolean 			loop = false;
 	private int					active_waypoint = 0;;
@@ -39,7 +39,6 @@ public class MovementReasoning extends Reasoning {
 	private double 				last_distance = 0.0; 
 	
 	// 
-	private int 				state = 0;
 	private Vector 				actual_pos = null;
 	private Vector 				actual_vel = null;
 	private Vector 				actual_ori = null;
@@ -48,31 +47,6 @@ public class MovementReasoning extends Reasoning {
 	private double MAX_ACELERATION = 10.0;
 	
 	public boolean init() {
-		
-		// Adiciona alguns waypoints para fazer um círculo
-//		waypoints.add(new Vector(0,-40,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(28.2842712474,-28.2842712474,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(40,0,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(28.2842712474,28.2842712474,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(0,40,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(-28.2842712474,28.2842712474,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(-40,0,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(-28.2842712474,-28.2842712474,0));
-//		time_constrains.add(4.0);
-//		waypoints.add(new Vector(30,40,0));
-//		time_constrains.add(8.0);
-//		waypoints.add(new Vector(-40,-30,0));
-//		time_constrains.add(7.0);
-//		waypoints.add(new Vector(60,-80,0));
-//		time_constrains.add(10.0);
-//		loop = true;
 		
 		String str = getParameter("waypoints", null);
 		if (str != null) {
@@ -115,8 +89,26 @@ public class MovementReasoning extends Reasoning {
 			actual_vel = Vector.parse(cmd.getParameter("vel"));
 			actual_ori = Vector.parse(cmd.getParameter("ori"));
 		}
-		System.out.println(getAgent().getAgentName() + " - new position " + actual_pos + " velocity " + actual_vel);
+//		System.out.println(getAgent().getAgentName() + " - new position " + actual_pos + " velocity " + actual_vel);
 
+	}
+	
+	@Override
+	public void processCommand(String recipient, Command cmd) {
+		
+		if (cmd.getCommand().equals("WALK")) {
+			if (cmd.containsParameter("DESTINATION") && cmd.containsParameter("TIME")) {
+				System.out.println("Walking...");
+				waypoints.clear();
+				time_constrains.clear();
+				active_waypoint = 0;
+				last_distance = 0;
+				loop = false;
+				time_constrains.add(Double.valueOf(cmd.getParameter("TIME")));
+				waypoints.add(Vector.parse(cmd.getParameter("DESTINATION")));
+			}
+		}
+		
 	}
 	
 	@Override
@@ -142,12 +134,11 @@ public class MovementReasoning extends Reasoning {
 				}
 				else {
 					// Estou parado ou passei
-					if (actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance > actual_distance)) {
+					if (actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance < actual_distance)) {
 						// TODO Mudar para o m�todo de Newton!!!
 						// Calcular quanto e por quanto tempo devo acelerar
 						double time_constrain = time_constrains.get(active_waypoint);
-//						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time);
-//						System.out.println("dist_to_wp = " + dist_to_wp);
+						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time_constrain);
 						double acc_mag = MAX_ACELERATION;
 						double t1 = 0.2; 
 						boolean found = false;
@@ -179,23 +170,18 @@ public class MovementReasoning extends Reasoning {
 //						System.out.println("acc_vec = " + acc);
 						// Enviar comando
 						sendAccCommand(acc, t1);
-						
 					}
+					last_distance = actual_distance;
 				}
-			}
+			} 
+			// Não tenho destino
 			else {
-				// Estou em movimento?
+				// Se estiver em movimento, parar
 				if (actual_vel.getMagnitude() > 0) {
 					sendStopCommand();
 				}
 			}
 		
-		}
-
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 		
 	}
@@ -213,7 +199,7 @@ public class MovementReasoning extends Reasoning {
 	
 	private void sendAccCommand(Vector acc, double dur) {
 		String cmd = "WALK :acc " + acc.toString() + " :dur " + Double.toString(dur);
-//		System.out.println(cmd);
+		System.out.println("acc command: " + cmd);
 		try {
 			legsMemory.writeMemory(cmd);
 			legs.act();
