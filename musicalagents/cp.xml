@@ -6,7 +6,7 @@
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
 		<WORLD CLASS_WORLD="mms.world.World">
-			<LAW CLASS="mms.world.law.MovementLaw" />
+			<LAW CLASS="mms.movement.MovementLaw" />
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
@@ -16,7 +16,7 @@
 			<ARG NAME="friction_coefficient" VALUE="0.25" />
 			<ARG NAME="gravity" VALUE="10" />
 		</LAW>
-		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 50 80 1000">
+		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="250 150 200 1000">
 			<!-- Qualquer agente e componente pode receber argumentos, no formato abaixo, e são totalmente de responsabilidad do código do usuário -->
 			<ARG NAME="SPEED_SOUND" VALUE="343.3" />
 			<ARG NAME="REFERENCE_DISTANCE" VALUE="1.0" />
@@ -40,12 +40,10 @@
 			<FACT NAME="slide" VALUE="1" />
 		</KB>
 		<COMPONENTS>
-			<REASONING NAME="Reasoning" CLASS="mms.apps.cp.CP_Reasoning" REASONING_MODE="PERIODIC" PERIOD="50" />
+			<REASONING NAME="Reasoning" CLASS="mms.apps.cp.CP_Reasoning" REASONING_MODE="PERIODIC" PERIOD="20" />
 			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" MEMORY="mms.kb.AudioMemory" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" MEMORY="mms.kb.AudioMemory" COMM="mms.comm.direct.CommDirect" />
-			<!-- 
-			<REASONING NAME="MovementReasoning" CLASS="rt.RT_MovementReasoning" CYCLIC="true" />
-			 -->
+			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" REASONING_MODE="PERIODIC" PERIOD="50"  />
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
@@ -65,28 +63,28 @@
 	<MUSICAL_AGENT NAME="Leader" CLASS="MUSICIAN">
 		<FACT NAME="role" VALUE="master" />
 		<FACT NAME="wavetable" VALUE="media/woodblock_low.wav" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Follower_1" CLASS="MUSICIAN">
 		<FACT NAME="role" VALUE="slave" />
-		<FACT NAME="wavetable" VALUE="media/woodblock_high.wav" />
+		<FACT NAME="wavetable" VALUE="media/cowbell.wav" />
 		<FACT NAME="phase" VALUE="1" />
 		<FACT NAME="slide" VALUE="1" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-7.5;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Follower_2" CLASS="MUSICIAN">
 		<FACT NAME="role" VALUE="slave" />
-		<FACT NAME="wavetable" VALUE="media/cowbell.wav" />
+		<FACT NAME="wavetable" VALUE="media/woodblock_high.wav" />
 		<FACT NAME="phase" VALUE="1" />
 		<FACT NAME="slide" VALUE="2" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(20;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
-
+	
 	<!-- 
 	<MUSICAL_AGENT NAME="Follower_3" CLASS="MUSICIAN">
 		<FACT NAME="role" VALUE="slave" />
@@ -108,7 +106,7 @@
 	 -->
 	<MUSICAL_AGENT NAME="Listener" CLASS="LISTENER">
 		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="Ear;system:playback_1" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-2;-2;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 

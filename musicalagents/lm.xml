@@ -8,7 +8,7 @@
 		<ARG NAME="WAIT_TIME_TURN" VALUE="100" />
 		<ARG NAME="WAIT_ALL_AGENTS" VALUE="FALSE" />
 		<WORLD CLASS_WORLD="mms.apps.lm.LM_World">
-			<LAW CLASS="mms.world.law.MovementLaw" />
+			<LAW CLASS="mms.movement.MovementLaw" />
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
