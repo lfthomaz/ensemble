@@ -1,15 +1,28 @@
 package mms;
 
+import java.util.Scanner;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Command {
 
+//	private String 		recipient;
 	private String 		command;
 	private Parameters	parameters = new Parameters();
 	private Parameters	userParameters = new Parameters();
 	
 	public Command(String command) {
 		this.command = command;
+	}
+	
+	public Command(String recipient, String command) {
+		this.command = command;
+		addParameter("recipient", recipient);
+	}
+	
+	public String getRecipient() {
+		return getParameter("recipient");
 	}
 	
 	public String getCommand() {
@@ -91,13 +104,17 @@ public class Command {
 		for (int i = 1; i < strSplited.length; i++) {
 			String[] parameter = strSplited[i].split(" ");
 
-			if (parameter.length != 2) {
-				System.out.println("[ERROR] parse() - Malformed command: " + str);
-				return null;
-			}
+//			if (parameter.length != 2) {
+//				System.out.println("[ERROR] parse() - Malformed command: " + str);
+//				return null;
+//			}
 			
 			String key = parameter[0].trim();
-			String value= parameter[1].trim();
+			String value = "";
+			for (int j = 1; j < parameter.length; j++) {
+				value += parameter[j] + " ";
+			}
+			value = value.trim();
 			if (key.startsWith("user_")) {
 				key = key.replaceFirst("user_", "");
 				cmd.addUserParameter(key, value);
@@ -119,7 +136,7 @@ public class Command {
 		}
 		
 		String ret = command;
-
+		
 		Set<String> set = parameters.keySet();
 		for (String key : set) {
 			String value = parameters.get(key);
@@ -135,14 +152,29 @@ public class Command {
 		return ret;
 	}
 	
-//	public static void main(String[] args) {
-//		
+	public static void main(String[] args) {
+		
 //		String str = "EVENT-REGISTER :compSendr Foot :compType ACTUATOR :compEvtType MOVEMENT :pos_x 2 :pos_y 4";
 //		Command cmd = Command.parse(str);
 //		if (cmd != null) {
 //			System.out.println(cmd.toString());
 //		}
-//		
-//	}
+		
+		
+		String input = "TESTE :name Leandro 232;676 :teste (12;23.0;0.1) :surname \"Ferrári Thomaz\" :ble bla";
+		Command cmd = Command.parse(input);
+		System.out.println(cmd);
+//		Pattern p_param = Pattern.compile(":(\\w*)(\\s([\\S&&[^:]])*)*");
+//		Matcher matcher = p_param.matcher(input);
+//		while (matcher.find()) {
+//			System.out.println("Found: " + matcher.group());
+//		}
+//		System.out.println();
+//		Pattern p_param_2 = Pattern.compile(":(\\w*)\\s\"[\\s\\p{L}\\p{N}\\p{S}\\p{P}&&[^\"]]*\"");
+//		matcher = p_param_2.matcher(input);
+//		while (matcher.find()) {
+//			System.out.println("Found: " + matcher.group());
+//		}		
+	}
 	
 }

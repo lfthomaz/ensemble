@@ -16,9 +16,9 @@ import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import mms.comm.Comm;
-import mms.router.CommandClientInterface;
+import mms.router.RouterClient;
 
-public abstract class EventServer implements Sensing, Acting, CommandClientInterface {
+public abstract class EventServer implements Sensing, Acting, RouterClient {
 
 	/**
 	 * Logger
@@ -870,15 +870,15 @@ public abstract class EventServer implements Sensing, Acting, CommandClientInter
 	}
 
 	@Override
-	public final void receiveCommand(String recipient, Command cmd) {
+	public final void receiveCommand(Command cmd) {
         System.out.println("[" + getAddress() +"] Command received: " + cmd);
-        processCommand(recipient, cmd);
+        // TODO Se existir algum comando de controle, processar aqui
+        processCommand(cmd);
 	}
 	
 	@Override
-	public final void sendCommand(String recipient, Command cmd) {
-		envAgent.getRouter().sendCommand(recipient, cmd);
-		
+	public final void sendCommand(Command cmd) {
+		envAgent.sendCommand(cmd);
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -965,7 +965,7 @@ public abstract class EventServer implements Sensing, Acting, CommandClientInter
 	}
 
 	@Override
-	public void processCommand(String recipient, Command cmd) {
+	public void processCommand(Command cmd) {
 	}
 
 }

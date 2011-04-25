@@ -46,13 +46,14 @@ public class JACKServerService extends BaseService {
 		
 		super.boot(p);
 		
-		System.out.println("[" + getName() + "] Starting JACK server...");
+//		System.out.println("[" + getName() + "] Starting JACK server...");
 		
 		try {
 			System.loadLibrary("mmsjack");
 		} catch (UnsatisfiedLinkError  e) {
 			e.printStackTrace();
 			System.err.println("[" + getName() + "] mmsjack library not found... JACK will not be available!");
+			shutdown();
 			return;
 		}
 

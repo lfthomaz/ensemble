@@ -77,8 +77,8 @@ public class Loader {
 		p = new ProfileImpl();
 		p.setParameter(Profile.MAIN_HOST, "localhost");
 		String services = "mms.clock.VirtualClockService;" +
-							"mms.comm.direct.CommDirectService;" +
-							"mms.router.RouterService;";
+							"mms.comm.direct.CommDirectService;";
+//							"mms.router.RouterService;";
 
 		// Load Global Parameters	
 		NodeList nl = elem_mms.getElementsByTagName(CONF_GLOBAL_PARAMETERS);
@@ -86,11 +86,6 @@ public class Loader {
 			Element elem_gp = (Element)nl.item(0);
 			p.setParameter(Constants.CLOCK_MODE, readAttribute(elem_gp, Constants.CLOCK_MODE, Constants.CLOCK_CPU));
 			p.setParameter(Constants.PROCESS_MODE, readAttribute(elem_gp, Constants.PROCESS_MODE, Constants.MODE_REAL_TIME));
-			String osc = readAttribute(elem_gp, Constants.OSC, "FALSE");
-			p.setParameter(Constants.OSC, osc);
-//			if (Boolean.valueOf(osc)) {
-//				services += "mms.router.osc.OSCServerService;";
-//			}
 			String jack = readAttribute(elem_gp, Constants.JACK, "FALSE");
 			p.setParameter(Constants.JACK, jack);
 			if (Boolean.valueOf(jack)) {
@@ -102,6 +97,13 @@ public class Loader {
 
 		cc = rt.createMainContainer(p);
 		
+		AgentController ac;
+		try {
+			ac = cc.createNewAgent("Router", "mms.router.RouterAgent", null);
+			ac.start();
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private static void stopJADE() {

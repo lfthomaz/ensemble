@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.EA_STATE;
 import mms.clock.TimeUnit;
-import mms.router.CommandClientInterface;
+import mms.router.RouterClient;
 import mms.world.World;
 
 import jade.core.AID;
@@ -31,7 +31,7 @@ import jade.wrapper.ContainerController;
  * @author Leandro Ferrari Thomaz
  *
  */
-public class EnvironmentAgent extends MMSAgent implements CommandClientInterface {
+public class EnvironmentAgent extends MMSAgent {
 	
 	// ---------------------------------------------- 
 	// General variables 
@@ -150,8 +150,12 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 			waitAllAgents = Boolean.valueOf(getParameters().get(Constants.WAIT_ALL_AGENTS, "TRUE"));
 			waitTimeTurn = Long.valueOf(getParameters().get(Constants.WAIT_TIME_TURN, "100"));
 	
-			// Conecta-se ao roteador de comandos
-			getRouter().connect(this);
+//			// Conecta-se ao roteador de comandos
+//			if (getRouter() != null) {
+//				getRouter().connect(this);
+//			} else {
+//				System.err.println("[" + getAgentName() + "] " + "Router not available...");
+//			}
 
 			// 2. Cria um mundo genérico
 			Class worldClass;
@@ -177,7 +181,7 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 			for (Iterator<EventServer> iterator = servers.iterator(); iterator.hasNext();) {
 				EventServer eventServer = iterator.next();
 				eventServer.start(this, parameters);
-				getRouter().connect(eventServer);
+//				getRouter().connect(eventServer);
 			}
 	
 			// 3. Registra o Ambiente no DS
@@ -206,6 +210,18 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 		
 		return true;
 		
+	}
+	
+	@Override
+	public boolean stop() {
+		
+		// Calls the user implemented finalization method
+		finit();
+		
+//		// Disconnects from the router
+//		getRouter().disconnect(this);
+		
+		return true;
 	}
 	
 	/**
@@ -263,7 +279,7 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o EventServer
 				if (state == EA_STATE.INITIALIZED) {
 					es.start(this, arguments);
-					getRouter().connect(es);
+//					getRouter().connect(es);
 				}
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -456,8 +472,6 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 			if (msg != null) {
 				
 				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
-
-				// TODO switch com os possíveis comandos
 				String sender = msg.getSender().getLocalName();
 				Command cmd = Command.parse(msg.getContent());
 				// TODO Podemos criar aqui uma thread, assim tratamos msgs em paralelo
@@ -480,23 +494,14 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 	// ---------------------------------------------- 
 
 	@Override
-	public final String getAddress() {
-		return "/" + Constants.FRAMEWORK_NAME + "/" + getAgentName();
-	}
-
-	@Override
-	public final void sendCommand(String recipient, Command cmd) {
-//		getRouter().sendCommand(cmd);
-	}
-	
-	@Override
-	public final void receiveCommand(String recipient, Command cmd) {
+	public final void receiveCommand(Command cmd) {
 		
-        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), recipient, cmd);
+        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), cmd.getRecipient(), cmd);
         // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
-        String[] str = recipient.split("/");
+        String[] str = cmd.getRecipient().split("/");
         if (str.length == 3) {
-        	processCommand(recipient, cmd);
+        	// TODO Aqui deve ver se é um comando que ele pode processar, senão, passa para o processCommand()
+        	processCommand(cmd);
         } 
         else if (str.length > 3) {
         	if (eventServers.containsKey(str[3])) {
@@ -511,11 +516,11 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 //        			}
 //        		}
 //        		else {
-        		es.receiveCommand(recipient, cmd);
+        		es.receiveCommand(cmd);
 //       		}
         	} 
         	else {
-        		System.out.println("[" + getAddress() +"] Component does not exist: " + str[2]);
+        		System.out.println("[" + getAddress() +"] Event Server '" + str[3] + "' does not exist");
         	}
         }
 
@@ -560,8 +565,8 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 	}
 	
 	/**
-	 * Destrói um agente presente no Ambiente.
-	 * @param agentName nome do agente a ser destruido
+	 * Kills a musical agent
+	 * @param agentName Musical Agent's name 
 	 */
 	public final void destroyAgent(String agentName) {
 		
@@ -814,13 +819,25 @@ public class EnvironmentAgent extends MMSAgent implements CommandClientInterface
 	// User implemented methods
 	//--------------------------------------------------------------------------------
 
+	@Override
+	public boolean configure() {
+		return true;
+	}
+
+	@Override
+	public boolean init() {
+		return true;
+	}
+
+	@Override
+	public boolean finit() {
+		return true;
+	}
+
 	/**
 	 * Método executado pelo Ambiente, quando em modo BATCH, imediatamente antes de alterar o turno.
 	 */
 	protected void preUpdateClock() {}
 
-	@Override
-	public void processCommand(String recipient, Command cmd) {
-	}
 
 }

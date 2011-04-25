@@ -9,9 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
-import mms.router.CommandClientInterface;
-import mms.router.RouterHelper;
-import mms.router.RouterService;
+import mms.router.RouterClient;
 import mms.world.Vector;
 
 import jade.core.AID;
@@ -26,7 +24,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-public class MusicalAgent extends MMSAgent implements CommandClientInterface {
+public class MusicalAgent extends MMSAgent {
 
 	//--------------------------------------------------------------------------------
 	// Agent attributes
@@ -104,8 +102,8 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 			// Inicia a recepção de Mensagens de Controle 
 			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
 
-			// Conecta-se ao roteador de comandos
-			getRouter().connect(this);
+//			// Conecta-se ao roteador de comandos
+//			getRouter().connect(this);
 			
 			// Registrar-se no Ambiente (necessário tanto em BATCH como em REAL_TIME)
 			DFAgentDescription template = new DFAgentDescription();
@@ -161,8 +159,8 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 					else if (comp instanceof Reasoning) {
 						numberReasoning++;
 					}
-					// Connects de Component to the Rotuer
-					getRouter().connect(comp);
+//					// Connects de Component to the Rotuer
+//					getRouter().connect(comp);
 				}
 			}
 			
@@ -171,8 +169,6 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 			
 			// Fim da inicialização do Agente Musical
 			state = MA_STATE.INITIALIZED;
-//			logger.info("[" + this.getAgentName() + "] " + "Initialized");
-			System.out.println("[" + this.getAgentName() + "] " + "Initialized");
 			
 		} finally {
 			lock.unlock();
@@ -184,10 +180,15 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 	
 	@Override
 	public final boolean stop() {
-		getRouter().disconnect(this);
-		// Calls JADE finalization method
-		this.doDelete();
+		
+		// Calls the user implemented finalization method
+		finit();
+		
+//		// Disconnects from the router
+//		getRouter().disconnect(this);
+		
 		return true;
+		
 	}
 
 	/** 
@@ -256,8 +257,8 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 						numberReasoning++;
 					}
 					// TODO Broadcast aos componentes existentes sobre o novo componente
-					// Connects de Component to the Rotuer
-					getRouter().connect(comp);
+//					// Connects de Component to the Rotuer
+//					getRouter().connect(comp);
 				}
 //				logger.info("[" + getAgentName() + "] " + "Component " + comp.getName() + " added");
 				
@@ -346,43 +347,34 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 	//--------------------------------------------------------------------------------
 
 	@Override
-	public final String getAddress() {
-		return "/" + Constants.FRAMEWORK_NAME + "/" + getAgentName();
-	}
-
-	@Override
-	public final void receiveCommand(String recipient, Command cmd) {
-        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), recipient, cmd);
-      // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
-      String[] str = recipient.split("/");
-      if (str.length == 3) {
-      	processCommand(recipient, cmd);
-      } 
-      else if (str.length > 3) {
-      	if (components.containsKey(str[3])) {
-      		MusicalAgentComponent comp = components.get(str[3]);
-      		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
-//      		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
-//      			String param = cmd.getParameter("NAME");
-//      			String value = cmd.getParameter("VALUE");
-//      			if (param != null && value != null) {
-//      				comp.addParameter(param, value);
-//      				comp.parameterUpdated(param);
-//      			}
-//      		}
-//      		else {
-      			comp.receiveCommand(recipient, cmd);
-//     		}
-      	} 
-      	else {
-      		System.out.println("[" + getAddress() +"] Component does not exist: " + str[2]);
-      	}
-      }
-	}
-	
-	@Override
-	public final void sendCommand(String recipient, Command cmd) {
-		getRouter().sendCommand(recipient, cmd);
+	public final void receiveCommand(Command cmd) {
+      
+		System.out.printf("[%s] Command received: %s - %s\n", getAddress(), cmd.getRecipient(), cmd);
+        // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
+        String[] str = cmd.getRecipient().split("/");
+        if (str.length == 3) {
+        	// TODO Aqui deve ver se é um comando que ele pode processar, senão, passa para o processCommand()
+        	processCommand(cmd);
+        } 
+        else if (str.length > 3) {
+        	if (components.containsKey(str[3])) {
+        		MusicalAgentComponent comp = components.get(str[3]);
+        		// Se for mudança de parâmetros, faz diretamente, caso contrário envia o comando para o componente
+	//      		if (cmd.getCommand().equals(Constants.CMD_PARAM)) {
+	//      			String param = cmd.getParameter("NAME");
+	//      			String value = cmd.getParameter("VALUE");
+	//      			if (param != null && value != null) {
+	//      				comp.addParameter(param, value);
+	//      				comp.parameterUpdated(param);
+	//      			}
+	//      		}
+	//      		else {
+        		comp.receiveCommand(cmd);
+	//     		}
+        	} else {
+        		System.out.println("[" + getAddress() +"] Component '" + str[3] + "' does not exist");
+        	}
+        }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -512,7 +504,7 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 
 	
 	}
-
+	
 	/**
 	 * Envia um comando para o Agente Ambiente
 	 */
@@ -544,8 +536,6 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 			if (msg != null) {
 				
 				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
-
-				// TODO switch com os poss�veis comandos
 				String sender = msg.getSender().getLocalName();
 				Command cmd = Command.parse(msg.getContent());
 				if (cmd != null) {
@@ -559,6 +549,10 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 	
 	}
 	
+	//--------------------------------------------------------------------------------
+	// 
+	//--------------------------------------------------------------------------------
+
 	/**
 	 * Classe interna que verifica se todos os componentes estão inicializados e registrados
 	 */
@@ -681,13 +675,11 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 
 		@Override
 		public void action() {
+			
 			MusicalAgent.logger.info("[" + getAgent().getAgentName() + " Killing agent '" + getAgent().getAgentName() + "'");
+			// Calls JADE finalization method
+			doDelete();
 			
-			// Calls the user implemented finalization method
-			finit();
-			
-			// Calls the MMS finalization method
-			stop();
 		}
 		
 	}
@@ -734,8 +726,18 @@ public class MusicalAgent extends MMSAgent implements CommandClientInterface {
 	//--------------------------------------------------------------------------------
 
 	@Override
-	public void processCommand(String recipient, Command cmd) {
-		
+	public boolean configure() {
+		return true;
+	}
+
+	@Override
+	public boolean init() {
+		return true;
+	}
+
+	@Override
+	public boolean finit() {
+		return true;
 	}
 	
 }

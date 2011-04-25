@@ -8,7 +8,6 @@ import mms.Constants.EH_STATUS;
 import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
-import mms.router.CommandClientInterface;
 
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;

@@ -94,7 +94,7 @@ public class MovementReasoning extends Reasoning {
 	}
 	
 	@Override
-	public void processCommand(String recipient, Command cmd) {
+	public void processCommand(Command cmd) {
 		
 		if (cmd.getCommand().equals("WALK")) {
 			if (cmd.containsParameter("DESTINATION") && cmd.containsParameter("TIME")) {

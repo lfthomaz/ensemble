@@ -1,5 +1,11 @@
 package mms.router;
 
+import jade.core.AID;
+import jade.core.Agent;
+import jade.lang.acl.ACLCodec.CodecException;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.StringACLCodec;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -13,74 +19,68 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextArea;
 
-public class ConsoleGUI extends JFrame implements CommandClientInterface {
+import mms.Command;
+
+public class ConsoleGUI extends JFrame implements RouterClient {
 
     private String myAddress = "/console/gui";
     
-    public RouterHelper router;
+//    public RouterHelper router;
 
 	private JPanel contentPane;
-	private JTextField textField;
+	private JTextField txtCommand;
 	private JTextArea textArea;
 	private JButton btnNewButton;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ConsoleGUI frame = new ConsoleGUI();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
+	private RouterAgent routerAgent;
+	private JTextField txtRecipient;
+	
 	/**
 	 * Create the frame.
 	 */
-	public ConsoleGUI() {
+	public ConsoleGUI(RouterAgent routerAgent) {
+		this.routerAgent = routerAgent;
+		
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 642, 415);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		textField = new JTextField();
-		textField.setBounds(10, 308, 606, 20);
-		contentPane.add(textField);
-		textField.setColumns(10);
+		txtCommand = new JTextField();
+		txtCommand.setBounds(10, 308, 606, 20);
+		contentPane.add(txtCommand);
+		txtCommand.setColumns(10);
+		
+		txtRecipient = new JTextField();
+		txtRecipient.setColumns(10);
+		txtRecipient.setBounds(10, 277, 606, 20);
+		contentPane.add(txtRecipient);
 		
 		textArea = new JTextArea();
-		textArea.setBounds(10, 11, 606, 286);
+		textArea.setBounds(10, 11, 606, 255);
 		contentPane.add(textArea);
 		textArea.setEditable(false);
 		
 		btnNewButton = new JButton("Send Command");
+		txtRecipient.setText("/mms/ENVIRONMENT");
+		txtCommand.setText("TESTE :key valeu :ke2 value composed");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 		        // Verifica o endereço
-		        String[] str = textField.getText().split(" ");
-		        String recipient = str[0];
+		        String recipient = txtRecipient.getText();
+	        	Command cmd = Command.parse(txtCommand.getText());
+	        	cmd.addParameter("recipient", recipient);
 		        // Se tivermos um endereço e algum comando após
-		        if (recipient.length() > 0 && str.length > 1) {
-			        String message = str[1];
-                    if (router != null) {
-                    	textArea.append("[ConsoleGUI] Sending to '" + recipient + "' command '" + str[1] + "'\n");
-                		router.sendCommand(myAddress, recipient, message);
-                    } else {
-                    	textArea.append("[ConsoleGUI] There is no router connected\n");
-                    }
-		        } else {
+		        if (cmd == null || recipient == null) {
 		        	textArea.append("[ConsoleGUI] Malformed address and/or command\n");
+		        } else {
+	            	textArea.append("[ConsoleGUI] Sending to '" + recipient + "' command '" + cmd + "'\n");
+	        		sendCommand(cmd);
 		        }
-		        textField.setText("");
+//		        txtCommand.setText("");
 			}
 		});
 		btnNewButton.setBounds(467, 339, 149, 26);
@@ -94,16 +94,17 @@ public class ConsoleGUI extends JFrame implements CommandClientInterface {
 	}
 
 	@Override
-	public void receiveCommand(String sender, String recipient, String msg) {
-    	textArea.append("[ConsoleGUI] Command received from '" + sender + "': " + msg + "\n");
+	public void receiveCommand(Command cmd) {
+    	textArea.append("[ConsoleGUI] Command received from : " + cmd + "\n");
 	}
 
 	@Override
-	public void sendCommand(String sender, String recipient, String msg) {
+	public void sendCommand(Command cmd) {
+		routerAgent.processCommand(cmd);
 	}
 
 	@Override
-	public void processCommand(String sender, String recipient, String msg) {
+	public void processCommand(Command cmd) {
 		
 	}
 }

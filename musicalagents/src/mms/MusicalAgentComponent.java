@@ -1,9 +1,9 @@
 package mms;
 
 import mms.Constants.EA_STATE;
-import mms.router.CommandClientInterface;
+import mms.router.RouterClient;
 
-public abstract class MusicalAgentComponent implements LifeCycle, CommandClientInterface {
+public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 
 	private String 			myName;
 	private MusicalAgent 	myAgent;
@@ -102,15 +102,14 @@ public abstract class MusicalAgentComponent implements LifeCycle, CommandClientI
 	}
 
 	@Override
-	public void receiveCommand(String recipient, Command cmd) {
+	public void receiveCommand(Command cmd) {
         System.out.println("[" + getAddress() +"] Command received: " + cmd);
-        processCommand(recipient, cmd);
+        processCommand(cmd);
 	}
 	
 	@Override
-	public void sendCommand(String recipient, Command cmd) {
-		getAgent().getRouter().sendCommand(recipient, cmd);
-		
+	public void sendCommand(Command cmd) {
+		getAgent().sendCommand(cmd);
 	}
 
 	//--------------------------------------------------------------------------------
@@ -136,7 +135,7 @@ public abstract class MusicalAgentComponent implements LifeCycle, CommandClientI
 	 * 
 	 */
 	@Override
-	public void processCommand(String recipient, Command cmd) {
+	public void processCommand(Command cmd) {
 		System.out.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()  +"] " + "User command received: " + cmd);
 	}
 

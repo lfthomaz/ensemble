@@ -334,9 +334,9 @@ public class MovementEventServer extends EventServer {
     		for (int i = 0; i < movState.position.dimensions; i++) {
 				str += " " + movState.position.getValue(i);
 			}
-    		Command cmd = new Command("OSC");
+    		Command cmd = new Command("/pd", "OSC");
     		cmd.addParameter("CONTENT", str);
-    		sendCommand("/pd", cmd); 
+    		sendCommand(cmd); 
     	}
     	
 		return userParam;
@@ -391,14 +391,14 @@ public class MovementEventServer extends EventServer {
 		for (int i = 0; i < state.position.dimensions; i++) {
 			str += " " + state.position.getValue(i);
 		}
-		Command cmd = new Command("OSC");
+		Command cmd = new Command("/pd", "OSC");
 		cmd.addParameter("CONTENT", str);
-		sendCommand("/pd", cmd);
+		sendCommand(cmd);
 
 	}
 	
 	@Override
-	public void processCommand(String recipient, Command cmd) {
+	public void processCommand(Command cmd) {
 
 		// TODO Problemas com a conversão de arguments para Float
 		// TODO Se eu mudar a posição aqui, vai mandar uma atualizaçai de volta para o gui??

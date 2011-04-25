@@ -2,20 +2,25 @@ package mms;
 
 import mms.clock.VirtualClockHelper;
 import mms.clock.VirtualClockService;
-import mms.router.CommandClientInterface;
-import mms.router.RouterHelper;
-import mms.router.RouterService;
+import mms.router.RouterClient;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.ServiceException;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.ThreadedBehaviourFactory;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.util.Logger;
 
-public abstract class MMSAgent extends Agent implements LifeCycle {
+public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient {
 
 	/**
 	 *  Log
 	 */
 	public static final Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	
 	/**
 	 *  Agent Parameters
 	 */
@@ -63,11 +68,11 @@ public abstract class MMSAgent extends Agent implements LifeCycle {
 	/**
 	 * Router Service
 	 */
-	private RouterHelper router;
-	
-	public RouterHelper getRouter() {
-		return router;
-	}
+//	private RouterHelper router;
+//	
+//	public RouterHelper getRouter() {
+//		return router;
+//	}
 	
 	protected boolean isBatch = false;
 	
@@ -76,7 +81,7 @@ public abstract class MMSAgent extends Agent implements LifeCycle {
 	 */
 	protected void setup() {
 		
-		System.out.println("[" + getAgentName() + "] MMSAgent setup()");
+//		System.out.println("[" + getAgentName() + "] MMSAgent setup()");
 		
 		// 1. Obtém os parâmetros de entrada do Agente
 		Object[] arguments = getArguments();
@@ -88,17 +93,23 @@ public abstract class MMSAgent extends Agent implements LifeCycle {
 		// 2. Inicializa os serviços básicos do agente
 		try {
 			clock = (VirtualClockHelper)getHelper(VirtualClockService.NAME);
-			router = (RouterHelper)getHelper(RouterService.NAME);
+//			router = (RouterHelper)getHelper(RouterService.NAME);
 		} catch (ServiceException e) {
 			logger.severe("[" + this.getAgentName() + "] " + "Service not available");
 			this.doDelete();
 		}
+		this.addBehaviour(tbf.wrap(new ReceiveCommand(this)));
 		
 		// 3. Executa o método de configuração do usuário
 		configure();
 
 		// 4. Inicializa o agente
-		start();
+		if (start()) {
+//			logger.info("[" + this.getAgentName() + "] " + "Initialized");
+			System.out.println("[" + this.getAgentName() + "] " + "Initialized");
+		} else {
+			doDelete();
+		}
 
 	}
 	
@@ -106,51 +117,74 @@ public abstract class MMSAgent extends Agent implements LifeCycle {
 	 * Finalization method called by JADE
 	 */
 	protected void takeDown() {
-		System.out.println("takeDown()");
+		
+		stop();
+		System.out.println("[" + this.getAgentName() + "] " + "Terminated");
+		
 	}
+	
+	private final class ReceiveCommand extends CyclicBehaviour {
 
+		MessageTemplate mt;
+		
+		public ReceiveCommand(Agent a) {
+			super(a);
+			mt = MessageTemplate.MatchConversationId("Router");
+		}
+		
+		public void action() {
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+//				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
+				Command cmd = Command.parse(msg.getContent());
+				if (cmd != null) {
+					receiveCommand(cmd);
+				}
+			}
+			else {
+				block();
+			}
+		}
+	
+	}
+	
+	@Override
+	public final String getAddress() {
+		return "/" + Constants.FRAMEWORK_NAME + "/" + getAgentName();
+	}
+	
+	@Override
+	public final void sendCommand(Command cmd) {
+		
+        // Verifies the destination of the command
+        String[] str = cmd.getRecipient().split("/");
+        if (str.length < 2) {
+            System.err.println("[" + getName() + "] Malformed address: " + cmd.getRecipient());
+            return;
+        }
+    
+    	// Fowards the command
+        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        msg.setSender(getAID());
+        msg.setContent(cmd.toString());
+        if (str[1].equals(Constants.FRAMEWORK_NAME)) {
+    		msg.addReceiver(new AID(str[2], AID.ISLOCALNAME));
+    		msg.setConversationId("Control");
+        } else {
+    		msg.addReceiver(new AID("Router", AID.ISLOCALNAME));
+    		msg.setConversationId("Router");
+        }
+        this.send(msg);
+
+	}
+	
 	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
 
-	/**
-	 * 
-	 */
-	public boolean configure() {
-//		System.out.println("[" + getAgentName() + "] MMSAgent configure()");
-		return true;
-	}
-	
-	/**
-	 * 
-	 */
-	public boolean start() {
-//		System.out.println("[" + getAgentName() + "] MMSAgent start()");
-		return true;
-	}
-	
-	/**
-	 * 
-	 */
-	public boolean init() {
-//		System.out.println("[" + getAgentName() + "] MMSAgent init()");
-		return true;
-	}
-	
-	/**
-	 * 
-	 */
-	public boolean finit() {
-//		System.out.println("[" + getAgentName() + "] MMSAgent finit()");
-		return true;
-	}
-
-	/**
-	 * 
-	 */
-	public boolean stop() {
-//		System.out.println("[" + getAgentName() + "] MMSAgent finit()");
-		return true;
+	@Override
+	public void processCommand(Command cmd) {
+		
 	}
 
 }

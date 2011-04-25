@@ -93,7 +93,6 @@
 		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="true" />
 		<FACT NAME="filename" VALUE="siren_2.wav" />
 	</MUSICAL_AGENT>
-	-->
 
 	<MUSICAL_AGENT NAME="Guitarist" CLASS="MUSICIAN">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;10;0)" />
@@ -112,14 +111,13 @@
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;0;0)" />
 		<FACT NAME="filename" VALUE="media/Drums_44_16.wav" />
 	</MUSICAL_AGENT>
+	-->
 
-	<!--
 	<MUSICAL_AGENT NAME="Sine" CLASS="MUSICIAN">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-20;2;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(2;0;0)" />
 		<FACT NAME="filename" VALUE="media/Sine_440_10s.wav" />
 	</MUSICAL_AGENT>
-	-->
 	
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(2;0;0)" />
@@ -127,11 +125,13 @@
 		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
 	</MUSICAL_AGENT>
 	
+	<!--
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-2;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="Ear_left;system:playback_2" />
 	</MUSICAL_AGENT>
+	-->
 
 	<!-- 	
 	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
