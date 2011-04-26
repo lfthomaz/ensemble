@@ -18,7 +18,7 @@ import mms.clock.VirtualClockHelper;
 import mms.comm.Comm;
 import mms.router.RouterClient;
 
-public abstract class EventServer implements Sensing, Acting, RouterClient {
+public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterClient {
 
 	/**
 	 * Logger
@@ -34,7 +34,7 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 	/**
 	 * Arguments
 	 */
-	Parameters parameters = null;
+	protected Parameters parameters = null;
 
 	/**
 	 * Environment Agent
@@ -114,14 +114,25 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 	 * Called by the system to initalize an EventServer.
 	 * Should not be called by the user!
 	 */
-	// TODO colocar um retorno para verificar se a configuração foi bem sucedida
-	protected final boolean start(EnvironmentAgent envAgent, Parameters parameters) {
+	@Override
+	public final boolean start() {
 		
-		logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Starting initialization...");
-
 		// TODO Verificar se está configurado, caso contrário, não libera a inicialização 
 		
-		this.envAgent = envAgent;
+		// Gets the Environment Agent
+		try {
+			envAgent = (EnvironmentAgent)parameters.getObject(Constants.PARAM_ES_AGENT);
+			if (envAgent == null) {
+				System.err.println("[EventServer] There is no EnvironmentAgent in the parameters!");
+				return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		// Gets the Event Type
+//		eventType = parameters.get(Constants.PARAM_ES_EVT_TYPE);
 		
 		// Obtém o clock
 		this.clock = envAgent.getClock();
@@ -134,7 +145,13 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 		try {
 			Class commClass = Class.forName(commType);
 			comm = (Comm)commClass.newInstance();
-			comm.configure(envAgent, this, this, getEventType());
+			Parameters commParam = new Parameters();
+			commParam.put(Constants.PARAM_COMM_AGENT, envAgent);
+			commParam.put(Constants.PARAM_COMM_SENSING, this);
+			commParam.put(Constants.PARAM_COMM_ACTING, this);
+			commParam.put(Constants.PARAM_COMM_AP, getEventType());
+			comm.setParameters(commParam);
+			comm.configure();
 			if (!comm.start()) {
 				return false;
 			}
@@ -155,10 +172,7 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 		}
 		
 		// Chama o método de inicialização do usuário
-		try {
-			init(parameters);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (!init()) {
 			return false;
 		}
 		
@@ -223,7 +237,8 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 	}
 	
 	// TODO Implementar a finalização segura de um EventServer
-	protected final boolean end() {
+	@Override
+	public final boolean stop() {
 		
 		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalizing the Event Server...");
 
@@ -248,6 +263,9 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 			String[] s_key = s.nextElement().split(":");
 			deregisterEventHandler(s_key[0], s_key[1], Constants.COMP_SENSOR);
 		}
+		
+		// Stops the communication interface
+		comm.stop();
 		
 		// Fecha o arquivo de log
 		try {
@@ -885,31 +903,6 @@ public abstract class EventServer implements Sensing, Acting, RouterClient {
 	// User implemented methods
 	//--------------------------------------------------------------------------------
 	
-	/**
-	 * User must configure here the commClass, eventType and eventExchange (and the period, if any).
-	 */
-	protected abstract void configure();
-	
-	/**
-	 * User initialization method
-	 * @param parameters
-	 * @throws Exception
-	 */
-	protected boolean init(Parameters parameters) throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
-		return true;
-	}
-	
-	/**
-	 * User finalization method
-	 * @param parameters
-	 * @throws Exception
-	 */
-	protected boolean finit() throws Exception {
-//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
-		return true;
-	}
-
 	/**
 	 * Método chamado ao receber um evento. Deve armazenar os eventos recebidos em uma estrutura de dados, para depois ser processado.
 	 */

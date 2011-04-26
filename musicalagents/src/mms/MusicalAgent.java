@@ -9,12 +9,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
-import mms.router.RouterClient;
 import mms.world.Vector;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.ServiceException;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
@@ -93,6 +91,7 @@ public class MusicalAgent extends MMSAgent {
 	/**
 	 * Inicializa o Agente Musical
 	 */
+	@Override
 	public final boolean start() {
 
 		lock.lock();

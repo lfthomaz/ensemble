@@ -52,13 +52,20 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		try {
 			Class commClass = Class.forName(commType);
 			myComm = (Comm)commClass.newInstance();
+			Parameters commParam = new Parameters();
+			commParam.put(Constants.PARAM_COMM_AGENT, getAgent());
 			if (getType().equals(Constants.COMP_SENSOR)) {
-				myComm.configure(getAgent(), (Sensing)this, null, getComponentName());
+				commParam.put(Constants.PARAM_COMM_SENSING, this);
 			} 
 			else if (getType().equals(Constants.COMP_ACTUATOR)) {
-				myComm.configure(getAgent(), null, (Actuator)this, getComponentName());
+				commParam.put(Constants.PARAM_COMM_ACTING, this);
 			}
-			myComm.start();
+			commParam.put(Constants.PARAM_COMM_AP, getComponentName());
+			myComm.setParameters(commParam);
+			myComm.configure();
+			if (!myComm.start()) {
+				return false;
+			}
 		} catch (Exception e) {
 //    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Comm class " + commType + " not found!");
 			e.printStackTrace();

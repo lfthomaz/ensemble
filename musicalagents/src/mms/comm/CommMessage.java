@@ -22,25 +22,32 @@ import jade.lang.acl.MessageTemplate;
 
 public class CommMessage extends Comm {
 
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	
 	Behaviour b = null;
 	
 	@Override
-	public final boolean start() {
+	public final boolean configure() {
+		return true;
+	}
+
+	@Override
+	public final boolean init() {
 		
 		// Creates a JADE behaviour for message receive 
 		b = new ReceiveMessages(myAgent);
-		myAgent.addBehaviour(b);
+		myAgent.addBehaviour(tbf.wrap(b));
 		
 		return true;
 		
 	}
 	
 	@Override
-	public boolean stop() {
+	public final boolean finit() {
 		
 		myAgent.removeBehaviour(b);
 		
-		return false;
+		return true;
 		
 	}
 	

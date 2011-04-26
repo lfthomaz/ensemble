@@ -1,11 +1,8 @@
 package mms.comm.direct;
 
-import mms.Acting;
 import mms.Event;
 import mms.MusicalAgent;
-import mms.Sensing;
 import mms.comm.Comm;
-import jade.core.Agent;
 import jade.core.ServiceException;
 import jade.util.Logger;
 
@@ -20,7 +17,12 @@ public class CommDirect extends Comm {
 	protected CommDirectHelper commDirect;
 	
 	@Override
-	public boolean start() {
+	public final boolean configure() {
+		return true;
+	}
+
+	@Override
+	public final boolean init() {
 		
 		try {
 //			System.out.println("COMM = " + myAgent.getName());
@@ -39,7 +41,7 @@ public class CommDirect extends Comm {
 	}
 	
 	@Override
-	public boolean stop() {
+	public final boolean finit() {
 		
 		commDirect.deregister(myAgent.getAgentName(), myAccessPoint);
 		

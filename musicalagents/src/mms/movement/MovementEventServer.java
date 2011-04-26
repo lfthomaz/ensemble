@@ -51,19 +51,27 @@ public class MovementEventServer extends EventServer {
 	private double coeficient = 0.1;
 
 	@Override
-	protected void configure() {
+	public boolean configure() {
 		setCommType("mms.comm.direct.CommDirect");
 		setEventType("MOVEMENT");
 		String[] period = getParameters().get("PERIOD", "100 1000").split(" ");
 		setEventExchange(Long.valueOf(period[0]), Long.valueOf(period[1]));
+		return true;
 	}
 	
 	@Override
-	protected boolean init(Parameters parameters) {
+	public boolean init() {
 		
 		this.world = envAgent.getWorld();
 		this.movLaw = world.getLaw("MOVEMENT");
 
+		return true;
+		
+	}
+	
+	@Override
+	public boolean finit() {
+		
 		return true;
 		
 	}

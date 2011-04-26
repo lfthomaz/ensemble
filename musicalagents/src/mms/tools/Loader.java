@@ -24,7 +24,6 @@ import mms.Constants;
 import mms.EnvironmentAgent;
 import mms.MusicalAgent;
 import mms.Parameters;
-import mms.router.Console;
 import mms.world.Vector;
 
 /**
@@ -78,7 +77,6 @@ public class Loader {
 		p.setParameter(Profile.MAIN_HOST, "localhost");
 		String services = "mms.clock.VirtualClockService;" +
 							"mms.comm.direct.CommDirectService;";
-//							"mms.router.RouterService;";
 
 		// Load Global Parameters	
 		NodeList nl = elem_mms.getElementsByTagName(CONF_GLOBAL_PARAMETERS);

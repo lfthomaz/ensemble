@@ -79,24 +79,24 @@ public class AudioEventServer extends EventServer {
 //	PrintWriter file_perf, file_perf_1, file_perf_2, file_perf_3;
 	
 	@Override
-	public void configure() {
+	public boolean configure() {
 		setEventType(Constants.EVT_AUDIO);
-		Parameters parameters = getParameters();
 		if (parameters.containsKey(Constants.PARAM_COMM_CLASS)) {
 			setCommType(parameters.get(Constants.PARAM_COMM_CLASS));
 		} else {
 			setCommType("mms.comm.direct.CommDirect");
 		}
-		if (parameters.containsKey(Constants.PARAM_COMM_CLASS)) {
+		if (parameters.containsKey(Constants.PARAM_PERIOD)) {
 			String[] str = (parameters.get(Constants.PARAM_PERIOD)).split(" ");
 			setEventExchange(Integer.valueOf(str[0]), Integer.valueOf(str[1]), Integer.valueOf(str[2]), Integer.valueOf(str[3]));
 		} else {
 			setEventExchange(500, 200, 400, 1000);
 		}
+		return true;
 	}
 
 	@Override
-	protected boolean init(Parameters parameters) {
+	public boolean init() {
 
 		// Inicialização dos parâmetros
 		this.SPEED_SOUND		= Double.valueOf(parameters.get("SPEED_SOUND", "343.3"));
@@ -144,6 +144,11 @@ public class AudioEventServer extends EventServer {
 		
 		return true;
 
+	}
+	
+	@Override
+	public boolean finit() {
+		return true;
 	}
 
 	@Override

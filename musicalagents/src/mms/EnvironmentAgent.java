@@ -180,8 +180,7 @@ public class EnvironmentAgent extends MMSAgent {
 			Collection<EventServer> servers = eventServers.values();
 			for (Iterator<EventServer> iterator = servers.iterator(); iterator.hasNext();) {
 				EventServer eventServer = iterator.next();
-				eventServer.start(this, parameters);
-//				getRouter().connect(eventServer);
+				eventServer.start();
 			}
 	
 			// 3. Registra o Ambiente no DS
@@ -258,7 +257,7 @@ public class EnvironmentAgent extends MMSAgent {
 	 * @param className classe Java do EventServer
 	 * @param arguments parâmetros a serem passados para o objeto criado
 	 */
-	public final void addEventServer(String className, Parameters arguments) {
+	public final void addEventServer(String className, Parameters esParam) {
 		
 		lock.lock();
 		try {
@@ -267,7 +266,8 @@ public class EnvironmentAgent extends MMSAgent {
 				Class esClass = Class.forName(className);
 				EventServer es = (EventServer)esClass.newInstance();
 				// Configurar o EventServer
-				es.setParameters(arguments);
+				esParam.put(Constants.PARAM_ES_AGENT, this);
+				es.setParameters(esParam);
 				es.configure();
 				// Adicionar na tabela
 				if (eventServers.containsKey(es.getEventType())) {
@@ -278,8 +278,7 @@ public class EnvironmentAgent extends MMSAgent {
 				}
 				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o EventServer
 				if (state == EA_STATE.INITIALIZED) {
-					es.start(this, arguments);
-//					getRouter().connect(es);
+					es.start();
 				}
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -305,7 +304,7 @@ public class EnvironmentAgent extends MMSAgent {
 		
 		if (eventServers.containsKey(eventType)) {
 			EventServer server = eventServers.remove(eventType);
-			server.end();
+			server.stop();
 		} else {
 			System.err.println("["+getAgentName()+"] Event server " + eventType + " does not exist.");
 		}
