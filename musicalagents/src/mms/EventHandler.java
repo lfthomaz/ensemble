@@ -60,7 +60,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			else if (getType().equals(Constants.COMP_ACTUATOR)) {
 				commParam.put(Constants.PARAM_COMM_ACTING, this);
 			}
-			commParam.put(Constants.PARAM_COMM_AP, getComponentName());
+			commParam.put(Constants.PARAM_COMM_ACCESS_POINT, getComponentName());
 			myComm.setParameters(commParam);
 			myComm.configure();
 			if (!myComm.start()) {

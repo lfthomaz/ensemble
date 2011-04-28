@@ -213,7 +213,7 @@ public class MovementEventServer extends EventServer {
 	//		System.out.println("[MovementEventServer] processSense() = " + evt.objContent);
 			String strContent = (String)evt.objContent;
 			String entity = evt.oriAgentName;
-			System.out.println("Processing command of '" + entity + "' at t = " + t + " " + strContent);
+//			System.out.println("Processing command of '" + entity + "' at t = " + t + " " + strContent);
 	
 			// Processar novo comando
 			Command cmd = Command.parse(strContent);

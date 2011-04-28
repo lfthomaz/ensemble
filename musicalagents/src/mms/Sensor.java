@@ -64,7 +64,6 @@ public class Sensor extends EventHandler implements Sensing {
 			}
 			
 			// Armazenar o evento na Base de Conhecimentos
-			getAgent().getKB().writeEventRepository(Constants.REP_TYPE_INPUT, eventType, getComponentName(), evt);
 			try {
 				if (myMemory == null) {
 					System.err.println("ERROR: no memory registered");

@@ -149,7 +149,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			commParam.put(Constants.PARAM_COMM_AGENT, envAgent);
 			commParam.put(Constants.PARAM_COMM_SENSING, this);
 			commParam.put(Constants.PARAM_COMM_ACTING, this);
-			commParam.put(Constants.PARAM_COMM_AP, getEventType());
+			commParam.put(Constants.PARAM_COMM_ACCESS_POINT, getEventType());
 			comm.setParameters(commParam);
 			comm.configure();
 			if (!comm.start()) {

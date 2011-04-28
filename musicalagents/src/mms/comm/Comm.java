@@ -49,7 +49,7 @@ public abstract class Comm implements LifeCycle {
 			myAgent = (MMSAgent)parameters.getObject(Constants.PARAM_COMM_AGENT);
 			mySensor = (Sensing)parameters.getObject(Constants.PARAM_COMM_SENSING);
 			myActuator = (Acting)parameters.getObject(Constants.PARAM_COMM_ACTING);
-			myAccessPoint = parameters.get(Constants.PARAM_COMM_AP, "");
+			myAccessPoint = parameters.get(Constants.PARAM_COMM_ACCESS_POINT, "");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

@@ -15,7 +15,7 @@ import jade.wrapper.AgentState;
 
 public class Reasoning extends MusicalAgentComponent {
 
-	enum ReasoningMode {NEED_ACTION, PERIODIC, CYCLIC};
+	enum ReasoningMode {REACTIVE, PERIODIC, CYCLIC};
 	
 	private ReasoningMode reasoningMode;
 	private long reasoningPeriod = 0;
@@ -37,7 +37,7 @@ public class Reasoning extends MusicalAgentComponent {
 		clock = getAgent().getClock();
 
 		// Sets reasoning mode
-		String rm = parameters.get(Constants.PARAM_REASONING_MODE, "NEED_ACTION");
+		String rm = parameters.get(Constants.PARAM_REASONING_MODE, "REACTIVE");
 		if (rm.equals("PERIODIC")) {
 			reasoningMode = ReasoningMode.PERIODIC;
 			reasoningPeriod = Long.valueOf(parameters.get(Constants.PARAM_PERIOD, "100"));
@@ -46,7 +46,7 @@ public class Reasoning extends MusicalAgentComponent {
 			reasoningMode = ReasoningMode.CYCLIC;
 		}
 		else {
-			reasoningMode = ReasoningMode.NEED_ACTION;
+			reasoningMode = ReasoningMode.REACTIVE;
 		}
 		
 		// TODO Verificar quais são os eventHandlers necessários para o funcionamento do raciocinio

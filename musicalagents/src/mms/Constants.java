@@ -45,7 +45,7 @@ public final class Constants {
 	public static final String	PARAM_COMM_AGENT 		= "COMM_AGENT";
 	public static final String	PARAM_COMM_SENSING		= "COMM_SENSING";
 	public static final String	PARAM_COMM_ACTING		= "COMM_ACTING";
-	public static final String 	PARAM_COMM_AP 			= "COMM_AP";
+	public static final String 	PARAM_COMM_ACCESS_POINT = "COMM_ACCESS_POINT";
 	public static final String	PARAM_TURN 				= "TURN";
 	public static final String	PARAM_NUMBER_EVT_SENT 	= "PARAM_NUMBER_EVT_SENT";
 	public static final String	PARAM_FACT_NAME			= "FACT_NAME";

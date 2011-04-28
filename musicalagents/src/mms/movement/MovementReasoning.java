@@ -134,11 +134,12 @@ public class MovementReasoning extends Reasoning {
 				}
 				else {
 					// Estou parado ou passei
+					// TODO As vezes da NullPointer aqui!
 					if (actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance < actual_distance)) {
 						// TODO Mudar para o m�todo de Newton!!!
 						// Calcular quanto e por quanto tempo devo acelerar
 						double time_constrain = time_constrains.get(active_waypoint);
-						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time_constrain);
+//						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time_constrain);
 						double acc_mag = MAX_ACELERATION;
 						double t1 = 0.2; 
 						boolean found = false;

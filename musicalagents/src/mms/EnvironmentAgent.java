@@ -65,6 +65,7 @@ public class EnvironmentAgent extends MMSAgent {
 	/**
 	 *  Tabela de fatos públicos dos agentes (Fenótipo)
 	 */
+	//TODO Faz mais sentido estar no World
 	public ConcurrentHashMap<String, String> agentsPublicFacts = new ConcurrentHashMap<String, String>();
 	
 	/**
