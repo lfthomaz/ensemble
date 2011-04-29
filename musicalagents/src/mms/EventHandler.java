@@ -98,6 +98,10 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		return eventType;
 	}
 	
+	public EH_STATUS getStatus() {
+		return status;
+	}
+	
 	public void setRelativePosition(Vector relative_position) {
 		relative_position.copy(this.relative_position);
 	}
@@ -156,9 +160,6 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	
 	public void confirmRegistration(String eventExecution, Parameters serverParameters, Parameters extraParameters) {
 
-		// Altera o status
-		this.status = EH_STATUS.REGISTERED;
-
 		this.eventExchange = eventExecution;
 
 		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC)) {
@@ -195,6 +196,9 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			act.setEventFrequency();
 		}
 		
+		// Altera o status
+		this.status = EH_STATUS.REGISTERED;
+
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getComponentName());
 		

@@ -45,6 +45,12 @@ public class PAOutputReasoning extends Reasoning {
 	public boolean init() {
 		
 		String[] str = getParameter("channel", "").split(";");
+		
+		if (str.length == 0) {
+			System.err.println("[" + getComponentName() + "] No channels configured... Aborting PA");
+			return false;
+		}
+		
 		for (int i = 0; i < str.length; i++) {
 			String[] str2 = str[i].split(":");
 			String[] str3 = str2[1].split(",");

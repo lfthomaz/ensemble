@@ -134,8 +134,8 @@ public class MovementReasoning extends Reasoning {
 				}
 				else {
 					// Estou parado ou passei
-					// TODO As vezes da NullPointer aqui!
-					if (actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance < actual_distance)) {
+					if (actual_vel != null &&
+							(actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance < actual_distance))) {
 						// TODO Mudar para o m�todo de Newton!!!
 						// Calcular quanto e por quanto tempo devo acelerar
 						double time_constrain = time_constrains.get(active_waypoint);
@@ -178,7 +178,7 @@ public class MovementReasoning extends Reasoning {
 			// Não tenho destino
 			else {
 				// Se estiver em movimento, parar
-				if (actual_vel.getMagnitude() > 0) {
+				if (actual_vel != null && actual_vel.getMagnitude() > 0) {
 					sendStopCommand();
 				}
 			}
@@ -200,7 +200,7 @@ public class MovementReasoning extends Reasoning {
 	
 	private void sendAccCommand(Vector acc, double dur) {
 		String cmd = "WALK :acc " + acc.toString() + " :dur " + Double.toString(dur);
-		System.out.println("acc command: " + cmd);
+//		System.out.println("acc command: " + cmd);
 		try {
 			legsMemory.writeMemory(cmd);
 			legs.act();

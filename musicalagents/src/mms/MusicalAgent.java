@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import mms.Constants.EH_STATUS;
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.world.Vector;
@@ -261,10 +262,11 @@ public class MusicalAgent extends MMSAgent {
 				}
 //				logger.info("[" + getAgentName() + "] " + "Component " + comp.getName() + " added");
 				
-				// Warns the Reasoning about all EventHandlers present
+				// Warns the Reasoning about all EventHandlers present that are already registered
 				if (comp instanceof Reasoning) {
 					for (MusicalAgentComponent existingComp : components.values()) {
-						if (existingComp instanceof EventHandler) {
+						if (existingComp instanceof EventHandler && 
+								((EventHandler)existingComp).getStatus() == EH_STATUS.REGISTERED) {
 							try {
 								((Reasoning)comp).eventHandlerRegistered((EventHandler)existingComp);
 							} catch (Exception e) {
