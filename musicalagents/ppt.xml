@@ -36,7 +36,7 @@
 			<REASONING NAME="AudioReasoning" CLASS="mms.apps.pp.PP_Reasoning" REASONING_MODE="REACTIVE" />
 			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Ear" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
-			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" CYCLIC="true" />
+			<REASONING NAME="MovementReasoning" CLASS="mms.movement.MovementReasoning" REASONING_MODE="CYCLIC" />
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 			<SENSOR NAME="Eyes" CLASS="mms.Sensor" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
@@ -91,7 +91,7 @@
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
 		 <ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
 		 <ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
-		<FACT NAME="instructions" VALUE="ppt_instructions.xml" />
+		<!-- <FACT NAME="instructions" VALUE="ppt_instructions.xml" /> -->
 		<FACT NAME="filename" VALUE="media/siren_2.wav" />
 	</MUSICAL_AGENT>
 	
@@ -102,14 +102,14 @@
 		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
 	</MUSICAL_AGENT>
 	
-	<!--
+	
 	<MUSICAL_AGENT NAME="Agent_1" CLASS="WALKER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
 		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-10;20;0) 2.0:(-10;-20;0) 4.0:(10;-10;0) 4.0" />
 		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
 	</MUSICAL_AGENT>
-	 
+	 <!--
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;50;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
