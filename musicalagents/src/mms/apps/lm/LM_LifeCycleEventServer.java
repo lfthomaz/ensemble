@@ -16,13 +16,19 @@ public class LM_LifeCycleEventServer extends EventServer {
 	LM_World world;
 
 	@Override
-	protected void configure() {
-		setEventType("LIFE");	
+	public boolean configure() {
+		setEventType("LIFE");
+		return true;
 	}
 
 	@Override
-	protected boolean init(mms.Parameters parameters) {
+	public boolean init() {
 		world = (LM_World)envAgent.getWorld();
+		return true;
+	}
+
+	@Override
+	public boolean finit() {
 		return true;
 	}
 

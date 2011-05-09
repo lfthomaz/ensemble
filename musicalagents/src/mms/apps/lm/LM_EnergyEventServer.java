@@ -17,13 +17,14 @@ public class LM_EnergyEventServer extends EventServer {
 	float 	food;
 	
 	@Override
-	protected void configure() {
+	public boolean configure() {
 		setEventType("ENERGY");
+		return true;
 	}
 
 	@Override
-	protected boolean init(Parameters parameters) {
-
+	public boolean init() {
+		
 		// obt�m o ambiente virtual
 		world = (LM_World)envAgent.getWorld();
 		// TODO reservar a comida para os agentes iniciais
@@ -37,9 +38,13 @@ public class LM_EnergyEventServer extends EventServer {
 				}
 			}
 		}
-		
+
 		return true;
-		
+	}
+
+	@Override
+	public boolean finit() {
+		return true;
 	}
 
 	@Override

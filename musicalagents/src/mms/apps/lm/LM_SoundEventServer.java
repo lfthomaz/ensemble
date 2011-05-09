@@ -45,11 +45,12 @@ public class LM_SoundEventServer extends EventServer {
 	Receiver 	rcv;
 	
 	@Override
-	protected void configure() {
+	public boolean configure() {
 		setEventType("SOUND");
+		return true;
 	}
 	
-	protected boolean init(Parameters parameters) {
+	public boolean init() {
 	
 		world = (LM_World)envAgent.getWorld();
 		
@@ -67,6 +68,11 @@ public class LM_SoundEventServer extends EventServer {
 		
 		return true;
 
+	}
+	
+	@Override
+	public boolean finit() {
+		return true;
 	}
 	
 	private void setSound(int x, int y, int note, int amplitude, int direction) {

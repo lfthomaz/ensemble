@@ -21,18 +21,23 @@ public class LM_MovementEventServer extends EventServer {
 	private Position 	proxPosition;
 	
 	@Override
-	protected void configure() {
-		setEventType("MOVEMENT");	
+	public boolean configure() {
+		setEventType("MOVEMENT");
+		return true;
 	}
 
 	@Override
-	protected boolean init(Parameters parameters) {
+	public boolean init() {
 		
 		world = (LM_World)envAgent.getWorld();
 		return true;
 		
 	}
 
+	@Override
+	public boolean finit() {
+		return true;
+	}
 	
 	private Position checkAgentPresence(int x, int y) {
 
