@@ -36,9 +36,10 @@
 	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
 			<REASONING NAME="AudioReasoning_left" CLASS="mms.audio.jack.JACKOutputReasoning" />
-			<!-- <REASONING NAME="AudioReasoning_right" CLASS="mms.audio.jack.JACKOutputReasoning" /> -->
-			<SENSOR NAME="ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(0;0;0)"/>
-			<!-- <SENSOR NAME="ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/> -->
+			<REASONING NAME="AudioReasoning_right" CLASS="mms.audio.jack.JACKOutputReasoning" />
+			<!-- <REASONING NAME="AudioReasoning_right" CLASS="mms.audio.jack.JACKOutputReasoning" CYCLIC="false" /> -->
+			<SENSOR NAME="ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(-2;0;0)"/>
+			<SENSOR NAME="ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/>
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
@@ -59,12 +60,22 @@
  	 
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
 		<ARG_COMP COMP="AudioReasoning_left" NAME="mapping" VALUE="ear_left;system:playback_1" />
-		<!-- <ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right;system:playback_2" /> -->
+		<ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right;system:playback_2" />
+	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
+		<ARG_COMP COMP="AudioReasoning_left" NAME="mapping" VALUE="ear_left;system:playback_1" />
+		<ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right;system:playback_2" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
 		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output1" />
 	</MUSICAL_AGENT>
+
+	<MUSICAL_AGENT NAME="Player_2" CLASS="PLAYER">
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output1" />
+	</MUSICAL_AGENT>
+
 	<!-- 
 	<MUSICAL_AGENT NAME="Player_2" CLASS="PLAYER">
 		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output0" />
