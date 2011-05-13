@@ -44,7 +44,7 @@ public class PAOutputReasoning extends Reasoning {
 	@Override
 	public boolean init() {
 		
-		String[] str = getParameter("channel", "").split(";");
+		String[] str = getParameter("mapping", "").split(";");
 		
 		if (str.length == 0) {
 			System.err.println("[" + getComponentName() + "] No channels configured... Aborting PA");
