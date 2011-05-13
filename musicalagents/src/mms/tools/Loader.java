@@ -24,7 +24,6 @@ import mms.Constants;
 import mms.EnvironmentAgent;
 import mms.MusicalAgent;
 import mms.Parameters;
-import mms.world.Vector;
 
 /**
  * Runs the system.
@@ -352,7 +351,7 @@ public class Loader {
 									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
 									args.merge(args_comp);
 									String comp_class = readAttribute(elem_reasoning, CONF_CLASS, null);
-									args.put(Constants.PARAM_REASONING_MODE, readAttribute(elem_reasoning, Constants.PARAM_REASONING_MODE, "NEED_ACTION"));
+									args.put(Constants.PARAM_REASONING_MODE, readAttribute(elem_reasoning, Constants.PARAM_REASONING_MODE, "REACTIVE"));
 									if (args.get(Constants.PARAM_REASONING_MODE).equals("PERIODIC")) {
 										args.put(Constants.PARAM_PERIOD, readAttribute(elem_reasoning, Constants.PARAM_PERIOD, "100"));
 									}
