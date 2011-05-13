@@ -13,9 +13,9 @@ import mms.Sensor;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
-import mms.processing.Process;
-import mms.processing.ProcessFactory;
-import mms.processing.ProcessFactory.AudioOperation;
+import mms.processing.Processor;
+import mms.processing.ProcessorFactory;
+import mms.processing.ProcessorFactory.AudioOperation;
 import mms.tools.AudioInputFile;
 import mms.world.Vector;
 
@@ -50,7 +50,7 @@ public class CP_Reasoning extends Reasoning {
 	private double[] 		wavetable;
 	
 	// Audio Processor - Onset Detection
-	private Process 		onsetproc;
+	private Processor 		onsetproc;
 	
 	// Common Variables
 	int 	number_beats;
@@ -191,7 +191,7 @@ public class CP_Reasoning extends Reasoning {
 			onset_args.put("frame_size", "512");
 			onset_args.put("sample_rate", "44100.0");
 			onset_args.put("onset_output", "sample");
-			onsetproc = ProcessFactory.createAudioProcessor(AudioOperation.ONSET_DETECTION, onset_args);
+			onsetproc = ProcessorFactory.createAudioProcessor(AudioOperation.ONSET_DETECTION, onset_args);
 
 			state = ReasoningState.ANALYSING;
 			
@@ -517,7 +517,7 @@ public class CP_Reasoning extends Reasoning {
 					System.out.println(getAgent().getAgentName() + " new destination =  " + "("+x+";"+y+";0)");
 //					String x = actual_phase == 0 || actual_phase == 3 ? "20" : "-20"; 
 //					String y = actual_phase == 0 || actual_phase == 1 ? "20" : "-20";
-//					String cmd = "TELEPORT :pos ("+x+";"+y+";0)";
+//					String cmd = "TRANSPORT :pos ("+x+";"+y+";0)";
 //					legsMemory.writeMemory(cmd);
 //					legs.act();
 				}

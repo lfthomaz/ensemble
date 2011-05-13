@@ -18,7 +18,7 @@ public class DummyEventServer extends EventServer {
 	@Override
 	public boolean configure() {
 		setEventType("DUMMY");
-		setEventExchange(100, 40, 80, 2000);
+		setEventExchange(1000, 100, 550, 2000);
 		return true;
 	}
 
@@ -78,7 +78,7 @@ public class DummyEventServer extends EventServer {
 	
 	@Override
 	protected void process() throws Exception {
-		System.out.println("process - " + workingFrame + " - " + eventsReceived);
+		System.out.println(eventsReceived);
 		eventsReceived = 0;
 		for (Enumeration<String> s = sensors.keys(); s.hasMoreElements();) {
 

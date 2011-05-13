@@ -3,7 +3,7 @@ package mms.processing;
 import mms.LifeCycle;
 import mms.Parameters;
 
-public abstract class Process implements LifeCycle {
+public abstract class Processor implements LifeCycle {
 
 	protected Parameters arguments;
 	

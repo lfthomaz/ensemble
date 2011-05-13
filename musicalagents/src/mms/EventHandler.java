@@ -1,5 +1,7 @@
 package mms;
 
+import java.util.ArrayList;
+
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.comm.Comm;
@@ -39,6 +41,9 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	protected long workingFrame;
 	protected long happeningFrame;
 		
+	// Lista de componentes interessados no evento
+	ArrayList<Reasoning> listeners = new ArrayList<Reasoning>();
+	
 	@Override
 	public boolean start() {
 		
@@ -204,6 +209,11 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		
 		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Register of '" + getComponentName() + "' confirmed");
 		
+	}
+	
+	// Chamado por um raciocínio para registrá-lo como listener dos eventos
+	public void registerListener(Reasoning reasoning) {
+		listeners.add(reasoning);
 	}
 	
 	/**

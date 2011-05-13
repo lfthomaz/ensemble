@@ -36,7 +36,7 @@
 	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
 			<REASONING NAME="AudioReasoning_left" CLASS="mms.audio.jack.JACKOutputReasoning" />
-			<!-- <REASONING NAME="AudioReasoning_right" CLASS="mms.audio.jack.JACKOutputReasoning" CYCLIC="false" /> -->
+			<!-- <REASONING NAME="AudioReasoning_right" CLASS="mms.audio.jack.JACKOutputReasoning" /> -->
 			<SENSOR NAME="ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(0;0;0)"/>
 			<!-- <SENSOR NAME="ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/> -->
 		</COMPONENTS>

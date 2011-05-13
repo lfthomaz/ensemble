@@ -26,6 +26,12 @@ import mms.world.law.Law;
  */
 public class MovementEventServer extends EventServer {
 
+	public static final String CMD_WALK = "WALK";
+	public static final String CMD_TURN = "TURN";
+	public static final String CMD_TRANSPORT = "TRANSPORT";
+	public static final String CMD_STOP = "STOP";
+	public static final String CMD_INFO = "INFO";
+	
 	long time_1 = 0;
 	long time_2 = 0;
 	long time_3 = 0;
@@ -225,17 +231,17 @@ public class MovementEventServer extends EventServer {
 				movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
 				if (movState != null) {
 			//		System.out.println("\tCommand found - " + cmd.toString());
-					if (cmd.getCommand().equals("WALK")) {
+					if (cmd.getCommand().equals(CMD_WALK)) {
 						// TODO Aqui deveria avaliar a possibilidade da mudança (mudanças bruscas não poderiam acontecer)
 						movState.acceleration = Vector.parse(cmd.getParameter("acc"));
-					} else if (cmd.getCommand().equals("TURN")) {
+					} else if (cmd.getCommand().equals(CMD_TURN)) {
 						movState.angularVelocity = Vector.parse(cmd.getParameter("ang_vel"));
-					} else if (cmd.getCommand().equals("STOP")) {
+					} else if (cmd.getCommand().equals(CMD_STOP)) {
 						movState.velocity.zero();
 						movState.acceleration.zero();
 						movState.angularVelocity.zero();
 						stop_command.remove(entity);
-					} else if (cmd.getCommand().equals("TELEPORT")) {
+					} else if (cmd.getCommand().equals(CMD_TRANSPORT)) {
 						movState.position = Vector.parse(cmd.getParameter("pos"));
 					}
 					// No caso do comando ter uma duração pré-definida, guardar na lista o momento em que deve parar

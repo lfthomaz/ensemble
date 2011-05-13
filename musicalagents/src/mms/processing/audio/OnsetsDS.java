@@ -3,11 +3,11 @@ package mms.processing.audio;
 import java.util.ArrayList;
 
 import mms.Parameters;
-import mms.processing.Process;
-import mms.processing.ProcessFactory;
-import mms.processing.ProcessFactory.AudioOperation;
+import mms.processing.Processor;
+import mms.processing.ProcessorFactory;
+import mms.processing.ProcessorFactory.AudioOperation;
 
-public class OnsetsDS extends Process {
+public class OnsetsDS extends Processor {
 
 	private final static double ods_log1 = -2.30258509;
 	
@@ -22,7 +22,7 @@ public class OnsetsDS extends Process {
 
 	private int N;
 	private OnsetsDS_struct ods;
-	private Process fftproc;
+	private Processor fftproc;
 	
 	enum output_type {
 		TIME,
@@ -672,7 +672,7 @@ public class OnsetsDS extends Process {
 		
 		Parameters fft_args = new Parameters();
 		fft_args.put("size", String.valueOf(N));
-		fftproc = ProcessFactory.createAudioProcessor(AudioOperation.FFT, fft_args);
+		fftproc = ProcessorFactory.createAudioProcessor(AudioOperation.FFT, fft_args);
 
 		// An instance of the OnsetsDS struct, declared/allocated somewhere in your code,
 		// however you want to do it.

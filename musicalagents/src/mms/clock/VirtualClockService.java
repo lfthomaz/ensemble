@@ -47,7 +47,7 @@ public class VirtualClockService extends BaseService {
 	private long referenceStartTime;
 	private long referenceNanoStartTime;
 	
-	private final static ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(20);
+	private final static ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(200);
 	
 	//----------------------------------------------------------
 

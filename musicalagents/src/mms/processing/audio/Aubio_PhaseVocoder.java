@@ -5,9 +5,9 @@ import aubio.SWIGTYPE_p_cvec_t;
 import aubio.SWIGTYPE_p_fvec_t;
 import aubio.aubiowrapper;
 import mms.Parameters;
-import mms.processing.Process;
+import mms.processing.Processor;
 
-public class Aubio_PhaseVocoder extends Process {
+public class Aubio_PhaseVocoder extends Processor {
 
 	private static final String PARAM_SIZE 			= "size";
 	private static final String PARAM_HOPSIZE 		= "hopsize";

@@ -17,10 +17,6 @@ public class Actuator extends EventHandler implements Acting {
 
 	private ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 
-	// Lista de componentes interessados em enviar eventos
-	// TODO Que tipo de evento pode se registrar? Somente raciocínios?
-	ArrayList<Reasoning> generators = new ArrayList<Reasoning>();
-
 	VirtualClockHelper clock;
 	
 	// Usado para referenciar dentro do WakerBehaviour
@@ -151,7 +147,7 @@ public class Actuator extends EventHandler implements Acting {
 				actuatorState = AC_STATE.NEED_ACTING;
 //				System.out.println(System.currentTimeMillis() + "*** estado 3 ***");
 //				System.out.println("Novo despertador = " + (frameTime + sendDeadline - sendLag));
-				for (Reasoning reason : generators) {
+				for (Reasoning reason : listeners) {
 					//reason.needAction(me);
 					NeedActionBehaviour nab = new NeedActionBehaviour(reason);
 					getAgent().addBehaviour(tbf.wrap(nab));
@@ -217,11 +213,6 @@ public class Actuator extends EventHandler implements Acting {
 		
 	}
 	
-	// Chamado por um raciocínio para registrá-lo como listener dos eventos
-	public void registerListener(Reasoning reasoning) {
-		generators.add(reasoning);
-	}
-	
 	public void act() {
 
 		Object content = null;
@@ -272,8 +263,7 @@ public class Actuator extends EventHandler implements Acting {
 		}
 		if (status.equals(EH_STATUS.REGISTERED)) {
 //			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Gerei um evento");
-//			System.out.println(clock.getCurrentTime() + " [" + getAgent().getAgentName() + ":" + getName() + "] " + "Gerei um evento");
-			
+//			System.out.println(clock.getCurrentTime(TimeUnit.SECONDS) + " [" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Gerei um evento do frame " + workingFrame);			
 			super.myComm.send(evt);
 			
 			// Avisa o Agente sobre o envio do evento (importante para o proc. Batch)

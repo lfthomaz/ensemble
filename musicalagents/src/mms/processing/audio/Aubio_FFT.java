@@ -10,9 +10,9 @@ import aubio.SWIGTYPE_p_fvec_t;
 import aubio.aubiowrapper;
 
 import mms.Parameters;
-import mms.processing.Process;
+import mms.processing.Processor;
 
-public class Aubio_FFT extends Process {
+public class Aubio_FFT extends Processor {
 
 	// Mutex needed for safe threaded FFTW initialization
 	private static final Semaphore mutex = new Semaphore(1);

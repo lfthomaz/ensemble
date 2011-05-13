@@ -15,7 +15,7 @@ import mms.processing.audio.OnsetsDS;
 import mms.tools.AudioInputFile;
 
 // TODO Mem�ria para guardar os �ltimos frames, utilizados em processamentos com janela deslizantes
-public class ProcessFactory {
+public class ProcessorFactory {
 	
 	public enum AudioOperation {
 		FFT,
@@ -59,9 +59,9 @@ public class ProcessFactory {
 
 	}
 	
-	public static Process createAudioProcessor(AudioOperation operation, Parameters arguments) {
+	public static Processor createAudioProcessor(AudioOperation operation, Parameters arguments) {
 		
-		Process proc = null;
+		Processor proc = null;
 		
 		switch (operation) {
 		
@@ -106,7 +106,7 @@ public class ProcessFactory {
 		return proc;
 	}
 	
-	public static void deleteAudioProcessor(Process proc) {
+	public static void deleteAudioProcessor(Processor proc) {
 		proc.stop();
 	}
 
@@ -133,8 +133,8 @@ public class ProcessFactory {
 		Parameters parameters = new Parameters();
 		parameters.put("size", String.valueOf(N));
 		parameters.put("sample_rate", String.valueOf(Fs));
-		final Process fftproc = ProcessFactory.createAudioProcessor(AudioOperation.FFT, parameters);
-		final Process fftproc2 = ProcessFactory.createAudioProcessor(AudioOperation.FFT, parameters);
+		final Processor fftproc = ProcessorFactory.createAudioProcessor(AudioOperation.FFT, parameters);
+		final Processor fftproc2 = ProcessorFactory.createAudioProcessor(AudioOperation.FFT, parameters);
 
 		new Thread() {
 			public void run() {

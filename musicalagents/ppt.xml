@@ -13,7 +13,7 @@
 			<ARG NAME="form" VALUE="cube:200:infinite" />
 			<ARG NAME="friction_coefficient" VALUE="0.25" />
 		</WORLD>
-		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 50 80 1000">
+		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="200 100 160 2000">
 			<ARG NAME="SPEED_SOUND" VALUE="343.3" />
 			<ARG NAME="REFERENCE_DISTANCE" VALUE="1.0" />
 			<ARG NAME="ROLLOF_FACTOR" VALUE="1.0" />
@@ -44,7 +44,7 @@
 	
 	<MUSICAL_AGENT_CLASS NAME="LISTENER" CLASS="mms.MusicalAgent">
 		<COMPONENTS>
-			<REASONING NAME="AudioReasoning" CLASS="mms.apps.pp.PP_ListenerReasoning" REASONING_MODE="REACTIVE" />
+			<REASONING NAME="AudioReasoning" CLASS="mms.audio.portaudio.PAOutputReasoning" REASONING_MODE="REACTIVE" />
 			<SENSOR NAME="Ear_left" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(-2;0;0)"/>
 			<SENSOR NAME="Ear_right" CLASS="mms.Sensor" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" POSITION="(2;0;0)"/>
 			<ACTUATOR NAME="Legs" CLASS="mms.Actuator" EVENT_TYPE="MOVEMENT" COMM="mms.comm.direct.CommDirect" />
@@ -84,31 +84,32 @@
 		<FACT NAME="filename" VALUE="shifting.wav" />
 	</MUSICAL_AGENT>
 	-->
+	
 	<MUSICAL_AGENT NAME="Ambulance" CLASS="MUSICIAN">
 		<!-- <ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;-50;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(20;0;0)" />  -->
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(30;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
-		 <ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
-		 <ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
+		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-20;20;0) 2.0:(-20;-20;0) 4.0:(20;-20;0) 4.0" />
+		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
 		<!-- <FACT NAME="instructions" VALUE="ppt_instructions.xml" /> -->
 		<FACT NAME="filename" VALUE="media/siren_2.wav" />
 	</MUSICAL_AGENT>
-	
+	 
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(50;50;0)" />
+		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
-		<ARG_COMP COMP="Ear_left" NAME="channel" VALUE="LEFT" />
-		<ARG_COMP COMP="Ear_right" NAME="channel" VALUE="RIGHT" />
+		<ARG_COMP COMP="AudioReasoning" NAME="channel" VALUE="Ear_left:10,0;Ear_right:10,1" />
 	</MUSICAL_AGENT>
 	
-	
+	<!-- 
 	<MUSICAL_AGENT NAME="Agent_1" CLASS="WALKER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
 		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />	
 		<ARG_COMP COMP="MovementReasoning" NAME="waypoints" VALUE="(20;20;0) 2.0:(-10;20;0) 2.0:(-10;-20;0) 4.0:(10;-10;0) 4.0" />
 		<ARG_COMP COMP="MovementReasoning" NAME="loop" VALUE="false" />
 	</MUSICAL_AGENT>
+	-->
+	  
 	 <!--
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
 		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(-50;50;0)" />

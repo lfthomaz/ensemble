@@ -7,9 +7,9 @@ import xtract.core.xtract;
 import xtract.core.xtract_features_;
 import xtract.core.xtract_spectrum_;
 import mms.Parameters;
-import mms.processing.Process;
+import mms.processing.Processor;
 
-public class LibXtract_FFT extends Process {
+public class LibXtract_FFT extends Processor {
 
 	// Mutex needed for safe threaded FFTW initialization
 	private static final Semaphore mutex = new Semaphore(1);

@@ -1,0 +1,31 @@
+<MMS NAME="Dummy">
+
+	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" JACK="FALSE"/>
+	
+  	<!-- ********** ENVIRONMENT AGENT ********** -->
+
+	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
+		<ARG NAME="arg_ea" VALUE="eaeaea" />
+		<WORLD CLASS_WORLD="mms.world.World">
+			<ARG NAME="dimensions" VALUE="3" />
+			<ARG NAME="structure" VALUE="continuous" />
+			<ARG NAME="form" VALUE="cube:200:loop" />
+		</WORLD>
+		<EVENT_SERVER CLASS="mms.apps.dummy.DummyEventServer" COMM="mms.comm.direct.CommDirect" />
+	</ENVIRONMENT_AGENT_CLASS>
+	
+  <!-- ********** MUSICAL AGENT CLASSES ********** -->
+
+	<MUSICAL_AGENT_CLASS NAME="DUMMY" CLASS="mms.MusicalAgent">
+		<COMPONENTS>
+			<REASONING NAME="DummyReasoning" CLASS="mms.apps.dummy.DummyReasoning" />
+			<ACTUATOR NAME="DummyActuator" CLASS="mms.Actuator" EVENT_TYPE="DUMMY" COMM="mms.comm.direct.CommDirect" />
+			<SENSOR NAME="DummySensor" CLASS="mms.Sensor" EVENT_TYPE="DUMMY" COMM="mms.comm.direct.CommDirect" />
+		</COMPONENTS>
+	</MUSICAL_AGENT_CLASS>
+	
+  <!-- ********** MUSICAL AGENT INSTANCES ********** -->
+
+	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="20" />
+
+</MMS>

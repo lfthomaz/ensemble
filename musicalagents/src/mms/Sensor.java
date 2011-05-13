@@ -1,7 +1,5 @@
 package mms;
 
-import java.util.ArrayList;
-
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.clock.TimeUnit;
@@ -9,10 +7,6 @@ import mms.memory.MemoryException;
 
 public class Sensor extends EventHandler implements Sensing {
 
-	// Lista de componentes interessados no evento
-	// TODO Que tipo de evento pode se registrar? Somento raciocínios?
-	ArrayList<Reasoning> listeners = new ArrayList<Reasoning>();
-	
 	@Override
 	public final boolean start() {
 

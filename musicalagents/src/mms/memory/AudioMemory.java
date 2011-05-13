@@ -8,7 +8,6 @@ import jade.util.Logger;
 import mms.Constants;
 import mms.MMSAgent;
 import mms.Parameters;
-import mms.audio.AudioChunk;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 
@@ -374,11 +373,7 @@ public class AudioMemory extends Memory {
 
 		// Verifica qual foi o objeto passado
 		double[] chunk;
-		if (object instanceof AudioChunk) {
-			AudioChunk ac = (AudioChunk)object;
-			chunk = ac.chunk;
-		}
-		else if (object instanceof double[]) {
+		if (object instanceof double[]) {
 			chunk = (double[])object;
 		}
 		else if (object instanceof Double) {

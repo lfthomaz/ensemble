@@ -4,9 +4,9 @@ import xtract.core.floatArray;
 import xtract.core.xtract;
 
 import mms.Parameters;
-import mms.processing.Process;
+import mms.processing.Processor;
 
-public class LibXtract_RMS extends Process {
+public class LibXtract_RMS extends Processor {
 
 	@Override
 	public boolean init() {

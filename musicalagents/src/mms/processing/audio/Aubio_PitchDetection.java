@@ -6,9 +6,9 @@ import aubio.aubio_pitchdetection_mode;
 import aubio.aubio_pitchdetection_type;
 import aubio.aubiowrapper;
 import mms.Parameters;
-import mms.processing.Process;
+import mms.processing.Processor;
 
-public class Aubio_PitchDetection extends Process {
+public class Aubio_PitchDetection extends Processor {
 
 	private static final String ARG_BUFSIZE = "bufsize";
 	private static final String ARG_HOPSIZE = "hopsize";
