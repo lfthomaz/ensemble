@@ -2,11 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/libaubio.jar"/>
-	<classpathentry kind="lib" path="lib/libxtract.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mmsportaudio"/>
 	<classpathentry kind="lib" path="lib/jade.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/mmsjack"/>
 	<classpathentry kind="lib" path="lib/NetUtil.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mmsaubio"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mmslibxtract"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

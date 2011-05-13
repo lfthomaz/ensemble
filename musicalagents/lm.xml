@@ -5,7 +5,7 @@
   	<!-- ********** ENVIRONMENT AGENT ********** -->
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.apps.lm.LM_Environment">
-		<ARG NAME="WAIT_TIME_TURN" VALUE="100" />
+		<ARG NAME="WAIT_TIME_TURN" VALUE="300" />
 		<ARG NAME="WAIT_ALL_AGENTS" VALUE="FALSE" />
 		<WORLD CLASS_WORLD="mms.apps.lm.LM_World">
 			<LAW CLASS="mms.movement.MovementLaw" />
