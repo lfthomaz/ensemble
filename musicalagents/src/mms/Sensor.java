@@ -80,8 +80,8 @@ public class Sensor extends EventHandler implements Sensing {
 			
 			// No caso de event BATCH, envia o ACK
 			if (getAgent().getProperty(Constants.PROCESS_MODE, null).equals(Constants.MODE_BATCH)) {
-				Command cmd = new Command(Constants.CMD_BATCH_EVENT_ACK);
-				getAgent().sendMessage(cmd);
+				Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_BATCH_EVENT_ACK);
+				sendCommand(cmd);
 			}
 			
 			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Processei evento " + evt.timestamp);

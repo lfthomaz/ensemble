@@ -74,7 +74,7 @@ public final class Constants {
 	public static final String 	CMD_EVENT_REGISTER_ACK 	= "EVENT_REGISTER_ACK";
 	public static final String 	CMD_EVENT_DEREGISTER 	= "EVENT_DEREGISTER";
 	public static final String 	CMD_EVENT_DEREGISTER_ACK= "EVENT_DEREGISTER_ACK";
-	public static final String 	CMD_PARAM	 			= "PARAM";
+	public static final String 	CMD_PARAMETER			= "PARAMETER";
 	public static final String 	CMD_FACT	 			= "FACT";
 	public static final String 	CMD_AGENT_REGISTER		= "AGENT_REGISTER";
 	public static final String 	CMD_AGENT_DEREGISTER	= "AGENT_DEREGISTER";
@@ -97,7 +97,7 @@ public final class Constants {
 	public static final String 	CMD_STOP_MMS 			= "STOP_MMS";
 	
 	// 
-	public static final String 	EVT_ENVIRONMENT 		= "ENVIRONMENT";
+	public static final String 	ENVIRONMENT_AGENT 		= "ENVIRONMENT";
 	
 	// EventHandler Status
 	public static enum EH_STATUS {REGISTERED, NOT_REGISTERED};
@@ -119,6 +119,4 @@ public final class Constants {
 	public static final String CLASS_WORLD		 		= "CLASS_WORLD";
 	public static final String CLASS_MUSICAL_AGENT 		= "CLASS_MUSICAL_AGENT";
 	
-	public static final String ENVIRONMENT_AGENT 		= "ENVIRONMENT_AGENT";
-
 }

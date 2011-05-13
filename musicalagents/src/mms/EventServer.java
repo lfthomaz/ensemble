@@ -416,7 +416,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
 
 		// Envia os parâmetros necessários
-		Command cmd = new Command(Constants.CMD_EVENT_REGISTER_ACK);
+		Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + agentName, Constants.CMD_EVENT_REGISTER_ACK);
 		Parameters extraParameters = null; 
 
 		if (eventHandlerType.equals(Constants.COMP_ACTUATOR)) {
@@ -478,7 +478,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + " [" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
 		
 		// Send the message
-		envAgent.sendMessage(agentName, cmd);
+		sendCommand(cmd);
 
 	}
 	
@@ -490,9 +490,9 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				actuatorDeregistered(agentName, eventHandlerName);
 				actuators.remove(agentName + ":" + eventHandlerName);
 				eventHandlers.remove(agentName+":"+eventHandlerName+":"+eventType+":"+Constants.COMP_ACTUATOR);
-				Command cmd = new Command(Constants.CMD_EVENT_DEREGISTER_ACK);
+				Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + agentName, Constants.CMD_EVENT_DEREGISTER_ACK);
 				cmd.addParameter(Constants.PARAM_COMP_NAME, eventHandlerName);
-				envAgent.sendMessage(agentName, cmd);
+				sendCommand(cmd);
 				System.out.println("[" + envAgent.getAgentName() + "] Actuator " + agentName + ":" + eventHandlerName + " deregistered");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -504,9 +504,9 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				sensorDeregistered(agentName, eventHandlerName);
 				sensors.remove(agentName + ":" + eventHandlerName);
 				eventHandlers.remove(agentName+":"+eventHandlerName+":"+eventType+":"+Constants.COMP_SENSOR);
-				Command cmd = new Command(Constants.CMD_EVENT_DEREGISTER_ACK);
+				Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + agentName, Constants.CMD_EVENT_DEREGISTER_ACK);
 				cmd.addParameter(Constants.PARAM_COMP_NAME, eventHandlerName);
-				envAgent.sendMessage(agentName, cmd);
+				sendCommand(cmd);
 				System.out.println("[" + envAgent.getAgentName() + "] Sensor " + agentName + ":" + eventHandlerName + " deregistered");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -558,12 +558,12 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		if (!isBatch && getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
 			if (evt.frame < workingFrame) {
 //				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame atrasado");
-//				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if ((evt.frame == workingFrame && eventServerState != ES_STATE.WAITING_AGENTS)) {
 //				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame atrasado");
-//				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
+				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if (evt.frame > workingFrame) {
@@ -578,7 +578,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				}
 //				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame adiantado");
 				if (evt.frame-workingFrame > 1) {
-//					System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Early frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+					System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Early frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				}
 				return;
 			}

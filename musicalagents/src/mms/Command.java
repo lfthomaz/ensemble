@@ -1,13 +1,9 @@
 package mms;
 
-import java.util.Scanner;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Command {
 
-//	private String 		recipient;
 	private String 		command;
 	private Parameters	parameters = new Parameters();
 	private Parameters	userParameters = new Parameters();
@@ -16,13 +12,18 @@ public class Command {
 		this.command = command;
 	}
 	
-	public Command(String recipient, String command) {
+	public Command(String sender, String recipient, String command) {
 		this.command = command;
+		addParameter("sender", sender);
 		addParameter("recipient", recipient);
 	}
 	
 	public String getRecipient() {
 		return getParameter("recipient");
+	}
+	
+	public String getSender() {
+		return getParameter("sender");
 	}
 	
 	public String getCommand() {

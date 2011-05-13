@@ -1,11 +1,8 @@
 package mms;
 
-import java.util.ArrayList;
-
 import mms.Constants.AC_STATE;
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
-import mms.Constants.ES_STATE;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 
@@ -263,7 +260,8 @@ public class Actuator extends EventHandler implements Acting {
 		}
 		if (status.equals(EH_STATUS.REGISTERED)) {
 //			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Gerei um evento");
-//			System.out.println(clock.getCurrentTime(TimeUnit.SECONDS) + " [" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Gerei um evento do frame " + workingFrame);			
+//			System.out.println(clock.getCurrentTime() + " [" + getAgent().getAgentName() + ":" + getName() + "] " + "Gerei um evento");
+			
 			super.myComm.send(evt);
 			
 			// Avisa o Agente sobre o envio do evento (importante para o proc. Batch)

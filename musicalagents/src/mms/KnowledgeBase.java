@@ -74,10 +74,10 @@ public class KnowledgeBase extends MusicalAgentComponent {
 			
 			// Se o fato faz parte do fenótipo do Agente, registrar no Ambiente
 			if (newFact.isPublic) {
-				Command cmd = new Command(Constants.CMD_PUBLIC_FACT_UPDATE);
+				Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_PUBLIC_FACT_UPDATE);
 				cmd.addParameter(Constants.PARAM_FACT_NAME, fact);
 				cmd.addParameter(Constants.PARAM_FACT_VALUE, value);
-				myAgent.sendMessage(cmd);
+				sendCommand(cmd);
 			}
 
 		} else {
@@ -102,10 +102,10 @@ public class KnowledgeBase extends MusicalAgentComponent {
 			
 			// Se o fato faz parte do fenótipo do Agente, enviar atualização 
 			if (aux.isPublic) {
-				Command cmd = new Command(Constants.CMD_PUBLIC_FACT_UPDATE);
+				Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_PUBLIC_FACT_UPDATE);
 				cmd.addParameter(Constants.PARAM_FACT_NAME, fact);
 				cmd.addParameter(Constants.PARAM_FACT_VALUE, value);
-				myAgent.sendMessage(cmd);
+				myAgent.sendCommand(cmd);
 			}
 			
 		}

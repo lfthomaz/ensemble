@@ -149,13 +149,13 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		}
 		// If found, sends the register command
 		if (es_registered) {
-			Command cmd = new Command(Constants.CMD_EVENT_REGISTER );
+			Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_EVENT_REGISTER );
 			cmd.addParameter(Constants.PARAM_COMP_NAME, getComponentName());
 			cmd.addParameter(Constants.PARAM_COMP_TYPE, getType());
 			cmd.addParameter(Constants.PARAM_EVT_TYPE, getEventType());
 			cmd.addParameter(Constants.PARAM_REL_POS, getRelativePosition().toString());
 			cmd.addUserParameters(getParameters());
-			getAgent().sendMessage(cmd);
+			sendCommand(cmd);
 		} else {
 //			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "EventServer " + eventType + " not found");
 			System.out.println("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "EventServer " + eventType + " not registered");
@@ -222,11 +222,11 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	public void deregister() {
 		
 		// Envia mensagem para tirar o EventHandler do registro
-		Command cmd = new Command(Constants.CMD_EVENT_DEREGISTER );
+		Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_EVENT_DEREGISTER );
 		cmd.addParameter(Constants.PARAM_COMP_NAME, getComponentName());
 		cmd.addParameter(Constants.PARAM_COMP_TYPE, getType());
 		cmd.addParameter(Constants.PARAM_EVT_TYPE, getEventType());
-		getAgent().sendMessage(cmd);
+		sendCommand(cmd);
 		
 	}
 	

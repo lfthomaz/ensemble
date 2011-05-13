@@ -504,7 +504,7 @@ public class CP_Reasoning extends Reasoning {
 				if (last_phase != actual_phase) {
 					last_phase = actual_phase;
 					// Ouve mudança de fase -> movimentar
-					Command cmd = new Command("/mms/"+getAgent().getAgentName()+"/MovementReasoning", "WALK");
+					Command cmd = new Command(getAddress(), "/"+ Constants.FRAMEWORK_NAME + "/" + getAgent().getAgentName() + "/MovementReasoning", "WALK");
 					double angle = actual_phase * 2 * Math.PI / number_beats;
 //					System.out.println(number_beats);
 //					System.out.println(angle);

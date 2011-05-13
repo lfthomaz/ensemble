@@ -104,7 +104,17 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 	@Override
 	public void receiveCommand(Command cmd) {
         System.out.println("[" + getAddress() +"] Command received: " + cmd);
-        processCommand(cmd);
+		if (cmd.equals(Constants.CMD_PARAMETER)) {
+//			String param = cmd.getParameter("NAME");
+//			String value = cmd.getParameter("VALUE");
+//			if (param != null && value != null) {
+//				comp.addParameter(param, value);
+//				comp.parameterUpdated(param);
+//			}
+		}
+		else {
+			processCommand(cmd);
+		}
 	}
 	
 	@Override

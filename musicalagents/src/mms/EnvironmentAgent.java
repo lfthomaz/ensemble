@@ -171,8 +171,8 @@ public class EnvironmentAgent extends MMSAgent {
 				System.exit(-1);
 			}
 
-			// 4. Inicia a recepção de Mensagens de Controle 
-			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
+//			// 4. Inicia a recepção de Mensagens de Controle 
+//			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
 			
 			// 5. Executa o método de inicialização do usuário
 			init();
@@ -185,7 +185,7 @@ public class EnvironmentAgent extends MMSAgent {
 			}
 	
 			// 3. Registra o Ambiente no DS
-			this.registerService(getAgentName(), Constants.EVT_ENVIRONMENT);
+			this.registerService(getAgentName(), Constants.ENVIRONMENT_AGENT);
 			
 			// 7. Fim da inicialização do Agente Ambiente
 			// TODO Deveria vir após o init()
@@ -316,43 +316,44 @@ public class EnvironmentAgent extends MMSAgent {
 	// Message handling
 	//--------------------------------------------------------------------------------
 
-	/**
-	 * Envia um comando a um agente
-	 * @param receiver agente destino do comando
-	 * @param command comando a ser enviado
-	 */
-	public final void sendMessage(String receiver, Command command) {
-		
-		String[] str = new String[1];
-		str[0] = receiver; 
-		sendMessage(str, command);
-		
-	}
+//	/**
+//	 * Envia um comando a um agente
+//	 * @param receiver agente destino do comando
+//	 * @param command comando a ser enviado
+//	 */
+//	public final void sendMessage(String receiver, Command command) {
+//		
+//		String[] str = new String[1];
+//		str[0] = receiver; 
+//		sendMessage(str, command);
+//		
+//	}
 
-	/**
-	 * Envia um comando a mais de um agente
-	 * @param receiver agentes destino do comando
-	 * @param command comando a ser enviado
-	 */
-	protected final void sendMessage(String[] receiver, Command command) {
+//	/**
+//	 * Envia um comando a mais de um agente
+//	 * @param receiver agentes destino do comando
+//	 * @param command comando a ser enviado
+//	 */
+//	protected final void sendMessage(String[] receiver, Command command) {
+//		
+//		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+//		String receivers = "";
+//		for (int i = 0; i < receiver.length; i++) {
+//			msg.addReceiver(new AID(receiver[i], AID.ISLOCALNAME));
+//			receivers = receivers + receiver[i] + " ";
+//		}
+//		msg.setConversationId("CommMsg");
+//		msg.setContent(command.toString());
+//		this.send(msg);
+//
+//		MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message sent to " + receivers + "(" + msg.getContent() + ")");
+//		
+//	}
+//	
+	protected final void processControlCommand(Command cmd) {
 		
-		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-		String receivers = "";
-		for (int i = 0; i < receiver.length; i++) {
-			msg.addReceiver(new AID(receiver[i], AID.ISLOCALNAME));
-			receivers = receivers + receiver[i] + " ";
-		}
-		msg.setConversationId("CommMsg");
-		msg.setContent(command.toString());
-		this.send(msg);
-
-		MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message sent to " + receivers + "(" + msg.getContent() + ")");
+		String command = cmd.getCommand();
 		
-	}
-	
-	protected final void processMessage(String sender, Command cmd) {
-		
-		String command = cmd.getCommand(); 
 		if (command.equals(Constants.CMD_CREATE_AGENT)) {
 			
 			String agentName = cmd.getParameter("NAME");
@@ -386,6 +387,7 @@ public class EnvironmentAgent extends MMSAgent {
 			// Repassar pedido de registro para o EventServer responsável
 			EventServer evtServer = eventServers.get(eventType);
 			if (evtServer != null) {
+				String sender = cmd.getParameter("sender").split("/")[2];
 				evtServer.registerEventHandler(sender, componentName, eventHandlerType, userParam);
 			} else {
 				logger.info("[" + getAgentName() + "] " + "EventServer " + eventType + " not found");
@@ -394,6 +396,7 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else if (command.equals(Constants.CMD_EVENT_DEREGISTER)) {
 			
+			String sender = cmd.getParameter("sender").split("/")[2];
 			String componentName = cmd.getParameter(Constants.PARAM_COMP_NAME);
 			String eventHandlerType = cmd.getParameter(Constants.PARAM_COMP_TYPE);
 			String eventType = cmd.getParameter(Constants.PARAM_EVT_TYPE);
@@ -407,18 +410,21 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else if (command.equals(Constants.CMD_AGENT_REGISTER)) {
 
+			String sender = cmd.getParameter("sender").split("/")[2];
 			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Recebi pedido de registro de " + sender);
 			registerAgent(sender, cmd.getParameters());
 
 		}
 		else if (command.equals(Constants.CMD_AGENT_DEREGISTER)) {
 
+			String sender = cmd.getParameter("sender").split("/")[2];
 			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Recebi pedido de desregistro de " + sender);
 			deregisterAgent(sender);
 
 		}
 		else if (command.equals(Constants.CMD_AGENT_READY)) {
 
+			String sender = cmd.getParameter("sender").split("/")[2];
 			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Agent " + sender + " ready for the simulation");
 			prepareAgent(sender);
 
@@ -426,6 +432,7 @@ public class EnvironmentAgent extends MMSAgent {
 		else if (command.equals(Constants.CMD_BATCH_TURN)) {
 		
 			if (isBatch) {
+				String sender = cmd.getParameter("sender").split("/")[2];
 				MusicalAgent.logger.info("[" + getAgentName() + "] " + "End of turn message received from " + sender);
 				int numberEventsSent = Integer.valueOf(cmd.getParameter(Constants.PARAM_NUMBER_EVT_SENT));
 				agentProcessed(numberEventsSent);
@@ -441,6 +448,7 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else if (command.equals(Constants.CMD_PUBLIC_FACT_UPDATE)) {
 			
+			String sender = cmd.getParameter("sender").split("/")[2];
 			String fact = cmd.getParameter(Constants.PARAM_FACT_NAME);
 			String value = cmd.getParameter(Constants.PARAM_FACT_VALUE);
 			agentsPublicFacts.put(sender + ":" + fact, value);
@@ -448,46 +456,46 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 		else {
 			
-			System.out.println("[" + getAgentName() + "] " + "Command not recognized: " + command);
+			processCommand(cmd);
 			
 		}
 		
 	}
 	
-	/**
-	 * Behaviour cíclico interno do agente responsável por receber e tratar as mensagens enviadas ao ambiente pelos agentes musicais.
-	 */
-	private final class ReceiveMessages extends CyclicBehaviour {
-
-		MessageTemplate mt;
-		
-		public ReceiveMessages(Agent a) {
-			super(a);
-			mt = MessageTemplate.MatchConversationId("CommMsg");
-		}
-		
-		public void action() {
-			
-			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				
-				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
-				String sender = msg.getSender().getLocalName();
-				Command cmd = Command.parse(msg.getContent());
-				// TODO Podemos criar aqui uma thread, assim tratamos msgs em paralelo
-				if (cmd != null) {
-					processMessage(sender, cmd);
-				}
-			
-			} else {
-				
-				block();
-				
-			}
-			
-		}
-	
-	}
+//	/**
+//	 * Behaviour cíclico interno do agente responsável por receber e tratar as mensagens enviadas ao ambiente pelos agentes musicais.
+//	 */
+//	private final class ReceiveMessages extends CyclicBehaviour {
+//
+//		MessageTemplate mt;
+//		
+//		public ReceiveMessages(Agent a) {
+//			super(a);
+//			mt = MessageTemplate.MatchConversationId("CommMsg");
+//		}
+//		
+//		public void action() {
+//			
+//			ACLMessage msg = myAgent.receive(mt);
+//			if (msg != null) {
+//				
+//				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
+//				String sender = msg.getSender().getLocalName();
+//				Command cmd = Command.parse(msg.getContent());
+//				// TODO Podemos criar aqui uma thread, assim tratamos msgs em paralelo
+//				if (cmd != null) {
+//					processMessage(sender, cmd);
+//				}
+//			
+//			} else {
+//				
+//				block();
+//				
+//			}
+//			
+//		}
+//	
+//	}
 
 	// ---------------------------------------------- 
 	// Command Interface 
@@ -496,12 +504,12 @@ public class EnvironmentAgent extends MMSAgent {
 	@Override
 	public final void receiveCommand(Command cmd) {
 		
-        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), cmd.getRecipient(), cmd);
+//        System.out.printf("[%s] Command received: %s - %s\n", getAddress(), cmd.getRecipient(), cmd);
         // Se for para o Agente, processa o comando, se for para algum de seus componentes, rotear
         String[] str = cmd.getRecipient().split("/");
         if (str.length == 3) {
         	// TODO Aqui deve ver se é um comando que ele pode processar, senão, passa para o processCommand()
-        	processCommand(cmd);
+        	processControlCommand(cmd);
         } 
         else if (str.length > 3) {
         	if (eventServers.containsKey(str[3])) {
@@ -571,8 +579,9 @@ public class EnvironmentAgent extends MMSAgent {
 	public final void destroyAgent(String agentName) {
 		
 		// Não podemos matar o agente diretamente pelo doDelete()
-		Command cmd = new Command(Constants.CMD_KILL_AGENT);
-		sendMessage(agentName, cmd);
+		Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + agentName, Constants.CMD_KILL_AGENT);
+//		sendMessage(agentName, cmd);
+		sendCommand(cmd);
 		
 //		MusicalAgent.logger.info("[" + this.getAID().getAgentName() + "] Sent KILL_AGENT to " + agentName);
 
@@ -595,7 +604,7 @@ public class EnvironmentAgent extends MMSAgent {
 	 */
 	protected final void prepareAgent(String agentName) {
 
-		Command cmd = new Command(Constants.CMD_AGENT_READY_ACK);
+		Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + agentName, Constants.CMD_AGENT_READY_ACK);
 		
 		// No caso de processamento BATCH
 		if (isBatch) {
@@ -617,7 +626,8 @@ public class EnvironmentAgent extends MMSAgent {
 		}
 
 		// Envia a resposta
-		sendMessage(agentName, cmd);
+//		sendMessage(agentName, cmd);
+		sendCommand(cmd);
 		
 	}
 
@@ -832,6 +842,11 @@ public class EnvironmentAgent extends MMSAgent {
 	@Override
 	public boolean finit() {
 		return true;
+	}
+
+	@Override
+	public void processCommand(Command cmd) {
+
 	}
 
 	/**

@@ -129,13 +129,14 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 		
 		public ReceiveCommand(Agent a) {
 			super(a);
-			mt = MessageTemplate.MatchConversationId("Router");
+			mt = MessageTemplate.MatchConversationId("CommandRouter");
 		}
 		
 		public void action() {
 			ACLMessage msg = myAgent.receive(mt);
 			if (msg != null) {
 //				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Message received from " + msg.getSender().getLocalName() + " (" + msg.getContent() + ")");
+				String sender = msg.getSender().getLocalName();
 				Command cmd = Command.parse(msg.getContent());
 				if (cmd != null) {
 					receiveCommand(cmd);
@@ -162,29 +163,29 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
             System.err.println("[" + getName() + "] Malformed address: " + cmd.getRecipient());
             return;
         }
-    
-    	// Fowards the command
-        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-        msg.setSender(getAID());
-        msg.setContent(cmd.toString());
-        if (str[1].equals(Constants.FRAMEWORK_NAME)) {
-    		msg.addReceiver(new AID(str[2], AID.ISLOCALNAME));
-    		msg.setConversationId("Control");
-        } else {
-    		msg.addReceiver(new AID("Router", AID.ISLOCALNAME));
-    		msg.setConversationId("Router");
-        }
-        this.send(msg);
+        
+        // If it's for the same agent, just pass to the processCommand of the recipient
+        if (str[1].equals(Constants.FRAMEWORK_NAME) && getAgentName().equals(str[2])) {
 
+        	receiveCommand(cmd);
+        	
+        } else {
+   	    
+        	// Fowards the command
+	        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+	        msg.setSender(getAID());
+	        msg.setContent(cmd.toString());
+    		msg.setConversationId("CommandRouter");
+	        if (str[1].equals(Constants.FRAMEWORK_NAME)) {
+	        	cmd.addParameter("sender", getAgentName());
+	    		msg.addReceiver(new AID(str[2], AID.ISLOCALNAME));
+	        } else {
+	    		msg.addReceiver(new AID("Router", AID.ISLOCALNAME));
+	        }
+	        this.send(msg);
+	        
+        }
+        
 	}
 	
-	//--------------------------------------------------------------------------------
-	// User implemented methods
-	//--------------------------------------------------------------------------------
-
-	@Override
-	public void processCommand(Command cmd) {
-		
-	}
-
 }
