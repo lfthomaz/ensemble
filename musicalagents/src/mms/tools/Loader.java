@@ -200,7 +200,7 @@ public class Loader {
 		if (nl.getLength() == 1) {
 			Element elem_ea = (Element)nl.item(0);
 
-			String ea_name = readAttribute(elem_ea, CONF_NAME, "Environment");
+			String ea_name = Constants.ENVIRONMENT_AGENT;
 			String ea_class = readAttribute(elem_ea, CONF_CLASS, "mms.EnvironmentAgent");
 			Parameters ea_parameters = readArguments(elem_ea);
 			
