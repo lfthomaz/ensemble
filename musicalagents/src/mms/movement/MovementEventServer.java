@@ -348,7 +348,7 @@ public class MovementEventServer extends EventServer {
     		for (int i = 0; i < movState.position.dimensions; i++) {
 				str += " " + movState.position.getValue(i);
 			}
-    		Command cmd = new Command("/pd", "OSC");
+    		Command cmd = new Command(getAddress(), "/pd", "OSC");
     		cmd.addParameter("CONTENT", str);
     		sendCommand(cmd); 
     	}
@@ -405,7 +405,7 @@ public class MovementEventServer extends EventServer {
 		for (int i = 0; i < state.position.dimensions; i++) {
 			str += " " + state.position.getValue(i);
 		}
-		Command cmd = new Command("/pd", "OSC");
+		Command cmd = new Command(getAddress(), "/pd", "OSC");
 		cmd.addParameter("CONTENT", str);
 		sendCommand(cmd);
 
