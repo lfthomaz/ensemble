@@ -11,7 +11,7 @@
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
 		</WORLD>
-		<EVENT_SERVER CLASS="mms.apps.dummy.DummyEventServer" COMM="mms.comm.CommMessage" PERIOD="50 25 38 2000" />
+		<EVENT_SERVER CLASS="mms.apps.dummy.DummyEventServer" COMM="mms.comm.CommMessage" PERIOD="500 250 450 2000" />
 	</ENVIRONMENT_AGENT_CLASS>
 	
   <!-- ********** MUSICAL AGENT CLASSES ********** -->
@@ -20,12 +20,12 @@
 		<COMPONENTS>
 			<REASONING NAME="DummyReasoning" CLASS="mms.apps.dummy.DummyReasoning" />
 			<ACTUATOR NAME="DummyActuator" CLASS="mms.Actuator" EVENT_TYPE="DUMMY" COMM="mms.comm.CommMessage" />
-			<SENSOR NAME="DummySensor" CLASS="mms.Sensor" EVENT_TYPE="DUMMY" COMM="mms.comm.CommMessage" />
+			<SENSOR NAME="DummySensor" CLASS="mms.apps.dummy.DummySensor" EVENT_TYPE="DUMMY" COMM="mms.comm.CommMessage" />
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>
 	
   <!-- ********** MUSICAL AGENT INSTANCES ********** -->
 
-	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="50" />
+	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="1" />
 
 </MMS>
