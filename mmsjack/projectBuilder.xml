@@ -42,7 +42,7 @@
     	
     	<!-- Compiles c file -->
         <exec executable="cc" dir="." >
-          <arg line="-I/Library/Frameworks/Jackmp.framework/Headers/ -I/System/Library/Frameworks/JavaVM.framework/Headers -c mmsjack_wrap.c -o mmsjack.o" />
+          <arg line="-I/Library/Frameworks/Jackmp.framework/Headers/ -I/System/Library/Frameworks/JavaVM.framework/Headers -c mmsjack.c -o mmsjack.o" />
         </exec>
     	
     	<!-- Creates the library --> 

@@ -1,6 +1,5 @@
 package mmsportaudio.tests;
 
-import java.awt.image.SampleModel;
 import java.nio.ByteBuffer;
 
 import mmsportaudio.PaCallback;
@@ -13,9 +12,9 @@ import mmsportaudio.portaudio;
 public class Test {
 	
 	enum Running_Mode {LIST, DEFAULT, CONFIGURABLE};
-	static Running_Mode mode = Running_Mode.LIST;
+	static Running_Mode mode = Running_Mode.DEFAULT;
 	
-	static int device = 10;
+	static int device = 2;
 	static int channel = 0;
 	
 	static portaudio pa;
@@ -37,10 +36,12 @@ public class Test {
 		cb.device = device;
 		cb.channel = channel;
 		cb.channelCount = channelCount;
+		System.out.println(device + " " + channel);
 		long stream = pa.Pa_OpenStream(null, outputParameters, 44100.0, 256, 0, cb);
+		System.out.println("BLA");
 		// StremInfo
-		PaStreamInfo streamInfo = pa.Pa_GetStreamInfo(stream);
-		System.out.println("latency = " + streamInfo.getOutputLatency());
+//		PaStreamInfo streamInfo = pa.Pa_GetStreamInfo(stream);
+//		System.out.println("latency = " + streamInfo.getOutputLatency());
 		//
 		System.out.println("Java::stream = " + stream);
 		return stream;
@@ -108,9 +109,9 @@ public class Test {
 			
 			break;
 		case CONFIGURABLE:
-			stream = createStream(10, 0);
+			stream = createStream(device, channel);
 			System.out.println("Java::stream = " + stream);
-			long stream2 = createStream(10, 1);
+			long stream2 = createStream(device, channel+1);
 			System.out.println("Java::stream = " + stream2);
 			
 			System.out.println("Starting stream...");

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <project name="portaudio" default="OS-TEST" basedir=".">
+  <project name="mmsportaudio" default="OS-TEST" basedir=".">
   	
   	<property name="JAVA_HOME" 		 value="C:\Program Files (x86)\Java\jdk1.6.0_22"/>
 
