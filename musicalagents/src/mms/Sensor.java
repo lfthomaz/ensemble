@@ -9,8 +9,6 @@ import mms.memory.MemoryException;
 
 public class Sensor extends EventHandler implements Sensing {
 	
-//	PrintWriter file_perf;
-	
 	@Override
 	public final boolean start() {
 
@@ -27,12 +25,6 @@ public class Sensor extends EventHandler implements Sensing {
 		if (!init()) {
 			return false;
 		}
-		
-//		try {
-//			file_perf = new PrintWriter(new FileOutputStream("./tests/out_"+getAgent().getAgentName()+".txt"), false);
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
 		
 		// Sets the agent's state to INITIALIZED
 		setState(EA_STATE.INITIALIZED);
@@ -94,13 +86,6 @@ public class Sensor extends EventHandler implements Sensing {
 				sendCommand(cmd);
 			}
 			
-//			// Performance
-//			long wf = (long)Math.ceil((getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS) - startTime) / period);
-//			if (wf == evt.frame) {
-//				file_perf.printf("%d\n", wf);
-//				file_perf.flush();
-//			}
-//			
 			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Processei evento " + evt.timestamp);
 		}
 		

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
@@ -54,7 +55,7 @@ public class MusicalAgent extends MMSAgent {
 	/**
 	 * Musical Agent's Knowledge Base
 	 */
-	protected KnowledgeBase kb = new KnowledgeBase(this);
+	protected KnowledgeBase kb = null;
 	
 	// ---------------------------------------------- 
 	// Batch processing control variables 
@@ -138,29 +139,36 @@ public class MusicalAgent extends MMSAgent {
 			// TODO Tratar o caso retornar false
 			init();
 			
+			// Inicializa o KB
+			// TODO Deve ser inicializado antes, mas não deveria ter um código separado
+			kb = (KnowledgeBase)components.get("KnowledgeBase");
+			kb.start();
+			
 			// Inicializa os componentes
 			Collection<MusicalAgentComponent> comps = components.values();
 			for (Iterator<MusicalAgentComponent> iterator = comps.iterator(); iterator.hasNext();) {
 				MusicalAgentComponent comp = iterator.next();
-				boolean result = comp.start();
-				if (!result) {
-					System.out.println("[" + this.getAgentName() + "] Component '" + comp.getComponentName() + "' not initialized");
-					removeComponent(comp.getComponentName());
-				} else {
-					// Descobre qual o tipo do componente
-					// Se for EventHandler, deve registrar no Ambiente responsável
-					// e avisar os raciocínios existentes sobre o novo EventHandler
-					if (comp instanceof EventHandler) {
-						// incrementa o contador de registros
-						numberEventHandlersRequest++;
-						// solicita o registro
-						((EventHandler)comp).register();
+				if (comp.getState() == EA_STATE.CREATED) { 
+					boolean result = comp.start();
+					if (!result) {
+						System.out.println("[" + this.getAgentName() + "] Component '" + comp.getComponentName() + "' not initialized");
+						removeComponent(comp.getComponentName());
+					} else {
+						// Descobre qual o tipo do componente
+						// Se for EventHandler, deve registrar no Ambiente responsável
+						// e avisar os raciocínios existentes sobre o novo EventHandler
+						if (comp instanceof EventHandler) {
+							// incrementa o contador de registros
+							numberEventHandlersRequest++;
+							// solicita o registro
+							((EventHandler)comp).register();
+						}
+						else if (comp instanceof Reasoning) {
+							numberReasoning++;
+						}
+	//					// Connects de Component to the Rotuer
+	//					getRouter().connect(comp);
 					}
-					else if (comp instanceof Reasoning) {
-						numberReasoning++;
-					}
-//					// Connects de Component to the Rotuer
-//					getRouter().connect(comp);
 				}
 			}
 			
@@ -209,8 +217,7 @@ public class MusicalAgent extends MMSAgent {
 
 				// Verificar as condições para a criação desse componente
 				if (compName.equals(Constants.COMP_ACTUATOR) || compName.equals(Constants.COMP_SENSOR) || 
-						compName.equals(Constants.COMP_SENSOR) || compName.equals(Constants.COMP_ANALYZER) || 
-						compName.equals(Constants.COMP_REASONING) || compName.equals(Constants.COMP_KB)) {
+					compName.equals(Constants.COMP_REASONING) || compName.equals(Constants.COMP_KB)) {
 					System.out.println("[" + this.getAgentName() + "] Component '" + compName + "' using a reserved name");
 					return;
 				}
@@ -224,6 +231,13 @@ public class MusicalAgent extends MMSAgent {
 				comp.setAgent(this);
 				comp.setParameters(arguments);
 				comp.configure();
+				
+				if (comp instanceof KnowledgeBase) {
+					if (kb != null) {
+						System.out.println("[" + this.getAgentName() + "] Agent already has a Knowledge Base!");
+						return;
+					}
+				}
 
 				// Sets the position of the EventHandler in Agent's "body"
 				if (comp instanceof EventHandler) {
@@ -236,7 +250,7 @@ public class MusicalAgent extends MMSAgent {
 				// Adicionar o componente na tabela
 				components.put(compName, comp);
 
-				// Caso o Agente Ambiente já tiver sido inicializado, inicializar o componente
+				// Caso o Agente Musical já tiver sido inicializado, inicializar o componente
 				if (state == MA_STATE.REGISTERED) {
 					boolean result = comp.start();
 					if (!result) {
@@ -336,6 +350,9 @@ public class MusicalAgent extends MMSAgent {
 	}
 	
 	public final KnowledgeBase getKB() {
+		if (kb == null) {
+			System.err.println("[" + getAddress() +"] No knowledge base present!");
+		}
 		return kb;
 	}
 	

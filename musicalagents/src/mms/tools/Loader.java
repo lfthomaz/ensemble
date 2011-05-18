@@ -321,6 +321,10 @@ public class Loader {
 							NodeList nl_ma_class_kb = elem_ma_class.getElementsByTagName(CONF_KB);
 							if (nl_ma_class_kb.getLength() == 1) {
 								Element elem_ma_class_kb = (Element)nl_ma_class_kb.item(0);
+								String kb_class = readAttribute(elem_ma_class_kb, CONF_CLASS, "mms.KnowledgeBase");
+								Parameters args = readArguments(elem_ma_class);
+								ma.addComponent("KnowledgeBase", kb_class, args);
+								System.out.println("\tKNOWLEDGE_BASE" + "KnowledgeBase");
 								NodeList nl_facts = elem_ma_class_kb.getElementsByTagName(CONF_FACT);
 								for (int k = 0; k < nl_facts.getLength(); k++) {
 									// Cria o fact na KB
@@ -334,6 +338,9 @@ public class Loader {
 										ma.getKB().updateFact(fact_name, facts.get(fact_name));
 									}
 								}
+							} else {
+								ma.addComponent("KnowledgeBase", "mms.KnowledgeBase", new Parameters());
+								System.out.println("\tKNOWLEDGE_BASE" + "KnowledgeBase");
 							}
 							
 							// Inserir Componentes Musicais no MA

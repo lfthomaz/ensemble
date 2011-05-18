@@ -3,14 +3,12 @@ package mms;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import mms.Constants.EA_STATE;
 import mms.memory.AudioMemory;
 import mms.memory.EventMemory;
 import mms.memory.Memory;
 
 public class KnowledgeBase extends MusicalAgentComponent {
-
-	// Agent Musical
-	MusicalAgent myAgent;
 	
 	//--------------------------------------------------------------------------------
 	// Facts
@@ -40,11 +38,30 @@ public class KnowledgeBase extends MusicalAgentComponent {
 
 	@Override
 	public final boolean start() {
+		// Sets component type
+		setType(Constants.COMP_KB);
+		
+		// Calls user initialization code
+		if (!init()) {
+			return false;
+		}
+		
+		// Sets the agent's state to INITIALIZED
+		setState(EA_STATE.INITIALIZED);
+
 		return true;
 	}
 
 	@Override
 	public final boolean stop() {
+		// Calls user finalization method
+		if (!finit()) {
+			return false;
+		}
+		
+		// Sets the agent's state to 
+		setState(Constants.EA_STATE.FINALIZED);
+		
 		return true;
 	}
 	
@@ -97,7 +114,7 @@ public class KnowledgeBase extends MusicalAgentComponent {
 				Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_PUBLIC_FACT_UPDATE);
 				cmd.addParameter(Constants.PARAM_FACT_NAME, fact);
 				cmd.addParameter(Constants.PARAM_FACT_VALUE, value);
-				myAgent.sendCommand(cmd);
+				getAgent().sendCommand(cmd);
 			}
 			
 		}
@@ -139,12 +156,12 @@ public class KnowledgeBase extends MusicalAgentComponent {
 			if (eventType.equals(Constants.EVT_AUDIO)) {
 //				mem = new AudioMemory(myAgent, name, expiration, expiration, parameters);
 				mem = new AudioMemory();
-				mem.start(myAgent, name, expiration, expiration, parameters);
+				mem.start(getAgent(), name, expiration, expiration, parameters);
 				memories.put(name, mem);
 //				System.out.println("Criei memória de AUDIO para " + name);
 			} else {
 				mem = new EventMemory();
-				mem.start(myAgent, name, expiration, expiration, parameters);
+				mem.start(getAgent(), name, expiration, expiration, parameters);
 				memories.put(name, mem);
 //				System.out.println("Criei memória de Simple para " + name);
 			}
