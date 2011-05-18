@@ -13,14 +13,6 @@ public class KnowledgeBase extends MusicalAgentComponent {
 	MusicalAgent myAgent;
 	
 	//--------------------------------------------------------------------------------
-	// Knowledge Base initialization/termination
-	//--------------------------------------------------------------------------------
-
-	public KnowledgeBase(MusicalAgent agent) {
-		this.myAgent = agent;
-	}
-	
-	//--------------------------------------------------------------------------------
 	// Facts
 	//--------------------------------------------------------------------------------
 	
