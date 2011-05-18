@@ -171,12 +171,11 @@ public abstract class EventHandler extends MusicalAgentComponent {
 			// Configuration
 			this.startTime 		= Long.valueOf(serverParameters.get(Constants.PARAM_START_TIME));
 			this.workingFrame 	= Long.valueOf(serverParameters.get(Constants.PARAM_WORKING_FRAME));
-			// TODO happeningFrame também deve ser enviado, para o caso de não ser o (workingFrame + 1) 
-			this.happeningFrame = workingFrame + 1;
+			// TODO happeningFrame também deve ser enviado, para o caso de não ser o (workingFrame - 1) 
+			this.happeningFrame = workingFrame - 1;
 			// TODO Dar um tempo de sobra para o envio do evento
 			this.period 		= Long.valueOf(serverParameters.get(Constants.PARAM_PERIOD));
 			this.sendDeadline 	= Long.valueOf(serverParameters.get(Constants.PARAM_RCV_DEADLINE));
-
 			// Armazena os parâmetros no Componente
 			addParameter(Constants.PARAM_START_TIME, serverParameters.get(Constants.PARAM_START_TIME));
 //			addParameter(Constants.PARAM_WORKING_FRAME, serverParameters.get(Constants.PARAM_WORKING_FRAME));
@@ -189,7 +188,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// Cria a memória relativa a esse EventHandler
 		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
 		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
-		myMemory = getAgent().getKB().createMemory(getComponentName(), eventType, 5.0, getParameters());
+		myMemory = getAgent().getKB().createMemory(getComponentName(), eventType, 1.0, getParameters());
 		if (myMemory == null) {
 			System.err.println("Não foi possível criar a memória");
 		}
@@ -207,7 +206,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getComponentName());
 		
-		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Register of '" + getComponentName() + "' confirmed");
+//		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Register of '" + getComponentName() + "' confirmed");
 		
 	}
 	

@@ -84,6 +84,7 @@ public class Actuator extends EventHandler implements Acting {
 		actuatorState = AC_STATE.INITIALIZED;
 //		getAgent().addBehaviour(tbf.wrap(new ActionScheduler()));
 		clock.execute(getAgent(), new ActionScheduler());
+//		(new Thread(new ActionScheduler())).start();
 
 		// Cria um WakeBehaviour que chama o action() automaticamente 
 			// TODO Certificar que inicia no tempo correto!!!
@@ -100,17 +101,8 @@ public class Actuator extends EventHandler implements Acting {
 			
 	}
 	
-//	private class ActionScheduler extends OneShotBehaviour {
 	private class ActionScheduler implements Runnable {
 
-//		ArrayList<NeedActionBehaviour> nabs = new ArrayList<NeedActionBehaviour>();
-
-//		public ActionScheduler(Agent a) {
-//			super(a);
-//			System.out.println(System.currentTimeMillis() + "*** estado 1 ***");
-//		}
-//		
-//		public void action() {
 		public void run() {
 
 			switch (actuatorState) {
@@ -183,6 +175,7 @@ public class Actuator extends EventHandler implements Acting {
 			}
 				
 			if (status == EH_STATUS.REGISTERED) {
+//				System.out.println(getAddress() + " - schedule() - " + actuatorState);
 				clock.schedule(getAgent(), this, nextStateChange);
 			}
 			
@@ -268,6 +261,7 @@ public class Actuator extends EventHandler implements Acting {
 			getAgent().eventSent();
 		} 
 		else {
+			System.out.println("BIZARRE!!!");
 //			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Componente n�o registrado em um Ambiente!");
 		}
 		

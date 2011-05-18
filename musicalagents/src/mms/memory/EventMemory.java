@@ -84,7 +84,7 @@ public class EventMemory extends Memory {
 		
 		if (head == null) {
 			
-			System.err.println("[ERROR] Memory has no state!");
+//			System.out.println("Memory is empty!");
 			return null;
 
 		} else {

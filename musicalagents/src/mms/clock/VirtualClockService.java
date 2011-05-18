@@ -137,7 +137,8 @@ public class VirtualClockService extends BaseService {
 
 		@Override
 		public void execute(Agent a, Runnable b) {
-			scheduler.execute(b);
+			(new Thread(b)).start();
+//			scheduler.execute(b);
 		}
 
 		@Override

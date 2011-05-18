@@ -99,13 +99,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	private ArrayList<Event> inputEvents = new ArrayList<Event>();
 	private ArrayList<Event> outputEvents = new ArrayList<Event>();
 	
-	// Statistics
-	BufferedWriter out;
-	private long partialchunksProcessed			= 0;
-	private long totalChunksLost				= 0;
-	private long totalChunksProcessed			= 0;
-	private long totalChunksExpected			= 0;
-
 	//--------------------------------------------------------------------------------
 	// Event Server initialization
 	//--------------------------------------------------------------------------------
@@ -164,13 +157,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		// Registra o tipo de evento no diretório do Jade
 		envAgent.registerService(envAgent.getAgentName()+"-"+getEventType(), getEventType());
 
-		// Cria o arquivo de estatísticas
-		try {
-			out = new BufferedWriter(new FileWriter("stats_" + eventType + ".txt"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 		// Chama o método de inicialização do usuário
 		if (!init()) {
 			return false;
@@ -184,12 +170,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			
 			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
-			try {
-				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t startTime = " + startTime + "\n");
-				out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
 			nextStateChange = startTime;
 			clock.execute(envAgent, new HybridScheduler());
@@ -214,13 +194,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			
 			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
 			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
-			try {
-				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t waitTime = " + waitTime + "\n");
-				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t startTime = " + nextStateChange + "\n");
-				out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
 			frameTime = startTime;
 //			envAgent.addBehaviour(new ActionScheduler());
@@ -266,14 +239,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		
 		// Stops the communication interface
 		comm.stop();
-		
-		// Fecha o arquivo de log
-		try {
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
 		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalized");
 		
@@ -395,22 +360,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		return list.toArray(ret);
 	}
 	
-	private void writeStats() {
-		if (out != null) {
-			try {
-	//			System.out.println(totalChunksProcessed + " " + totalChunksExpected);
-				out.write(totalChunksProcessed + " " + totalChunksExpected);
-				float aux = (float)totalChunksProcessed / (float)totalChunksExpected;
-				out.write(" % de chunks recebidos = " + String.valueOf(aux * 100) + "\n");
-				out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-//		System.out.println("Parcial chunks = " + partialchunksProcessed);
-		partialchunksProcessed = 0;
-	}
-
 	public void registerEventHandler(String agentName, String eventHandlerName, String eventHandlerType, Parameters userParameters) {
 
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
@@ -463,7 +412,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			cmd.addParameter(Constants.PARAM_RCV_DEADLINE, Long.toString(receiveDeadline));
 			cmd.addParameter(Constants.PARAM_START_TIME, Long.toString(startTime)); 
 			// Deve começar no próximo frame
-			cmd.addParameter(Constants.PARAM_WORKING_FRAME, Long.toString(workingFrame+2));
+			cmd.addParameter(Constants.PARAM_WORKING_FRAME, Long.toString(workingFrame+1));
 		} else {
 			// Sporadic and hybrid event
 			cmd.addParameter(Constants.PARAM_COMP_NAME, eventHandlerName);
@@ -523,8 +472,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	//--------------------------------------------------------------------------------
 
 	protected void senseEarlyEvents(Event evt) {
-		totalChunksProcessed++;
-		partialchunksProcessed++;
 		try {
 			processSense(evt);
 		} catch (Exception e) {
@@ -539,15 +486,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Event received: " + evt);
 //		System.out.println(clock.getCurrentTime() + " [" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Event received: " + evt);
 
-		if (out != null) {
-			try {
-				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] " + evt + "\n");
-				out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
 		// Verifica se o evento é do mesmo tipo do ES
 		if (!evt.eventType.equals(getEventType())) {
 //			MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Evento não é do tipo correto");
@@ -558,12 +496,12 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		if (!isBatch && getEventExchange().equals(Constants.EVT_EXC_PERIODIC)) {
 			if (evt.frame < workingFrame) {
 //				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame atrasado");
-				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+//				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " - Late frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if ((evt.frame == workingFrame && eventServerState != ES_STATE.WAITING_AGENTS)) {
 //				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame atrasado");
-				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
+//				System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + evt.oriAgentName + ":" + evt.oriAgentCompName + " -  Same frame, late arrival: received frame = " + evt.frame + ", expected = " + workingFrame);
 				return;
 			}
 			else if (evt.frame > workingFrame) {
@@ -578,15 +516,13 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				}
 //				MusicalAgent.logger.warning("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Frame adiantado");
 				if (evt.frame-workingFrame > 1) {
-					System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Early frame: received frame = " + evt.frame + ", expected = " + workingFrame);
+//					System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Early frame: received frame = " + evt.frame + ", expected = " + workingFrame);
 				}
 				return;
 			}
 		}
 		
 		// chama o método implementado pelo usuário
-		totalChunksProcessed++;
-		partialchunksProcessed++;
 		try {
 			processSense(evt);
 		} catch (Exception e) {
@@ -687,9 +623,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			try {
 				long currentTime = (long)clock.getCurrentTime(TimeUnit.MILLISECONDS); 
 				long elapsedTime = currentTime - nextStateChange;
-				out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> PROCESSING << (" + elapsedTime + ")\n");
 				process();
-				out.flush();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -741,11 +675,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				eventServerState = ES_STATE.WAITING_BEGIN;
 //				System.out.println("--------------------------------------------------------------------------------");
 //				System.out.println(clock.getCurrentTime() + " >> 1 - WAITING_BEGIN << ");
-				try {
-					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 1 - WAITING_BEGIN << \n");
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
 //	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 1 - WAITING_BEGIN <<");
 				nextStateChange = startTime;
 				receivingFrame++;
@@ -756,12 +685,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			case WAITING_BEGIN:
 			case SENDING_RESPONSE:
 
-				// Escreve as estatásticas do último turno
-				if (eventServerState == ES_STATE.SENDING_RESPONSE) {
-					writeStats();
-					totalChunksExpected += actuators.size();
-				}
-				
 				workingFrame++;
 				happeningFrame++;
 
@@ -772,11 +695,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				// comm.sensing = true;
 //				System.out.println("--------------------------------------------------------------------------------");
 //				System.out.println(clock.getCurrentTime() + " >> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((double)(period * workingFrame)/1000) + "s)");
-				try {
-					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((double)(period * workingFrame)/1000) + "s)\n");;
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
 //	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 2 - WAITING_AGENTS << (" + elapsedTime + ") (workingFrame " + workingFrame + ") (t " + ((startTime + (double)(period * workingFrame))/1000) + "s)");;
 				nextStateChange = frameTime + receiveDeadline;
 				
@@ -809,11 +727,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				
 				// Inicia o processamento dos eventos
 //				System.out.println(clock.getCurrentTime() + " >> 3 - PROCESSING << (" + elapsedTime + ") ");
-				try {
-					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 3 - PROCESSING << (" + elapsedTime + ")\n");
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
 //	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 3 - PROCESSING << (" + elapsedTime + ") ");
 				
 //				System.out.println("Entrou no process()\t " + clock.getCurrentTime());
@@ -826,11 +739,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 //	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "process() demorou " + (clock.getCurrentTime() - time));
 //				System.out.println(clock.getCurrentTime() + "\t process() demorou " + (clock.getCurrentTime() - time));
 //				System.out.println("Saiu do process()\t " + clock.getCurrentTime());
-				try {
-					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] \t process() demorou " + ((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) - time) + "\n");
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
 				
 				// Agenda a pr�xima mudan�a de estado
 				nextStateChange = frameTime + sendDeadline;
@@ -842,11 +750,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 				eventServerState = ES_STATE.SENDING_RESPONSE;
 				frameTime = frameTime + period;
 //				System.out.println(clock.getCurrentTime() + " >> 4 - SENDING_RESPONSE << (" + elapsedTime + ") ");
-				try {
-					out.write("[" + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "] >> 4 - SENDING_RESPONSE << (" + elapsedTime + ") \n");
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
 //	    		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + ">> 4 - SENDING_RESPONSE << (" + elapsedTime + ") ");
 				nextStateChange = frameTime;
 				act();
@@ -857,11 +760,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			}
 			
 //			System.out.println(clock.getCurrentTime() + " \t 2");
-			try {
-				out.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 
 			// Agenda a próxima mudança de estado
 //			System.out.println(clock.getCurrentTime() + "\t [EventServer:"+ eventType + "] \t Vou agendar \t - " + num);

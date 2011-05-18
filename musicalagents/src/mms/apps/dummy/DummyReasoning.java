@@ -1,5 +1,9 @@
 package mms.apps.dummy;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
 import mms.Actuator;
 import mms.EventHandler;
 import mms.MusicalAgent;
@@ -16,6 +20,11 @@ public class DummyReasoning extends Reasoning {
 	
 	Sensor sensor;
 	Memory sensorMemory;
+	
+	@Override
+	public boolean init() {
+		return true;
+	}
 	
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) throws Exception {
@@ -39,7 +48,6 @@ public class DummyReasoning extends Reasoning {
 	
 	@Override
 	public void needAction(Actuator sourceActuator, double instant, double duration) throws Exception {
-//		System.out.println("needAction()");
 		double[] buf = new double[1024];
 		// Armazena o chunk de saída na memória e atua
 		try {

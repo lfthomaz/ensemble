@@ -250,7 +250,12 @@ public class World {
 
     public void addEntityStateAttribute(String entityName, String attribute, Object value) {
 
-    	entities.get(entityName).attributes.put(attribute, value);
+    	EntityState entity = entities.get(entityName);
+    	if (entity != null) {
+        	entity.attributes.put(attribute, value);
+    	} else {
+    		System.err.println("[ERROR] EntityState does not exist!");
+    	}
     
     }
     
