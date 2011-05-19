@@ -1,5 +1,6 @@
 package mms.router;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -28,8 +29,21 @@ public class RouterAgent extends Agent {
 	private OSCClient 	oscClient;
 	private OSCServer 	oscServer;
 	
+	
+    //----------------------------------------------------------
+	// Sniffer
+	boolean withSniffer = true;
+	Sniffer sniffer;
+	
 	@Override
 	protected void setup() {
+		
+		// TODO Deve ser parâmetro
+		final RouterAgent me = this;
+		if (withSniffer) {
+			sniffer = new Sniffer(me);
+			sniffer.setVisible(true);
+		}
 		
 		// Starts OSC
 		try {
@@ -80,20 +94,23 @@ public class RouterAgent extends Agent {
             System.err.println("[" + getName() + "] Malformed address: " + cmd.getRecipient());
             return;
         }
-    
+		
         // Fowards the command
         if (str[1].equals(Constants.FRAMEWORK_NAME)) {
         	
 //            System.out.println("[Router] Command to MMS received: " + cmd);
     		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
     		msg.addReceiver(new AID(str[2], AID.ISLOCALNAME));
-    		msg.setConversationId("Router");
+    		msg.setConversationId("CommandRouter");
     		msg.setContent(cmd.toString());
         	send(msg);
             
         } else if (str[1].equals("console")) {
         	
 //            System.out.println("[Router] Command to CONSOLE received: " + cmd);
+        	if (sniffer != null) {
+        		sniffer.receiveCommand(cmd);
+        	}
             	            
         } else {
         	
@@ -113,7 +130,7 @@ public class RouterAgent extends Agent {
 		
 		public ReceiveMessages(Agent a) {
 			super(a);
-			mt = MessageTemplate.MatchConversationId("Router");
+			mt = MessageTemplate.MatchConversationId("CommandRouter");
 		}
 		
 		public void action() {
