@@ -23,8 +23,7 @@ public class DummyEventServer extends EventServer {
 	
 //	PrintWriter file_perf;
 	
-	
-	private int numberFrames = 50;
+	private int numberFrames = 1;
 	private int eventsReceived = 0;
 	private int eventsReceivedInFrame = 0;
 	private int numberAgents = 0;
@@ -85,8 +84,8 @@ public class DummyEventServer extends EventServer {
 		double ratio = (agentsEventsReceived / expected) * 100;
 		System.out.printf("Ratio = %.1f", ratio);
 		
-		// Cair fora
-		System.exit(0);
+//		// Cair fora
+//		System.exit(0);
 		
 		return true;
 	}
@@ -136,11 +135,13 @@ public class DummyEventServer extends EventServer {
 	@Override
 	protected void process() throws Exception {
 		
-		if (workingFrame > numberFrames) {
+		if (workingFrame == numberFrames) {
+//		if (workingFrame > numberFrames) {
 
-			Command cmd = new Command(getAddress(), "/"+Constants.FRAMEWORK_NAME+"/"+Constants.ENVIRONMENT_AGENT, "REMOVE_EVENT_SERVER");
-			cmd.addParameter("NAME", getEventType());
-			sendCommand(cmd);
+//			Command cmd = new Command(getAddress(), "/"+Constants.FRAMEWORK_NAME+"/"+Constants.ENVIRONMENT_AGENT, "REMOVE_EVENT_SERVER");
+//			cmd.addParameter("NAME", getEventType());
+//			Command cmd = new Command(getAddress(), "/"+Constants.FRAMEWORK_NAME+"/"+Constants.ENVIRONMENT_AGENT, "STOP_SIMULATION");
+//			sendCommand(cmd);
 			
 		} else {
 		
