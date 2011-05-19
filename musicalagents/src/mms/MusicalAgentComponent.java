@@ -16,6 +16,10 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 		return myName;
 	}
 	
+	public final String getComponentType() {
+		return myType;
+	}
+	
 	protected final void setComponentName(String myName) {
 		if (myState == EA_STATE.CREATED) {
 			this.myName = myName;

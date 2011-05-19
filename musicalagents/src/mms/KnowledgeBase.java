@@ -41,6 +41,13 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		// Sets component type
 		setType(Constants.COMP_KB);
 		
+		Command cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("TYPE", getComponentType());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
+
 		// Calls user initialization code
 		if (!init()) {
 			return false;
@@ -48,6 +55,14 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		
 		// Sets the agent's state to INITIALIZED
 		setState(EA_STATE.INITIALIZED);
+
+		// Informs the console
+		cmd = new Command(getAddress(), "/console", "UPDATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("NAME", "STATE");
+		cmd.addParameter("VALUE", "INITIALIZED");
+		sendCommand(cmd);
 
 		return true;
 	}

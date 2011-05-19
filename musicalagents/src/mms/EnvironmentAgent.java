@@ -147,48 +147,38 @@ public class EnvironmentAgent extends MMSAgent {
 		lock.lock();
 		try {
 
-			// 1. Obtém as propriedades da simulação
+			// Obtém as propriedades da simulação
 			waitAllAgents = Boolean.valueOf(getParameters().get(Constants.WAIT_ALL_AGENTS, "TRUE"));
 			waitTimeTurn = Long.valueOf(getParameters().get(Constants.WAIT_TIME_TURN, "100"));
 	
-//			// Conecta-se ao roteador de comandos
-//			if (getRouter() != null) {
-//				getRouter().connect(this);
-//			} else {
-//				System.err.println("[" + getAgentName() + "] " + "Router not available...");
-//			}
-
-			// 2. Cria um mundo genérico
+			// Cria um mundo genérico
 			Class worldClass;
 			try {
 				worldClass = Class.forName(parameters.get(Constants.CLASS_WORLD, "mms.world.World"));
 				world = (World)worldClass.newInstance();
+				getParameters().put(Constants.PARAM_WORLD_AGENT, this);
 				world.setParameters(getParameters());
 				world.configure();
-				world.start(this);
+				world.start();
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(-1);
 			}
 
-//			// 4. Inicia a recepção de Mensagens de Controle 
-//			this.addBehaviour(tbf.wrap(new ReceiveMessages(this)));
 			
-			// 5. Executa o método de inicialização do usuário
+			// Executa o método de inicialização do usuário
 			init();
 			
-			// 6. Inicia os EventServers
+			// Inicia os EventServers
 			Collection<EventServer> servers = eventServers.values();
 			for (Iterator<EventServer> iterator = servers.iterator(); iterator.hasNext();) {
 				EventServer eventServer = iterator.next();
 				eventServer.start();
 			}
 	
-			// 3. Registra o Ambiente no DS
+			// Registra o Ambiente no DS
 			this.registerService(getAgentName(), Constants.ENVIRONMENT_AGENT);
 			
-			// 7. Fim da inicialização do Agente Ambiente
-			// TODO Deveria vir após o init()
 			state = EA_STATE.INITIALIZED;
 			logger.info("[" + getAgentName() + "] " + "Initialized");
 //			System.out.println("[" + this.getAID().getAgentName() + "] " + "Initialized");
@@ -215,11 +205,21 @@ public class EnvironmentAgent extends MMSAgent {
 	@Override
 	public boolean stop() {
 		
+		// Stops EventServers
+		for (EventServer es : eventServers.values()) {
+			es.stop();
+		}
+		
+		// Destroy Agents
+		for (String agent : getWorld().getEntityList()) {
+			destroyAgent(agent);
+		}
+		
+		// Stop World
+		world.stop();
+		
 		// Calls the user implemented finalization method
 		finit();
-		
-//		// Disconnects from the router
-//		getRouter().disconnect(this);
 		
 		return true;
 	}
@@ -354,7 +354,13 @@ public class EnvironmentAgent extends MMSAgent {
 		
 		String command = cmd.getCommand();
 		
-		if (command.equals(Constants.CMD_CREATE_AGENT)) {
+		if (command.equals(Constants.CMD_START_SIMULATION)) {
+		
+		} else if (command.equals(Constants.CMD_STOP_SIMULATION)) {
+
+			this.doDelete();
+			
+		} else if (command.equals(Constants.CMD_CREATE_AGENT)) {
 			
 			String agentName = cmd.getParameter("NAME");
 			String agentClass = cmd.getParameter("CLASS");

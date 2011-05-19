@@ -46,6 +46,7 @@ public final class Constants {
 	public static final String	PARAM_COMM_SENSING		= "COMM_SENSING";
 	public static final String	PARAM_COMM_ACTING		= "COMM_ACTING";
 	public static final String 	PARAM_COMM_ACCESS_POINT = "COMM_ACCESS_POINT";
+	public static final String 	PARAM_WORLD_AGENT 		= "WORLD_AGENT";
 	public static final String	PARAM_TURN 				= "TURN";
 	public static final String	PARAM_NUMBER_EVT_SENT 	= "PARAM_NUMBER_EVT_SENT";
 	public static final String	PARAM_FACT_NAME			= "FACT_NAME";
@@ -87,14 +88,14 @@ public final class Constants {
 	public static final String 	CMD_KILL_AGENT			= "KILL_AGENT";
 	public static final String 	CMD_KILL_AGENT_ACK		= "KILL_AGENT_ACK";
 
+	public static final String 	CMD_START_SIMULATION 	= "START_SIMULATION";
+	public static final String 	CMD_STOP_SIMULATION 	= "STOP_SIMULATION";
 	public static final String 	CMD_CREATE_AGENT 		= "CREATE_AGENT";
 	public static final String 	CMD_ADD_COMPONENT 		= "ADD_COMPONENT";
 	public static final String 	CMD_REMOVE_COMPONENT 	= "REMOVE_COMPONENT";
 	public static final String 	CMD_DESTROY_AGENT 		= "DESTROY_AGENT";
 	public static final String 	CMD_ADD_EVENT_SERVER	= "ADD_EVENT_SERVER";
 	public static final String 	CMD_REMOVE_EVENT_SERVER = "REMOVE_EVENT_SERVER";
-	public static final String 	CMD_START_MMS 			= "START_MMS";
-	public static final String 	CMD_STOP_MMS 			= "STOP_MMS";
 	
 	// 
 	public static final String 	ENVIRONMENT_AGENT 		= "ENVIRONMENT";
@@ -118,5 +119,5 @@ public final class Constants {
 	// Classes
 	public static final String CLASS_WORLD		 		= "CLASS_WORLD";
 	public static final String CLASS_MUSICAL_AGENT 		= "CLASS_MUSICAL_AGENT";
-	
+
 }

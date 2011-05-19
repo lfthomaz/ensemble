@@ -96,6 +96,15 @@ public class MusicalAgent extends MMSAgent {
 	@Override
 	public final boolean start() {
 
+		Command cmd;
+		
+		// Enviar mensagem para o console
+		cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("CLASS", this.getClass().toString());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
+
 		lock.lock();
 		try {
 
@@ -118,7 +127,7 @@ public class MusicalAgent extends MMSAgent {
 					if (result.length == 1) {
 						environmentAgent = result[0].getName().getLocalName();
 						envFound = true;
-						Command cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_AGENT_REGISTER);
+						cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_AGENT_REGISTER);
 						sendCommand(cmd);
 					} else {
 						// TODO jeito ruim de ficar tentando registrar o Agente
@@ -177,6 +186,13 @@ public class MusicalAgent extends MMSAgent {
 			
 			// Fim da inicialização do Agente Musical
 			state = MA_STATE.INITIALIZED;
+			
+			// Enviar mensagem para o console
+			cmd = new Command(getAddress(), "/console", "UPDATE");
+			cmd.addParameter("AGENT", getAgent().getAgentName());
+			cmd.addParameter("NAME", "STATE");
+			cmd.addParameter("VALUE", "INITIALIZED");
+			sendCommand(cmd);
 			
 		} finally {
 			lock.unlock();

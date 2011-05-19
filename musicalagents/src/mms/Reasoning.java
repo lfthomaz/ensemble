@@ -30,6 +30,12 @@ public class Reasoning extends MusicalAgentComponent {
 	@Override
 	public final boolean start() {
 		
+		Command cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
+		
 		// Sets component type
 		setType(Constants.COMP_REASONING);
 		
@@ -58,6 +64,14 @@ public class Reasoning extends MusicalAgentComponent {
 		
 		// Sets the agent's state to INITIALIZED
 		setState(EA_STATE.INITIALIZED);
+
+		// Informs the console
+		cmd = new Command(getAddress(), "/console", "UPDATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("NAME", "STATE");
+		cmd.addParameter("VALUE", "INITIALIZED");
+		sendCommand(cmd);
 		
 		// Cycle Behaviour que controla o raciocínio
 		switch (reasoningMode) {

@@ -15,6 +15,14 @@ public class Sensor extends EventHandler implements Sensing {
 		// Sets component type
 		setType(Constants.COMP_SENSOR);
 		
+		Command cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("TYPE", getComponentType());
+		cmd.addParameter("EVT_TYPE", getEventType());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
+
 		if (!super.start()) {
 			return false;
 		}
@@ -29,6 +37,13 @@ public class Sensor extends EventHandler implements Sensing {
 		// Sets the agent's state to INITIALIZED
 		setState(EA_STATE.INITIALIZED);
 		
+		cmd = new Command(getAddress(), "/console", "UPDATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("NAME", "STATE");
+		cmd.addParameter("VALUE", "INITIALIZED");
+		sendCommand(cmd);
+
 		return true;
 
 	}
