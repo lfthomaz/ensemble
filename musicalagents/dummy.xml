@@ -17,6 +17,7 @@
   <!-- ********** MUSICAL AGENT CLASSES ********** -->
 
 	<MUSICAL_AGENT_CLASS NAME="DUMMY" CLASS="mms.MusicalAgent">
+		<ARG NAME="BLA" VALUE="1.0" /> <!-- NÃO ESTÁ INDO!!! -->
 		<COMPONENTS>
 			<REASONING NAME="DummyReasoning" CLASS="mms.apps.dummy.DummyReasoning" />
 			<ACTUATOR NAME="DummyActuator" CLASS="mms.Actuator" EVENT_TYPE="DUMMY" COMM="mms.comm.CommMessage" />
@@ -26,6 +27,8 @@
 	
   <!-- ********** MUSICAL AGENT INSTANCES ********** -->
 
-	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="1" />
+	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="1" >
+		<ARG NAME="BLA" VALUE="2.0" />
+	</MUSICAL_AGENT>
 
 </MMS>
