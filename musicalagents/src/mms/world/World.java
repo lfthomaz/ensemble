@@ -5,9 +5,14 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import mms.Acting;
+import mms.Constants;
 import mms.EnvironmentAgent;
+import mms.LifeCycle;
+import mms.MMSAgent;
 import mms.MusicalAgent;
 import mms.Parameters;
+import mms.Sensing;
 import mms.clock.VirtualClockHelper;
 import mms.world.law.Law;
 
@@ -15,7 +20,7 @@ import mms.world.law.Law;
  * Represents the actual state of the world, with all its entities.
  */
 //TODO Criar métodos genéricos para obter o estado do agente no mundo, posição etc...
-public class World {
+public class World implements LifeCycle {
 	
 	/**
 	 * Locks
@@ -80,11 +85,23 @@ public class World {
 	/**
      * Constructor
      */
-    public void start(EnvironmentAgent envAgent) {
+	@Override
+    public boolean start() {
 
-    	this.envAgent = envAgent;
-    	this.clock = envAgent.getClock();
+    	// Parameters
+    	if (parameters == null) {
+			System.err.println("[World] Parameters not set! World not initialized!");
+			return false;
+		}
+		try {
+			this.envAgent = (EnvironmentAgent)parameters.getObject(Constants.PARAM_WORLD_AGENT);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
     	
+    	this.clock = envAgent.getClock();
+
     	// Laws
     	if (getParameters().containsKey("LAW")) {
 	    	String[] laws = getParameters().get("LAW").split(" ");
@@ -93,17 +110,41 @@ public class World {
 			}
     	}
     	
-    	try {
-			init();
-		} catch (Exception e) {
-			e.printStackTrace();
+    	// Basic world attributes
+		this.dimensions = Integer.valueOf(parameters.get("dimensions", "3"));
+		this.structure	= parameters.get("structure", "continuous");
+    	String form = getParameters().get("form");
+    	if (form != null) {
+    		String[] str = form.split(":");
+    		if (str[0].equals("cube") && str.length == 3) {
+        		this.form_type 		= str[0];
+    			this.form_size 		= Double.valueOf(str[1]); 
+    			this.form_size_half = form_size / 2;
+    			this.form_loop 		= str[2].equals("loop") ? true : false;
+    		}
+    	} else {
+        		this.form_type 		= "infinite";
+    			this.form_size 		= Double.MAX_VALUE; 
+    			this.form_size_half = Double.MAX_VALUE / 2;
+    			this.form_loop 		= false;
+    	}
+    	
+		if (!init()) {
+			return false;
 		}
 		
 //		System.out.println("[WORLD] " + "Initialized");
 		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":WORLD] " + "Initialized");
+		
+		return true;
 	
     }
     
+	@Override
+	public boolean stop() {
+		return true;
+	}
+	
     /**
      * Add an entity to the virtual World (agent, obstacle etc.)
      * @param entityName
@@ -269,38 +310,22 @@ public class World {
 	// User implemented methods
 	//--------------------------------------------------------------------------------
     
-	/**
-	 * 
-	 */
-	public void configure() {
-		this.dimensions = Integer.valueOf(parameters.get("dimensions", "3"));
-		this.structure	= parameters.get("structure", "continuous");
-    	String form = getParameters().get("form");
-    	if (form != null) {
-    		String[] str = form.split(":");
-    		if (str[0].equals("cube") && str.length == 3) {
-        		this.form_type 		= str[0];
-    			this.form_size 		= Double.valueOf(str[1]); 
-    			this.form_size_half = form_size / 2;
-    			this.form_loop 		= str[2].equals("loop") ? true : false;
-    		}
-    	} else {
-        		this.form_type 		= "infinite";
-    			this.form_size 		= Double.MAX_VALUE; 
-    			this.form_size_half = Double.MAX_VALUE / 2;
-    			this.form_loop 		= false;
-    	}
+    @Override
+	public boolean configure() {
+    	return true;
 	}
 
-	/**
-	 * User initialization method
-	 * @param parameters
-	 * @throws Exception
-	 */
-	protected void init() throws Exception {
+	@Override
+	public boolean init() {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
+		return true;
 	}
 	
+	@Override
+	public boolean finit() {
+		return true;
+	}
+
 	/**
 	 * Called when an entity is added from the World. Must be overrided by the user.
 	 * @param entityName
