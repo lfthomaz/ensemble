@@ -30,14 +30,16 @@ public class Reasoning extends MusicalAgentComponent {
 	@Override
 	public final boolean start() {
 		
+		// Sets component type
+		setType(Constants.COMP_REASONING);
+		
 		Command cmd = new Command(getAddress(), "/console", "CREATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("COMPONENT", getComponentName());
+		cmd.addParameter("CLASS", this.getClass().toString());
+		cmd.addParameter("TYPE", getType());
 		cmd.addParameter("PARAMETERS", parameters.toString());
 		sendCommand(cmd);
-		
-		// Sets component type
-		setType(Constants.COMP_REASONING);
 		
 		// Gets clock service
 		clock = getAgent().getClock();
