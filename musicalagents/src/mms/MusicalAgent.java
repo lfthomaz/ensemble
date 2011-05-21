@@ -357,10 +357,6 @@ public class MusicalAgent extends MMSAgent {
 	//--------------------------------------------------------------------------------
 	// Agent Getters
 	//--------------------------------------------------------------------------------
-
-	public final MusicalAgent getAgent() {
-		return this;
-	}
 	
 	public final KnowledgeBase getKB() {
 		if (kb == null) {
@@ -493,6 +489,7 @@ public class MusicalAgent extends MMSAgent {
 			}
 
 			comp.confirmDeregistration();
+			
 		}
 		else if (command.equals(Constants.CMD_KILL_AGENT) || 
 				command.equals(Constants.CMD_DESTROY_AGENT)) {

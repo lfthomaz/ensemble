@@ -327,6 +327,10 @@ public class Sniffer extends Agent implements RouterClient {
 		btnStopSimulation = new JButton("Stop Simulation");
 		btnStopSimulation.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				Command cmd = new Command(getAddress(), 
+						"/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT,
+						"STOP_SIMULATION");
+				sendCommand(cmd);
 			}
 		});
 		btnStopSimulation.setBounds(162, 471, 150, 29);

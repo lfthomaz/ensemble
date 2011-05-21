@@ -53,6 +53,14 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 	 * Gets agent's name
 	 * @return 
 	 */
+	public final MMSAgent getAgent() {
+		return this;
+	}
+
+	/** 
+	 * Gets agent's name
+	 * @return 
+	 */
 	public final String getAgentName() {
 		return getLocalName();
 	}

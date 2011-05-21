@@ -103,7 +103,7 @@ public final class Constants {
 	// EventHandler Status
 	public static enum EH_STATUS {REGISTERED, NOT_REGISTERED};
 	// MusicalAgent States
-	public static enum EA_STATE {CREATED, INITIALIZED, FINALIZED};
+	public static enum EA_STATE {CREATED, INITIALIZED, TERMINATING, FINALIZED};
 	// MusicalAgent States
 	public static enum MA_STATE {CREATED, INITIALIZED, REGISTERED, TERMINATING, FINALIZED};
 	// Actuator States

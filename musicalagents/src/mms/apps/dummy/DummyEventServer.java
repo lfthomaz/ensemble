@@ -60,23 +60,23 @@ public class DummyEventServer extends EventServer {
 //		for (int i = 0; i < array.length; i++) {
 //			
 //		}
-		File dir = new File("./tests");
-		File[] files = dir.listFiles(new FilenameFilter() {
-			public boolean accept(File arg0, String arg1) {
-				return arg1.startsWith("out_");
-			}
-		});
-		for (File file : files) {
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				while (br.readLine() != null) {
-					agentsEventsReceived++;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			file.delete();
-		}
+//		File dir = new File("./tests");
+//		File[] files = dir.listFiles(new FilenameFilter() {
+//			public boolean accept(File arg0, String arg1) {
+//				return arg1.startsWith("out_");
+//			}
+//		});
+//		for (File file : files) {
+//			try {
+//				BufferedReader br = new BufferedReader(new FileReader(file));
+//				while (br.readLine() != null) {
+//					agentsEventsReceived++;
+//				}
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			file.delete();
+//		}
 		System.out.println("Number of Agents = " + numberAgents);
 		System.out.println("Events received ES = " + eventsReceived);
 		System.out.println("Events received MAs = " + agentsEventsReceived);
