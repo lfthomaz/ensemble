@@ -1,4 +1,4 @@
-package mms.tools;
+package mms.sniffer;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -7,35 +7,36 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
+import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import mms.Constants;
 import mms.Command;
 import mms.Parameters;
-import mms.router.RouterAgent;
 import mms.router.RouterClient;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
-import java.awt.FlowLayout;
-import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.swing.tree.TreeModel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.border.EtchedBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.LineBorder;
+import java.awt.Color;
 
 public class Sniffer extends Agent implements RouterClient {
 
@@ -61,6 +62,8 @@ public class Sniffer extends Agent implements RouterClient {
 	private JLabel lblType;
 	private JLabel lblEvent;
 	
+	private JPanel pnlParameters;
+	
 	private JButton btnAddComponent;
 	private JButton btnDestroyAgent;
 	private JButton btnStartSimulation;
@@ -68,6 +71,11 @@ public class Sniffer extends Agent implements RouterClient {
 	private JButton btnSendCommand;
 	private JButton btnRemoveComponent;
 	private JButton btnCreateAgent;
+	private DefaultTableModel tblParametersModel;
+	private JTable tblParameters;
+	private JScrollPane scrollPane_1;
+	private JButton btnInsert;
+	private JButton btnRemove;
 
 	/**
 	 * Create the application.
@@ -76,6 +84,12 @@ public class Sniffer extends Agent implements RouterClient {
 	protected void setup() {
 		
 		// GUI
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		frame.setTitle("Ensemble Sniffer");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		initialize();
@@ -91,12 +105,12 @@ public class Sniffer extends Agent implements RouterClient {
 	 */
 	private void initialize() {
 
-		frame.setBounds(100, 100, 583, 410);
+		frame.setBounds(100, 100, 586, 539);
 		frame.getContentPane().setLayout(null);
 		
 		JPanel infoPanel = new JPanel();
 		infoPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		infoPanel.setBounds(274, 6, 303, 259);
+		infoPanel.setBounds(274, 6, 303, 379);
 		frame.getContentPane().add(infoPanel);
 		infoPanel.setLayout(null);
 		
@@ -149,13 +163,35 @@ public class Sniffer extends Agent implements RouterClient {
 		txtEvent.setColumns(10);
 		txtEvent.setBounds(44, 142, 253, 28);
 		infoPanel.add(txtEvent);
-		
+
 		btnAddComponent = new JButton("Add Component...");
 		btnAddComponent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				SnifferDialog dialog = new SnifferDialog(1);
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				dialog.setResizable(false);
+				dialog.setVisible(true);
+				if (dialog.result) {
+					Command cmd = new Command(getAddress(), 
+							"/" + Constants.FRAMEWORK_NAME + "/" + selectedNode.toString(),
+							"ADD_COMPONENT");
+					// Returns the command string
+					cmd.addParameter("NAME", dialog.txtName.getText());
+					cmd.addParameter("CLASS", dialog.txtClass.getText());
+					String parameters = "{";
+					for (int i = 0; i < dialog.tableModel.getRowCount(); i++) {
+						parameters += dialog.tableModel.getValueAt(i, 0) + "=" + dialog.tableModel.getValueAt(i, 1) + ";";
+					}
+					if (!dialog.txtEvtType.equals("")) {
+						parameters += "EVT_TYPE=" + dialog.txtEvtType.getText();
+					}
+					parameters += "}";
+					cmd.addParameter("PARAMETERS", parameters);
+					sendCommand(cmd);
+				}
 			}
 		});
-		btnAddComponent.setBounds(139, 195, 158, 29);
+		btnAddComponent.setBounds(139, 310, 158, 29);
 		infoPanel.add(btnAddComponent);
 		
 		btnDestroyAgent = new JButton("Destroy Agent");
@@ -170,7 +206,7 @@ public class Sniffer extends Agent implements RouterClient {
 				}
 			}
 		});
-		btnDestroyAgent.setBounds(139, 224, 158, 29);
+		btnDestroyAgent.setBounds(139, 339, 158, 29);
 		infoPanel.add(btnDestroyAgent);
 		
 		btnRemoveComponent = new JButton("Remove Component");
@@ -185,35 +221,89 @@ public class Sniffer extends Agent implements RouterClient {
 				}
 			}
 		});
-		btnRemoveComponent.setBounds(139, 224, 158, 29);
+		btnRemoveComponent.setBounds(139, 339, 158, 29);
 		infoPanel.add(btnRemoveComponent);
 		
 		btnCreateAgent = new JButton("Create Agent...");
-		btnCreateAgent.setBounds(139, 224, 158, 29);
+		btnCreateAgent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				SnifferDialog dialog = new SnifferDialog(0);
+				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				dialog.setResizable(false);
+				dialog.setVisible(true);
+				if (dialog.result) {
+					Command cmd = new Command(getAddress(), 
+							"/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT,
+							"CREATE_AGENT");
+					// Returns the command string
+					cmd.addParameter("NAME", dialog.txtName.getText());
+					cmd.addParameter("CLASS", dialog.txtClass.getText());
+					String parameters = "{";
+					for (int i = 0; i < dialog.tableModel.getRowCount(); i++) {
+						parameters += dialog.tableModel.getValueAt(i, 0) + "=" + dialog.tableModel.getValueAt(i, 1) + ";";
+					}
+					parameters += "}";
+					cmd.addParameter("PARAMETERS", parameters);
+					sendCommand(cmd);
+				}
+			}
+		});
+		btnCreateAgent.setBounds(139, 339, 158, 29);
 		infoPanel.add(btnCreateAgent);
 		
+		pnlParameters = new JPanel();
+		pnlParameters.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Parameters", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		pnlParameters.setBounds(6, 180, 291, 126);
+		infoPanel.add(pnlParameters);
+		pnlParameters.setLayout(null);
+		
+		scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(52, 16, 229, 103);
+		pnlParameters.add(scrollPane_1);
+		
+		tblParameters = new JTable();
+		scrollPane_1.setViewportView(tblParameters);
+		tblParameters.setRowSelectionAllowed(false);
+		tblParametersModel = new DefaultTableModel(
+				new Object[][] {},
+				new String[] {
+					"NAME", "VALUE"
+				}
+			);
+		tblParameters.setModel(tblParametersModel);
+		tblParameters.getColumnModel().getColumn(0).setMinWidth(30);
+		tblParameters.setBorder(new LineBorder(Color.LIGHT_GRAY));
+		
+		btnInsert = new JButton("+");
+		btnInsert.setBounds(6, 68, 41, 23);
+		pnlParameters.add(btnInsert);
+		
+		btnRemove = new JButton("-");
+		btnRemove.setBounds(6, 96, 41, 23);
+		pnlParameters.add(btnRemove);
+		
+		rootNode = new DefaultMutableTreeNode("Ensemble");
+		treeModel = new DefaultTreeModel(rootNode);
+		
 		JPanel listPanel = new JPanel();
-		listPanel.setBounds(6, 6, 256, 259);
+		listPanel.setBounds(6, 6, 256, 379);
 		frame.getContentPane().add(listPanel);
 		listPanel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(0, 0, 256, 259);
+		scrollPane.setBounds(0, 0, 256, 378);
 		listPanel.add(scrollPane);
 		
-		rootNode = new DefaultMutableTreeNode("Ensemble");
-		treeModel = new DefaultTreeModel(rootNode);
-
 		tree = new JTree(treeModel);
 		tree.setShowsRootHandles(true);
 		scrollPane.setViewportView(tree);
 		
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		tree.addTreeSelectionListener(new MyTreeSelectionListener());
-		
+
 		JPanel commandPanel = new JPanel();
 		commandPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		commandPanel.setBounds(6, 273, 571, 71);
+		commandPanel.setBounds(6, 396, 571, 71);
 		frame.getContentPane().add(commandPanel);
 		commandPanel.setLayout(null);
 		
@@ -231,7 +321,7 @@ public class Sniffer extends Agent implements RouterClient {
 		commandPanel.add(btnSendCommand);
 		
 		btnStartSimulation = new JButton("Start Simulation");
-		btnStartSimulation.setBounds(6, 348, 150, 29);
+		btnStartSimulation.setBounds(6, 471, 150, 29);
 		frame.getContentPane().add(btnStartSimulation);
 		
 		btnStopSimulation = new JButton("Stop Simulation");
@@ -239,7 +329,7 @@ public class Sniffer extends Agent implements RouterClient {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnStopSimulation.setBounds(162, 348, 150, 29);
+		btnStopSimulation.setBounds(162, 471, 150, 29);
 		frame.getContentPane().add(btnStopSimulation);
 		
 		lblName.setVisible(false);
@@ -252,6 +342,7 @@ public class Sniffer extends Agent implements RouterClient {
 		txtType.setVisible(false);
 		lblEvent.setVisible(false);
 		txtEvent.setVisible(false);
+		pnlParameters.setVisible(false);
 		btnAddComponent.setVisible(false);
 		btnDestroyAgent.setVisible(false);
 		btnRemoveComponent.setVisible(false);
@@ -270,6 +361,12 @@ public class Sniffer extends Agent implements RouterClient {
 				txtName.setText(info.name);
 				txtClass.setText(info.className);
 				txtState.setText(info.state);
+				while (tblParametersModel.getRowCount() > 0) {
+					tblParametersModel.removeRow(0);
+				}
+				for (String key : info.parameters.keySet()) {
+					tblParametersModel.addRow(new String[] {key, info.parameters.get(key)});
+				}
 				lblName.setVisible(true);
 				txtName.setVisible(true);
 				lblClass.setVisible(true);
@@ -280,6 +377,7 @@ public class Sniffer extends Agent implements RouterClient {
 				txtType.setVisible(false);
 				lblEvent.setVisible(false);
 				txtEvent.setVisible(false);
+				pnlParameters.setVisible(true);
 				btnAddComponent.setVisible(true);
 				btnDestroyAgent.setVisible(true);
 				btnRemoveComponent.setVisible(false);
@@ -291,6 +389,12 @@ public class Sniffer extends Agent implements RouterClient {
 				txtState.setText(info.state);
 				txtType.setText(info.type);
 				txtEvent.setText(info.evt_type);
+				while (tblParametersModel.getRowCount() > 0) {
+					tblParametersModel.removeRow(0);
+				}
+				for (String key : info.parameters.keySet()) {
+					tblParametersModel.addRow(new String[] {key, info.parameters.get(key)});
+				}
 				lblName.setVisible(true);
 				txtName.setVisible(true);
 				lblClass.setVisible(true);
@@ -306,6 +410,7 @@ public class Sniffer extends Agent implements RouterClient {
 					lblEvent.setVisible(false);
 					txtEvent.setVisible(false);
 				}
+				pnlParameters.setVisible(true);
 				btnAddComponent.setVisible(false);
 				btnDestroyAgent.setVisible(false);
 				btnRemoveComponent.setVisible(true);
@@ -321,6 +426,7 @@ public class Sniffer extends Agent implements RouterClient {
 				txtType.setVisible(false);
 				lblEvent.setVisible(false);
 				txtEvent.setVisible(false);
+				pnlParameters.setVisible(false);
 				btnAddComponent.setVisible(false);
 				btnDestroyAgent.setVisible(false);
 				btnRemoveComponent.setVisible(false);
@@ -434,7 +540,7 @@ public class Sniffer extends Agent implements RouterClient {
 						compInfo.className = className.substring(6); 
 						compInfo.type = cmd.getParameter("TYPE");
 						compInfo.evt_type = cmd.getParameter("EVT_TYPE");
-//						compInfo.parameters = cmd.getParameters("PARAMETERS");
+						compInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
 						DefaultMutableTreeNode compNode = new DefaultMutableTreeNode(compInfo);
 						treeModel.insertNodeInto(compNode, agentNode, agentNode.getChildCount());
 					}
@@ -447,9 +553,10 @@ public class Sniffer extends Agent implements RouterClient {
 				String className = cmd.getParameter("CLASS");
 				agentInfo.className = className.substring(6); 
 				agentInfo.state = "CREATED";
-//				agentInfo.parameters = cmd.getParameters("PARAMETERS");
+				agentInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
 				DefaultMutableTreeNode agentNode = new DefaultMutableTreeNode(agentInfo);
 				treeModel.insertNodeInto(agentNode, rootNode, rootNode.getChildCount());
+				tree.expandRow(0);
 			}
 		}
 		else if (cmd.getCommand().equals("UPDATE")) {
@@ -513,6 +620,7 @@ public class Sniffer extends Agent implements RouterClient {
 					compNode = (DefaultMutableTreeNode)agentNode.getChildAt(i);
 					if (compNode.toString().equals(compName)) {
 						treeModel.removeNodeFromParent(compNode);
+						tree.setSelectionPath(new TreePath(agentNode.getPath()));
 						return;
 					}
 					compNode = null;
@@ -523,7 +631,9 @@ public class Sniffer extends Agent implements RouterClient {
 				treeModel.removeNodeFromParent(agentNode);
 			}
 		}
+		tree.setSelectionPath(new TreePath(rootNode.getPath()));
 	}
+	
 
 	@Override
 	public void sendCommand(Command cmd) {
@@ -534,7 +644,6 @@ public class Sniffer extends Agent implements RouterClient {
 		msg.setContent(cmd.toString());
     	send(msg);
 	}
-	
 }
 
 class AgentInfo {

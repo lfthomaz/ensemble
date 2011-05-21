@@ -101,7 +101,7 @@ public class Loader {
 			ac = cc.createNewAgent("Router", "mms.router.RouterAgent", null);
 			ac.start();
 			// Sniffer
-			ac = cc.createNewAgent("Sniffer", "mms.tools.Sniffer", null);
+			ac = cc.createNewAgent("Sniffer", "mms.sniffer.Sniffer", null);
 			ac.start();
 		} catch (StaleProxyException e) {
 			e.printStackTrace();

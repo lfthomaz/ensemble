@@ -118,8 +118,10 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 	 */
 	protected void takeDown() {
 		
+		// Calls agent's stop method
 		stop();
-		System.out.println("[" + this.getAgentName() + "] " + "Terminated");
+		
+		System.out.println("[" + this.getAgentName() + "] " + "Agent terminated");
 		
 	}
 	

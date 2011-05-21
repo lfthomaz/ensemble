@@ -364,7 +364,7 @@ public class EnvironmentAgent extends MMSAgent {
 			
 			String agentName = cmd.getParameter("NAME");
 			String agentClass = cmd.getParameter("CLASS");
-			Parameters parameters = cmd.getParameters();
+			Parameters parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
 			createMusicalAgent(agentName, agentClass, parameters);
 			
 		} else if (command.equals(Constants.CMD_DESTROY_AGENT)) {								
@@ -375,8 +375,8 @@ public class EnvironmentAgent extends MMSAgent {
 		} else if (command.equals(Constants.CMD_ADD_EVENT_SERVER)) {								
 		
 			String className = cmd.getParameter("NAME");
-			Parameters arguments = cmd.getParameters();
-			addEventServer(className, arguments);
+			Parameters parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+			addEventServer(className, parameters);
 			
 		} else if (command.equals(Constants.CMD_REMOVE_EVENT_SERVER)) {								
 			

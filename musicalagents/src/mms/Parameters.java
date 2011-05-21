@@ -59,6 +59,24 @@ public class Parameters extends HashMap<String, Object> {
 		return super.get(key);
 	}
 	
+	public static Parameters parse(String str) {
+		Parameters param = new Parameters();
+		
+		if (str.length() > 0) {
+			str = str.substring(1, str.length()-1);
+			String[] str2 = str.split(";");
+			for (int i = 0; i < str2.length; i++) {
+				  String[] str3 = str2[i].split("=");
+				  if (str3.length == 2) {
+					  param.put(str3[0], str3[1]);
+				  }
+			}
+		}
+		
+		return param;
+	}
+	
+	// Format: {NAME=VALUE; NAME2=VALUE2; ..... }
 	public String toString() {
 		
 		String str = "";
@@ -69,9 +87,8 @@ public class Parameters extends HashMap<String, Object> {
 			}
 			str = "{" + str.substring(0, str.length()-1) + "}"; 
 		} else {
-			str = "{ }";
+			str = "{}";
 		}
-		
 		
 		return str;
 		
