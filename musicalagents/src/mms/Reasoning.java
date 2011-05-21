@@ -127,6 +127,11 @@ public class Reasoning extends MusicalAgentComponent {
 		// Sets the agent's state to 
 		setState(Constants.EA_STATE.FINALIZED);
 		
+		Command cmd = new Command(getAddress(), "/console", "DESTROY");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		sendCommand(cmd);
+		
 		return true;
 	}
 	

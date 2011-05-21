@@ -75,7 +75,24 @@ public class Actuator extends EventHandler implements Acting {
 	
 	@Override
 	public final boolean stop() {
-		return super.stop();
+		
+		// Calls user initialization code
+		if (!finit()) {
+			return false;
+		}
+		
+		// Calls EventHandler stop code
+		if (!super.stop()) {
+			return false;
+		}
+		
+		Command cmd = new Command(getAddress(), "/console", "DESTROY");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		sendCommand(cmd);
+		
+		return true; 
+		
 	}
 	
 	//--------------------------------------------------------------------------------

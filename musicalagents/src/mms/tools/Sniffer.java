@@ -1,4 +1,10 @@
-package mms.router;
+package mms.tools;
+
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -15,6 +21,8 @@ import javax.swing.tree.TreeSelectionModel;
 
 import mms.Command;
 import mms.Parameters;
+import mms.router.RouterAgent;
+import mms.router.RouterClient;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -29,11 +37,11 @@ import javax.swing.border.EtchedBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class Sniffer extends JFrame implements RouterClient, TreeSelectionListener {
+public class Sniffer extends Agent implements RouterClient {
 
-	RouterAgent 			router;
-	
 	HashMap<String, AgentInfo> 	agents;
+	
+	JFrame frame = new JFrame();
 	
 	DefaultMutableTreeNode 	selectedNode;
 
@@ -63,25 +71,33 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 
 	/**
 	 * Create the application.
+	 * @wbp.parser.entryPoint
 	 */
-	public Sniffer(RouterAgent router) {
-		setResizable(false);
-		this.router = router;
+	protected void setup() {
+		
+		// GUI
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
 		initialize();
+		frame.setVisible(true);
+		
+        // Receive messages
+		this.addBehaviour(new ReceiveMessages(this));
+		
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		this.setBounds(100, 100, 583, 405);
-		this.setDefaultCloseOperation(JFrame.NORMAL);
-		this.getContentPane().setLayout(null);
+
+		frame.setBounds(100, 100, 583, 410);
+		frame.getContentPane().setLayout(null);
 		
 		JPanel infoPanel = new JPanel();
 		infoPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		infoPanel.setBounds(274, 6, 303, 259);
-		getContentPane().add(infoPanel);
+		frame.getContentPane().add(infoPanel);
 		infoPanel.setLayout(null);
 		
 		lblName = new JLabel("name");
@@ -139,12 +155,19 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 			public void actionPerformed(ActionEvent arg0) {
 			}
 		});
-		btnAddComponent.setBounds(139, 197, 158, 29);
+		btnAddComponent.setBounds(139, 195, 158, 29);
 		infoPanel.add(btnAddComponent);
 		
 		btnDestroyAgent = new JButton("Destroy Agent");
 		btnDestroyAgent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				if (selectedNode != null) {
+					Command cmd = new Command(getAddress(), 
+							"/mms/"+selectedNode.toString(), 
+							"DESTROY_AGENT");
+					cmd.addParameter("NAME", selectedNode.toString());
+					sendCommand(cmd);
+				}
 			}
 		});
 		btnDestroyAgent.setBounds(139, 224, 158, 29);
@@ -153,11 +176,13 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 		btnRemoveComponent = new JButton("Remove Component");
 		btnRemoveComponent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Command cmd = new Command(getAddress(), 
-						"/mms/"+selectedNode.getParent().toString(), 
-						"REMOVE_COMPONENT");
-				cmd.addParameter("NAME", selectedNode.toString());
-				sendCommand(cmd);
+				if (selectedNode != null) {
+					Command cmd = new Command(getAddress(), 
+							"/mms/"+selectedNode.getParent().toString(), 
+							"REMOVE_COMPONENT");
+					cmd.addParameter("NAME", selectedNode.toString());
+					sendCommand(cmd);
+				}
 			}
 		});
 		btnRemoveComponent.setBounds(139, 224, 158, 29);
@@ -169,7 +194,7 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 		
 		JPanel listPanel = new JPanel();
 		listPanel.setBounds(6, 6, 256, 259);
-		getContentPane().add(listPanel);
+		frame.getContentPane().add(listPanel);
 		listPanel.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -184,12 +209,12 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 		scrollPane.setViewportView(tree);
 		
 		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		tree.addTreeSelectionListener(this);
+		tree.addTreeSelectionListener(new MyTreeSelectionListener());
 		
 		JPanel commandPanel = new JPanel();
 		commandPanel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		commandPanel.setBounds(6, 273, 571, 71);
-		getContentPane().add(commandPanel);
+		frame.getContentPane().add(commandPanel);
 		commandPanel.setLayout(null);
 		
 		JLabel lblCustomCommand = new JLabel("Command");
@@ -207,11 +232,15 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 		
 		btnStartSimulation = new JButton("Start Simulation");
 		btnStartSimulation.setBounds(6, 348, 150, 29);
-		getContentPane().add(btnStartSimulation);
+		frame.getContentPane().add(btnStartSimulation);
 		
 		btnStopSimulation = new JButton("Stop Simulation");
+		btnStopSimulation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btnStopSimulation.setBounds(162, 348, 150, 29);
-		getContentPane().add(btnStopSimulation);
+		frame.getContentPane().add(btnStopSimulation);
 		
 		lblName.setVisible(false);
 		txtName.setVisible(false);
@@ -228,25 +257,77 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 		btnRemoveComponent.setVisible(false);
 	}
 	
-//	private void createNodes(DefaultMutableTreeNode top) {
-//	    DefaultMutableTreeNode category = null;
-//	    
-//	    category = new DefaultMutableTreeNode("Dummy");
-//	    top.add(category);
-//	    
-//	    category.add(new DefaultMutableTreeNode("Environment"));
-//	    category.add(new DefaultMutableTreeNode("Dummy_1"));
-//
-//	    category = new DefaultMutableTreeNode("Clapping Music");
-//	    top.add(category);
-//	    
-//	    category.add(new DefaultMutableTreeNode("Environment"));
-//	    category.add(new DefaultMutableTreeNode("Listener"));
-//	    category.add(new DefaultMutableTreeNode("Leader"));
-//	    category.add(new DefaultMutableTreeNode("Follower_1"));
-//	    category.add(new DefaultMutableTreeNode("Follower_2"));
-//
-//	}
+	class MyTreeSelectionListener implements TreeSelectionListener {
+		@Override
+		public void valueChanged(TreeSelectionEvent e) {
+			selectedNode = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+			if (selectedNode == null) {
+				return;
+			}	
+			Object nodeInfo = selectedNode.getUserObject();
+			if (nodeInfo instanceof AgentInfo) {
+				AgentInfo info = (AgentInfo)nodeInfo;
+				txtName.setText(info.name);
+				txtClass.setText(info.className);
+				txtState.setText(info.state);
+				lblName.setVisible(true);
+				txtName.setVisible(true);
+				lblClass.setVisible(true);
+				txtClass.setVisible(true);
+				lblState.setVisible(true);
+				txtState.setVisible(true);
+				lblType.setVisible(false);
+				txtType.setVisible(false);
+				lblEvent.setVisible(false);
+				txtEvent.setVisible(false);
+				btnAddComponent.setVisible(true);
+				btnDestroyAgent.setVisible(true);
+				btnRemoveComponent.setVisible(false);
+				btnCreateAgent.setVisible(false);
+			} else if (nodeInfo instanceof ComponentInfo) {
+				ComponentInfo info = (ComponentInfo)nodeInfo;
+				txtName.setText(info.name);
+				txtClass.setText(info.className);
+				txtState.setText(info.state);
+				txtType.setText(info.type);
+				txtEvent.setText(info.evt_type);
+				lblName.setVisible(true);
+				txtName.setVisible(true);
+				lblClass.setVisible(true);
+				txtClass.setVisible(true);
+				lblState.setVisible(true);
+				txtState.setVisible(true);
+				lblType.setVisible(true);
+				txtType.setVisible(true);
+				if (info.type.equals("SENSOR") || info.type.equals("ACTUATOR")) {
+					lblEvent.setVisible(true);
+					txtEvent.setVisible(true);
+				} else {
+					lblEvent.setVisible(false);
+					txtEvent.setVisible(false);
+				}
+				btnAddComponent.setVisible(false);
+				btnDestroyAgent.setVisible(false);
+				btnRemoveComponent.setVisible(true);
+				btnCreateAgent.setVisible(false);
+			} else {
+				lblName.setVisible(false);
+				txtName.setVisible(false);
+				lblClass.setVisible(false);
+				txtClass.setVisible(false);
+				lblState.setVisible(false);
+				txtState.setVisible(false);
+				lblType.setVisible(false);
+				txtType.setVisible(false);
+				lblEvent.setVisible(false);
+				txtEvent.setVisible(false);
+				btnAddComponent.setVisible(false);
+				btnDestroyAgent.setVisible(false);
+				btnRemoveComponent.setVisible(false);
+				btnCreateAgent.setVisible(true);
+			}
+		}
+	}
 	
 //	class MyTreeModelListener implements TreeModelListener {
 //	    public void treeNodesChanged(TreeModelEvent e) {
@@ -293,9 +374,40 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 //		});
 //	}
 
+	//--------------------------------------------------------------------------------
+	// JADE Message Control 
+	//--------------------------------------------------------------------------------
+
+	private final class ReceiveMessages extends CyclicBehaviour {
+
+		MessageTemplate mt;
+		
+		public ReceiveMessages(Agent a) {
+			super(a);
+			mt = MessageTemplate.MatchConversationId("CommandRouter");
+		}
+		
+		public void action() {
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				if (msg.getPerformative() != ACLMessage.FAILURE) {
+					String sender = msg.getSender().getLocalName();
+					Command cmd = Command.parse(msg.getContent());
+					if (cmd != null) {
+						receiveCommand(cmd);
+					}
+				}
+			}
+			else {
+				block();
+			}
+		}
+	
+	}
+	
 	@Override
 	public String getAddress() {
-		return "/console/sniffer";
+		return "/console/Sniffer";
 	}
 
 	@Override
@@ -382,82 +494,45 @@ public class Sniffer extends JFrame implements RouterClient, TreeSelectionListen
 				}
 			}
 		}
+		else if (cmd.getCommand().equals("DESTROY")) {
+			DefaultMutableTreeNode agentNode = null;
+			String agentName = cmd.getParameter("AGENT");
+			for (int i = 0; i < rootNode.getChildCount(); i++) {
+				agentNode = (DefaultMutableTreeNode)rootNode.getChildAt(i);
+				if (agentNode.toString().equals(agentName)) {
+					break;
+				}
+				agentNode = null;
+			}
+			// If it is a component
+			if (cmd.containsParameter("COMPONENT")) {
+				// Searches for comp's node
+				DefaultMutableTreeNode compNode = null;
+				String compName = cmd.getParameter("COMPONENT");
+				for (int i = 0; i < agentNode.getChildCount(); i++) {
+					compNode = (DefaultMutableTreeNode)agentNode.getChildAt(i);
+					if (compNode.toString().equals(compName)) {
+						treeModel.removeNodeFromParent(compNode);
+						return;
+					}
+					compNode = null;
+				}
+			} 
+			// If it is an agent
+			else {
+				treeModel.removeNodeFromParent(agentNode);
+			}
+		}
 	}
 
 	@Override
 	public void sendCommand(Command cmd) {
 		System.out.println("[Sniffer] sendCommand(): " + cmd);
-		router.processCommand(cmd);
-	}
-
-	@Override
-	public void valueChanged(TreeSelectionEvent e) {
-		selectedNode = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
-		if (selectedNode == null) {
-			return;
-		}	
-		Object nodeInfo = selectedNode.getUserObject();
-		if (nodeInfo instanceof AgentInfo) {
-			AgentInfo info = (AgentInfo)nodeInfo;
-			txtName.setText(info.name);
-			txtClass.setText(info.className);
-			txtState.setText(info.state);
-			lblName.setVisible(true);
-			txtName.setVisible(true);
-			lblClass.setVisible(true);
-			txtClass.setVisible(true);
-			lblState.setVisible(true);
-			txtState.setVisible(true);
-			lblType.setVisible(false);
-			txtType.setVisible(false);
-			lblEvent.setVisible(false);
-			txtEvent.setVisible(false);
-			btnAddComponent.setVisible(true);
-			btnDestroyAgent.setVisible(true);
-			btnRemoveComponent.setVisible(false);
-			btnCreateAgent.setVisible(false);
-		} else if (nodeInfo instanceof ComponentInfo) {
-			ComponentInfo info = (ComponentInfo)nodeInfo;
-			txtName.setText(info.name);
-			txtClass.setText(info.className);
-			txtState.setText(info.state);
-			txtType.setText(info.type);
-			txtEvent.setText(info.evt_type);
-			lblName.setVisible(true);
-			txtName.setVisible(true);
-			lblClass.setVisible(true);
-			txtClass.setVisible(true);
-			lblState.setVisible(true);
-			txtState.setVisible(true);
-			lblType.setVisible(true);
-			txtType.setVisible(true);
-			if (info.type.equals("SENSOR") || info.type.equals("ACTUATOR")) {
-				lblEvent.setVisible(true);
-				txtEvent.setVisible(true);
-			} else {
-				lblEvent.setVisible(false);
-				txtEvent.setVisible(false);
-			}
-			btnAddComponent.setVisible(false);
-			btnDestroyAgent.setVisible(false);
-			btnRemoveComponent.setVisible(true);
-			btnCreateAgent.setVisible(false);
-		} else {
-			lblName.setVisible(false);
-			txtName.setVisible(false);
-			lblClass.setVisible(false);
-			txtClass.setVisible(false);
-			lblState.setVisible(false);
-			txtState.setVisible(false);
-			lblType.setVisible(false);
-			txtType.setVisible(false);
-			lblEvent.setVisible(false);
-			txtEvent.setVisible(false);
-			btnAddComponent.setVisible(false);
-			btnDestroyAgent.setVisible(false);
-			btnRemoveComponent.setVisible(false);
-			btnCreateAgent.setVisible(true);
-		}
+		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+		msg.addReceiver(new AID("Router", AID.ISLOCALNAME));
+		msg.setConversationId("CommandRouter");
+		msg.setContent(cmd.toString());
+    	send(msg);
 	}
 	
 }

@@ -238,8 +238,6 @@ public abstract class EventHandler extends MusicalAgentComponent {
 	
 	public void confirmDeregistration() {
 		
-		getAgent().eventHandlerDeregistered(getComponentName());
-
 		this.status = EH_STATUS.NOT_REGISTERED;
 		
 		Command cmd = new Command(getAddress(), "/console", "UPDATE");
@@ -249,6 +247,8 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		cmd.addParameter("VALUE", "NOT_REGISTERED");
 		sendCommand(cmd);
 		
+		getAgent().eventHandlerDeregistered(getComponentName());
+
 	}
 	
 }

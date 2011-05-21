@@ -51,7 +51,23 @@ public class Sensor extends EventHandler implements Sensing {
 	
 	@Override
 	public final boolean stop() {
-		return super.stop();
+
+		// Calls user initialization code
+		if (!finit()) {
+			return false;
+		}
+		
+		if (!super.stop()) {
+			return false;
+		}
+		
+		Command cmd = new Command(getAddress(), "/console", "DESTROY");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("COMPONENT", getComponentName());
+		sendCommand(cmd);
+		
+		return true; 
+		
 	}
 	
 	// Chamado por um raciocínio para registrá-lo como listener dos eventos

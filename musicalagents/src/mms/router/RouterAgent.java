@@ -1,6 +1,5 @@
 package mms.router;
 
-import java.awt.EventQueue;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -30,20 +29,8 @@ public class RouterAgent extends Agent {
 	private OSCServer 	oscServer;
 	
 	
-    //----------------------------------------------------------
-	// Sniffer
-	boolean withSniffer = true;
-	Sniffer sniffer;
-	
 	@Override
 	protected void setup() {
-		
-		// TODO Deve ser parâmetro
-		final RouterAgent me = this;
-		if (withSniffer) {
-			sniffer = new Sniffer(me);
-			sniffer.setVisible(true);
-		}
 		
 		// Starts OSC
 		try {
@@ -108,9 +95,11 @@ public class RouterAgent extends Agent {
         } else if (str[1].equals("console")) {
         	
 //            System.out.println("[Router] Command to CONSOLE received: " + cmd);
-        	if (sniffer != null) {
-        		sniffer.receiveCommand(cmd);
-        	}
+    		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+    		msg.addReceiver(new AID("Sniffer", AID.ISLOCALNAME));
+    		msg.setConversationId("CommandRouter");
+    		msg.setContent(cmd.toString());
+        	send(msg);
             	            
         } else {
         	

@@ -206,7 +206,9 @@ public class MusicalAgent extends MMSAgent {
 	public final boolean stop() {
 		
 		// Calls the user implemented finalization method
-		finit();
+		if (!finit()) { 
+			return false;
+		}
 		
 //		// Disconnects from the router
 //		getRouter().disconnect(this);
@@ -497,7 +499,8 @@ public class MusicalAgent extends MMSAgent {
 
 			comp.confirmDeregistration();
 		}
-		else if (command.equals(Constants.CMD_KILL_AGENT)) {
+		else if (command.equals(Constants.CMD_KILL_AGENT) || 
+				command.equals(Constants.CMD_DESTROY_AGENT)) {
 
 			if (isBatch) {
 				dieNextTurn = true;
