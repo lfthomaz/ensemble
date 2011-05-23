@@ -11,6 +11,8 @@ import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -34,6 +36,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
@@ -270,6 +273,7 @@ public class Sniffer extends Agent implements RouterClient {
 					"NAME", "VALUE"
 				}
 			);
+		tblParametersModel.addTableModelListener(new MyTableModelListener());
 		tblParameters.setModel(tblParametersModel);
 		tblParameters.getColumnModel().getColumn(0).setMinWidth(30);
 		tblParameters.setBorder(new LineBorder(Color.LIGHT_GRAY));
@@ -439,34 +443,19 @@ public class Sniffer extends Agent implements RouterClient {
 		}
 	}
 	
-//	class MyTreeModelListener implements TreeModelListener {
-//	    public void treeNodesChanged(TreeModelEvent e) {
-//	        DefaultMutableTreeNode node;
-//	        node = (DefaultMutableTreeNode)
-//	                 (e.getTreePath().getLastPathComponent());
-//
-//	        /*
-//	         * If the event lists children, then the changed
-//	         * node is the child of the node we have already
-//	         * gotten.  Otherwise, the changed node and the
-//	         * specified node are the same.
-//	         */
-//	        try {
-//	            int index = e.getChildIndices()[0];
-//	            node = (DefaultMutableTreeNode)
-//	                   (node.getChildAt(index));
-//	        } catch (NullPointerException exc) {}
-//
-//	        System.out.println("The user has finished editing the node.");
-//	        System.out.println("New value: " + node.getUserObject());
-//	    }
-//	    public void treeNodesInserted(TreeModelEvent e) {
-//	    }
-//	    public void treeNodesRemoved(TreeModelEvent e) {
-//	    }
-//	    public void treeStructureChanged(TreeModelEvent e) {
-//	    }
-//	}
+	class MyTableModelListener implements TableModelListener {
+
+		@Override
+		public void tableChanged(TableModelEvent e) {
+			int row = e.getFirstRow();
+	        int column = e.getColumn();
+	        TableModel model = (TableModel)e.getSource();
+	        String columnName = model.getColumnName(column);
+	        Object data = model.getValueAt(row, column);
+	        System.out.println(columnName + " " + data.toString());
+	    }
+		
+	}
 	
 //	/**
 //	 * Launch the application.
