@@ -84,7 +84,7 @@ public class LM_World extends World {
 //	protected HashMap<String, Agent> agents = new HashMap<String, Agent>();
 	
 	@Override
-	protected void init() {
+	public boolean init() {
 		// Inicializa��o das posi��es
 		squareLattice = new Site[LM_Constants.WorldSize][LM_Constants.WorldSize];
 		
@@ -95,6 +95,8 @@ public class LM_World extends World {
 		}
 	
 		setWorldGUI(new LM_BoardGUI(squareLattice));
+		
+		return true;
 	}
 	
 }

@@ -61,7 +61,6 @@ public class World implements LifeCycle {
     /**
      * World GUI
      */
-    // TODO permitir inserir qualquer tipo de GUI (?)
     protected WorldGUI gui;
     
     /**

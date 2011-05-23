@@ -6,13 +6,12 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.JFrame;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -27,6 +26,7 @@ import mms.router.RouterClient;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+
 import java.util.HashMap;
 
 import javax.swing.JTextField;
@@ -36,10 +36,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
+import java.awt.Component;
 
 public class Sniffer extends Agent implements RouterClient {
 
@@ -77,8 +78,6 @@ public class Sniffer extends Agent implements RouterClient {
 	private DefaultTableModel tblParametersModel;
 	private JTable tblParameters;
 	private JScrollPane scrollPane_1;
-	private JButton btnInsert;
-	private JButton btnRemove;
 
 	/**
 	 * Create the application.
@@ -202,7 +201,7 @@ public class Sniffer extends Agent implements RouterClient {
 			public void actionPerformed(ActionEvent arg0) {
 				if (selectedNode != null) {
 					Command cmd = new Command(getAddress(), 
-							"/mms/"+selectedNode.toString(), 
+							"/" + Constants.FRAMEWORK_NAME + "/"+selectedNode.toString(), 
 							"DESTROY_AGENT");
 					cmd.addParameter("NAME", selectedNode.toString());
 					sendCommand(cmd);
@@ -217,7 +216,7 @@ public class Sniffer extends Agent implements RouterClient {
 			public void actionPerformed(ActionEvent arg0) {
 				if (selectedNode != null) {
 					Command cmd = new Command(getAddress(), 
-							"/mms/"+selectedNode.getParent().toString(), 
+							"/" + Constants.FRAMEWORK_NAME + "/"+selectedNode.getParent().toString(), 
 							"REMOVE_COMPONENT");
 					cmd.addParameter("NAME", selectedNode.toString());
 					sendCommand(cmd);
@@ -271,20 +270,19 @@ public class Sniffer extends Agent implements RouterClient {
 				new Object[][] {},
 				new String[] {
 					"NAME", "VALUE"
+				}) {
+			boolean[] columnEditables = new boolean[] {
+					false, true
+				};
+				public boolean isCellEditable(int row, int column) {
+					return columnEditables[column];
 				}
-			);
-		tblParametersModel.addTableModelListener(new MyTableModelListener());
+			};
 		tblParameters.setModel(tblParametersModel);
+//		tblParameters.setDefaultEditor(String.class, new MyTableEditor());
 		tblParameters.getColumnModel().getColumn(0).setMinWidth(30);
+		tblParameters.getColumnModel().getColumn(1).setCellEditor(new MyTableCellEditor());
 		tblParameters.setBorder(new LineBorder(Color.LIGHT_GRAY));
-		
-		btnInsert = new JButton("+");
-		btnInsert.setBounds(6, 68, 41, 23);
-		pnlParameters.add(btnInsert);
-		
-		btnRemove = new JButton("-");
-		btnRemove.setBounds(6, 96, 41, 23);
-		pnlParameters.add(btnRemove);
 		
 		rootNode = new DefaultMutableTreeNode("Ensemble");
 		treeModel = new DefaultTreeModel(rootNode);
@@ -443,17 +441,39 @@ public class Sniffer extends Agent implements RouterClient {
 		}
 	}
 	
-	class MyTableModelListener implements TableModelListener {
+	class MyTableCellEditor extends AbstractCellEditor 
+						implements TableCellEditor {
+
+		JTextField component = new JTextField();
+		int row, column;
+		
+		@Override
+		public Object getCellEditorValue() {
+			String recipient;
+			if (selectedNode.getDepth() == 1) {
+				recipient = "/" + Constants.FRAMEWORK_NAME + "/" + selectedNode.toString(); 
+			} else {
+				recipient = "/" + Constants.FRAMEWORK_NAME + "/" + selectedNode.getParent().toString() + "/" + selectedNode.toString(); 
+			}
+			Command cmd = new Command(getAddress(), 
+						recipient, 
+						Constants.CMD_PARAMETER);
+			cmd.addParameter("NAME", (String)tblParametersModel.getValueAt(row, column-1));
+			cmd.addParameter("VALUE", ((JTextField)component).getText());
+			sendCommand(cmd);
+			return ((JTextField)component).getText();
+		}
 
 		@Override
-		public void tableChanged(TableModelEvent e) {
-			int row = e.getFirstRow();
-	        int column = e.getColumn();
-	        TableModel model = (TableModel)e.getSource();
-	        String columnName = model.getColumnName(column);
-	        Object data = model.getValueAt(row, column);
-	        System.out.println(columnName + " " + data.toString());
-	    }
+		public Component getTableCellEditorComponent(JTable table,
+				Object value, boolean isSelected, int row, int column) {
+
+			((JTextField)component).setText((String)value);
+			this.row = row;
+			this.column = column;
+			
+			return component;
+		}
 		
 	}
 	
@@ -585,12 +605,16 @@ public class Sniffer extends Agent implements RouterClient {
 				}
 				if (cmd.getParameter("NAME").equals("STATE")) {
 					((ComponentInfo)compNode.getUserObject()).state = cmd.getParameter("VALUE");
+				} else {
+					((ComponentInfo)compNode.getUserObject()).parameters.put(cmd.getParameter("NAME"), cmd.getParameter("VALUE"));
 				}
 			}
 			// If it is an agent
 			else {
 				if (cmd.getParameter("NAME").equals("STATE")) {
 					((AgentInfo)agentNode.getUserObject()).state = cmd.getParameter("VALUE");
+				} else {
+					((AgentInfo)agentNode.getUserObject()).parameters.put(cmd.getParameter("NAME"), cmd.getParameter("VALUE"));
 				}
 			}
 		}
@@ -622,9 +646,9 @@ public class Sniffer extends Agent implements RouterClient {
 			// If it is an agent
 			else {
 				treeModel.removeNodeFromParent(agentNode);
+				tree.setSelectionPath(new TreePath(rootNode.getPath()));
 			}
 		}
-		tree.setSelectionPath(new TreePath(rootNode.getPath()));
 	}
 	
 
@@ -640,10 +664,10 @@ public class Sniffer extends Agent implements RouterClient {
 }
 
 class AgentInfo {
-	String 							name;
-	String 							className;
-	String 							state;
-	Parameters 						parameters;
+	String 		name;
+	String 		className;
+	String 		state;
+	Parameters 	parameters;
 	
 	@Override
 	public String toString() {
@@ -666,7 +690,29 @@ class ComponentInfo {
 	}
 }
 
-//class EnvironmentInfo {
-//	String 		name;
-//	
-//}
+class EnvironmentInfo {
+	String 		className;
+	String		state;
+	Parameters 	parameters;
+
+	@Override
+	public String toString() {
+		return Constants.ENVIRONMENT_AGENT;
+	}
+}
+
+class EventServerInfo {
+	String 		evt_type;
+	String		state;
+	String 		className;
+	Parameters	parameters;
+	
+	@Override
+	public String toString() {
+		return evt_type;
+	}
+}
+
+class WorldInfo {
+	String[] laws;
+}

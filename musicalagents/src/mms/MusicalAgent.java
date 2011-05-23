@@ -98,7 +98,7 @@ public class MusicalAgent extends MMSAgent {
 
 		Command cmd;
 		
-		// Enviar mensagem para o console
+		// Sends a message to the console
 		cmd = new Command(getAddress(), "/console", "CREATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("CLASS", this.getClass().toString());
@@ -514,12 +514,20 @@ public class MusicalAgent extends MMSAgent {
 			
 		}
 		else if (command.equals(Constants.CMD_PARAMETER)) {
-//			String param = cmd.getParameter("NAME");
-//			String value = cmd.getParameter("VALUE");
-//			if (param != null && value != null) {
-//				comp.addParameter(param, value);
-//				comp.parameterUpdated(param);
-//			}
+			String param = cmd.getParameter("NAME");
+			String value = cmd.getParameter("VALUE");
+			if (param != null && value != null && parameters.containsKey(param)) {
+				// TODO Alguns parâmetros não podem ser mudados!
+				parameters.put(param, value);
+				// Calls user method
+				parameterUpdated(param);
+				// Sends a message to the console 
+				cmd = new Command(getAddress(), "/console", "UPDATE");
+				cmd.addParameter("AGENT", getAgent().getAgentName());
+				cmd.addParameter("NAME", param);
+				cmd.addParameter("VALUE", value);
+				sendCommand(cmd);
+			}
 		}
 		else {
 			processCommand(cmd);
