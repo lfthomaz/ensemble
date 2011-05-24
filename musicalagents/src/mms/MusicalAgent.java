@@ -251,6 +251,8 @@ public class MusicalAgent extends MMSAgent {
 					if (kb != null) {
 						System.out.println("[" + this.getAgentName() + "] Agent already has a Knowledge Base!");
 						return;
+					} else {
+						kb = (KnowledgeBase)comp;
 					}
 				}
 

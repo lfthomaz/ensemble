@@ -47,6 +47,12 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		cmd.addParameter("CLASS", this.getClass().toString());
 		cmd.addParameter("TYPE", getComponentType());
 		cmd.addParameter("PARAMETERS", parameters.toString());
+		String param_facts = "{";
+		for (String fact : facts.keySet()) {
+			param_facts += fact + "=" + facts.get(fact).value + " ";
+		}
+		param_facts += "}";
+		cmd.addParameter("FACTS", param_facts);
 		sendCommand(cmd);
 
 		// Calls user initialization code
@@ -63,7 +69,6 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		cmd.addParameter("COMPONENT", getComponentName());
 		cmd.addParameter("NAME", "STATE");
 		cmd.addParameter("VALUE", "INITIALIZED");
-//		cmd.addParameter("FACTS", )
 		sendCommand(cmd);
 
 		return true;

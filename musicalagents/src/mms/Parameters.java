@@ -64,7 +64,7 @@ public class Parameters extends HashMap<String, Object> {
 		
 		if (str.length() > 0) {
 			str = str.substring(1, str.length()-1);
-			String[] str2 = str.split(";");
+			String[] str2 = str.split(" ");
 			for (int i = 0; i < str2.length; i++) {
 				  String[] str3 = str2[i].split("=");
 				  if (str3.length == 2) {
@@ -83,7 +83,7 @@ public class Parameters extends HashMap<String, Object> {
 		if (this.size() > 0) { 
 			Set<String> keys = this.keySet();
 			for (String key: keys) {
-				str = str + key + "=" + this.get(key) + ";";
+				str = str + key + "=" + this.get(key) + " ";
 			}
 			str = "{" + str.substring(0, str.length()-1) + "}"; 
 		} else {

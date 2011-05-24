@@ -264,6 +264,11 @@ public class Sniffer extends Agent implements RouterClient {
 				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 				dialog.setLocationRelativeTo(frame);
 				dialog.setResizable(false);
+				// Populates facts table
+				Parameters facts = ((ComponentInfo)selectedNode.getUserObject()).facts;
+				for (String key : facts.keySet()) {
+					dialog.tableModel.addRow(new String[] {key, facts.get(key)});
+				}
 				dialog.setVisible(true);
 				if (dialog.result) {
 					Command cmd = new Command(getAddress(), 
@@ -488,7 +493,7 @@ public class Sniffer extends Agent implements RouterClient {
 				txtState.setVisible(true);
 				lblType.setVisible(true);
 				txtType.setVisible(true);
-				if (info.type.equals("SENSOR") || info.type.equals("ACTUATOR")) {
+				if (info.type.equals(Constants.COMP_SENSOR) || info.type.equals(Constants.COMP_ACTUATOR)) {
 					lblEvent.setVisible(true);
 					txtEvent.setVisible(true);
 				} else {
@@ -501,7 +506,7 @@ public class Sniffer extends Agent implements RouterClient {
 				btnRemoveComponent.setVisible(true);
 				btnCreateAgent.setVisible(false);
 				btnSendCommand.setEnabled(true);
-				btnFacts.setVisible(true);
+				btnFacts.setVisible(info.type.equals(Constants.COMP_KB));
 			} else {
 				lblName.setVisible(false);
 				txtName.setVisible(false);
@@ -639,6 +644,9 @@ public class Sniffer extends Agent implements RouterClient {
 						compInfo.type = cmd.getParameter("TYPE");
 						compInfo.evt_type = cmd.getParameter("EVT_TYPE");
 						compInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+						if (cmd.containsParameter("FACTS")) {
+							compInfo.facts = Parameters.parse(cmd.getParameter("FACTS"));
+						}
 						DefaultMutableTreeNode compNode = new DefaultMutableTreeNode(compInfo);
 						treeModel.insertNodeInto(compNode, agentNode, agentNode.getChildCount());
 					}
@@ -768,6 +776,7 @@ class ComponentInfo {
 	String 		state;
 	String 		evt_type;
 	Parameters 	parameters;
+	Parameters 	facts;
 
 	@Override
 	public String toString() {
