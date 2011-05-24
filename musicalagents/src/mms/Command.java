@@ -22,8 +22,16 @@ public class Command {
 		return getParameter("recipient");
 	}
 	
+	public void setRecipient(String recipient) {
+		addParameter("recipient", recipient);
+	}
+	
 	public String getSender() {
 		return getParameter("sender");
+	}
+	
+	public void setSender(String sender) {
+		addParameter("sender", sender);
 	}
 	
 	public String getCommand() {

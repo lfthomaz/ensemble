@@ -63,6 +63,7 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		cmd.addParameter("COMPONENT", getComponentName());
 		cmd.addParameter("NAME", "STATE");
 		cmd.addParameter("VALUE", "INITIALIZED");
+//		cmd.addParameter("FACTS", )
 		sendCommand(cmd);
 
 		return true;
