@@ -206,8 +206,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		Command cmd = new Command(getAddress(), "/console", "UPDATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("COMPONENT", getComponentName());
-		cmd.addParameter("NAME", "STATE");
-		cmd.addParameter("VALUE", "REGISTERED");
+		cmd.addParameter("STATE", "REGISTERED");
 		sendCommand(cmd);
 
 		// Avisa o agente do novo EventHandler registrado
@@ -243,8 +242,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		Command cmd = new Command(getAddress(), "/console", "UPDATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("COMPONENT", getComponentName());
-		cmd.addParameter("NAME", "STATE");
-		cmd.addParameter("VALUE", "NOT_REGISTERED");
+		cmd.addParameter("STATE", "NOT_REGISTERED");
 		sendCommand(cmd);
 		
 		getAgent().eventHandlerDeregistered(getComponentName());

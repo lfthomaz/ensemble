@@ -186,8 +186,7 @@ public class MusicalAgent extends MMSAgent {
 			// Enviar mensagem para o console
 			cmd = new Command(getAddress(), "/console", "UPDATE");
 			cmd.addParameter("AGENT", getAgent().getAgentName());
-			cmd.addParameter("NAME", "STATE");
-			cmd.addParameter("VALUE", "INITIALIZED");
+			cmd.addParameter("STATE", "INITIALIZED");
 			sendCommand(cmd);
 			
 		} finally {
@@ -360,6 +359,10 @@ public class MusicalAgent extends MMSAgent {
 	// Agent Getters
 	//--------------------------------------------------------------------------------
 	
+	public final MA_STATE getMAState() {
+		return state;
+	}
+	
 	public final KnowledgeBase getKB() {
 		if (kb == null) {
 			System.err.println("[" + getAddress() +"] No knowledge base present!");
@@ -503,8 +506,7 @@ public class MusicalAgent extends MMSAgent {
 				// Enviar mensagem para o console
 				cmd = new Command(getAddress(), "/console", "UPDATE");
 				cmd.addParameter("AGENT", getAgent().getAgentName());
-				cmd.addParameter("NAME", "STATE");
-				cmd.addParameter("VALUE", "TERMINATING");
+				cmd.addParameter("STATE", "TERMINATING");
 				sendCommand(cmd);
 				// Deregisters EventHandlers
 				for (MusicalAgentComponent existingComp : components.values()) {
@@ -520,9 +522,11 @@ public class MusicalAgent extends MMSAgent {
 			String value = cmd.getParameter("VALUE");
 			if (param != null && value != null && parameters.containsKey(param)) {
 				// TODO Alguns parâmetros não podem ser mudados!
-				parameters.put(param, value);
 				// Calls user method
-				parameterUpdated(param);
+				if (!parameterUpdate(param, value)) {
+					return;
+				}
+				parameters.put(param, value);
 				// Sends a message to the console 
 				cmd = new Command(getAddress(), "/console", "UPDATE");
 				cmd.addParameter("AGENT", getAgent().getAgentName());
@@ -709,30 +713,6 @@ public class MusicalAgent extends MMSAgent {
 		
 		// Checar o fim de turno
 		addBehaviour(new CheckEndTurn(this));
-
-	}
-
-	//--------------------------------------------------------------------------------
-	// User implemented methods
-	//--------------------------------------------------------------------------------
-
-	@Override
-	public boolean configure() {
-		return true;
-	}
-
-	@Override
-	public boolean init() {
-		return true;
-	}
-
-	@Override
-	public boolean finit() {
-		return true;
-	}
-	
-	@Override
-	public void processCommand(Command cmd) {
 
 	}
 

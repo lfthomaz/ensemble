@@ -39,14 +39,12 @@ public final class Constants {
 	public static final String	PARAM_COMP_TYPE			= "COMP_TYPE";
 	public static final String	PARAM_EVT_TYPE			= "EVT_TYPE";
 	public static final String	PARAM_EVT_EXECUTION		= "EVT_EXECUTION";
-	public static final String 	PARAM_ES_AGENT 			= "ES_AGENT";
 	public static final String 	PARAM_ES_EVT_TYPE 		= "ES_EVT_TYPE";
 	public static final String	PARAM_COMM_CLASS 		= "COMM_CLASS";
 	public static final String	PARAM_COMM_AGENT 		= "COMM_AGENT";
 	public static final String	PARAM_COMM_SENSING		= "COMM_SENSING";
 	public static final String	PARAM_COMM_ACTING		= "COMM_ACTING";
 	public static final String 	PARAM_COMM_ACCESS_POINT = "COMM_ACCESS_POINT";
-	public static final String 	PARAM_WORLD_AGENT 		= "WORLD_AGENT";
 	public static final String	PARAM_TURN 				= "TURN";
 	public static final String	PARAM_NUMBER_EVT_SENT 	= "PARAM_NUMBER_EVT_SENT";
 	public static final String	PARAM_FACT_NAME			= "FACT_NAME";
@@ -98,7 +96,8 @@ public final class Constants {
 	public static final String 	CMD_REMOVE_EVENT_SERVER = "REMOVE_EVENT_SERVER";
 	
 	// 
-	public static final String 	ENVIRONMENT_AGENT 		= "ENVIRONMENT";
+	public static final String 	ENVIRONMENT_AGENT 		= "Environment";
+	public static final String 	WORLD 					= "World";
 	
 	// EventHandler Status
 	public static enum EH_STATUS {REGISTERED, NOT_REGISTERED};
@@ -116,8 +115,4 @@ public final class Constants {
 	public static final String REP_TYPE_OUTPUT			= "OUTPUT";
 	public static final String REP_TYPE_PARAMETERS  	= "PARAMETERS";
 	
-	// Classes
-	public static final String CLASS_WORLD		 		= "CLASS_WORLD";
-	public static final String CLASS_MUSICAL_AGENT 		= "CLASS_MUSICAL_AGENT";
-
 }

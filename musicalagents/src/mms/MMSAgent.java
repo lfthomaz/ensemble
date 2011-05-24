@@ -199,14 +199,31 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 	}
 	
 	//--------------------------------------------------------------------------------
-	// User implemented method
+	// User implemented methods
 	//--------------------------------------------------------------------------------
 
-	/**
-	 * Called when a parameter has been updated
-	 * @param paramName
-	 */
-	public void parameterUpdated(String paramName) {
+	@Override
+	public boolean configure() {
+		return true;
+	}
+
+	@Override
+	public boolean init() {
+		return true;
+	}
+
+	@Override
+	public boolean finit() {
+		return true;
+	}
+	
+	@Override
+	public boolean parameterUpdate(String name, Object newValue) {
+		return true;
+	}
+	
+	@Override
+	public void processCommand(Command cmd) {
 	}
 	
 }

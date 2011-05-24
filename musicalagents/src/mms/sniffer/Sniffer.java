@@ -53,6 +53,7 @@ public class Sniffer extends Agent implements RouterClient {
 	DefaultMutableTreeNode 	selectedNode;
 
 	DefaultMutableTreeNode 	rootNode;
+	DefaultMutableTreeNode 	envNode;
 	DefaultTreeModel 		treeModel;
 	private JTextField txtCommand;
 	private JTextField txtName;
@@ -60,13 +61,11 @@ public class Sniffer extends Agent implements RouterClient {
 	private JTextField txtState;
 	private JTree 		tree;
 	private JTextField txtType;
-	private JTextField txtEvent;
 	
 	private JLabel lblName;
 	private JLabel lblState;
 	private JLabel lblClass;
 	private JLabel lblType;
-	private JLabel lblEvent;
 	
 	private JPanel pnlParameters;
 	
@@ -159,16 +158,6 @@ public class Sniffer extends Agent implements RouterClient {
 		txtType.setBounds(44, 108, 294, 28);
 		infoPanel.add(txtType);
 		
-		lblEvent = new JLabel("EVENT");
-		lblEvent.setBounds(6, 148, 51, 16);
-		infoPanel.add(lblEvent);
-		
-		txtEvent = new JTextField();
-		txtEvent.setEditable(false);
-		txtEvent.setColumns(10);
-		txtEvent.setBounds(44, 142, 294, 28);
-		infoPanel.add(txtEvent);
-		
 		btnDestroyAgent = new JButton("Destroy Agent");
 		btnDestroyAgent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -228,12 +217,12 @@ public class Sniffer extends Agent implements RouterClient {
 		
 		pnlParameters = new JPanel();
 		pnlParameters.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Parameters", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		pnlParameters.setBounds(6, 180, 332, 148);
+		pnlParameters.setBounds(6, 147, 332, 181);
 		infoPanel.add(pnlParameters);
 		pnlParameters.setLayout(null);
 		
 		scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(10, 22, 312, 115);
+		scrollPane_1.setBounds(10, 22, 312, 148);
 		pnlParameters.add(scrollPane_1);
 		
 		tblParameters = new JTable();
@@ -396,8 +385,6 @@ public class Sniffer extends Agent implements RouterClient {
 		txtState.setVisible(false);
 		lblType.setVisible(false);
 		txtType.setVisible(false);
-		lblEvent.setVisible(false);
-		txtEvent.setVisible(false);
 		pnlParameters.setVisible(false);
 		btnDestroyAgent.setVisible(false);
 		btnRemoveComponent.setVisible(false);
@@ -406,14 +393,24 @@ public class Sniffer extends Agent implements RouterClient {
 	
 	class MyTreeCellRenderer extends DefaultTreeCellRenderer {
 	    
+		ImageIcon ensembleIcon;
 		ImageIcon maIcon;
 	    ImageIcon eaIcon;
 	    ImageIcon compIcon;
+	    ImageIcon kbIcon;
+	    ImageIcon sensorIcon;
+	    ImageIcon actuatorIcon;
+	    ImageIcon reasoningIcon;
 	 
 	    public MyTreeCellRenderer() {
+	    	ensembleIcon = new ImageIcon("media/ensemble.png");
 	        eaIcon = new ImageIcon("media/world.png");
-	        maIcon = new ImageIcon("media/eva.png");
+	        maIcon = new ImageIcon("media/agent.png");
 	        compIcon = new ImageIcon("media/gear.png");
+	        kbIcon = new ImageIcon("media/kb.png");
+	        sensorIcon = new ImageIcon("media/sensor.png");
+	        actuatorIcon = new ImageIcon("media/actuator.png");
+	        reasoningIcon = new ImageIcon("media/reasoning.png");
 	    }
 	 
 	    public Component getTreeCellRendererComponent(JTree tree,
@@ -426,12 +423,28 @@ public class Sniffer extends Agent implements RouterClient {
 	        Object nodeObj = ((DefaultMutableTreeNode)value).getUserObject();
 	        // check whatever you need to on the node user object
 	        if (nodeObj instanceof AgentInfo) {
-	            setIcon(maIcon);
+	        	if (((AgentInfo)nodeObj).name.equals(Constants.ENVIRONMENT_AGENT)) {
+	        		setIcon(eaIcon);
+	        	} else {
+	        		setIcon(maIcon);
+	        	}
 	        } else if (nodeObj instanceof ComponentInfo) {
+	        	String compType = ((ComponentInfo)nodeObj).type;
+	        	if (compType.equals(Constants.COMP_KB)) {
+	        		setIcon(kbIcon);
+	        	} else if (compType.equals(Constants.COMP_REASONING)) {
+	        		setIcon(reasoningIcon);
+	        	} else if (compType.equals(Constants.COMP_SENSOR)) {
+	        		setIcon(sensorIcon);
+	        	} else if (compType.equals(Constants.COMP_ACTUATOR)) {
+	        		setIcon(actuatorIcon);
+	        	}
+	    	} else if (nodeObj instanceof WorldInfo ||
+	        			nodeObj instanceof EventServerInfo) {
 	            setIcon(compIcon);
-	        } else if (nodeObj instanceof EnvironmentInfo) {
-	            setIcon(eaIcon);
-	        } 
+	        } else {
+	            setIcon(ensembleIcon);
+	        }
 	        return this;
 	    }
 	}
@@ -463,8 +476,6 @@ public class Sniffer extends Agent implements RouterClient {
 				txtState.setVisible(true);
 				lblType.setVisible(false);
 				txtType.setVisible(false);
-				lblEvent.setVisible(false);
-				txtEvent.setVisible(false);
 				pnlParameters.setVisible(true);
 				btnAddComponent.setVisible(true);
 				btnDestroyAgent.setVisible(true);
@@ -478,7 +489,6 @@ public class Sniffer extends Agent implements RouterClient {
 				txtClass.setText(info.className);
 				txtState.setText(info.state);
 				txtType.setText(info.type);
-				txtEvent.setText(info.evt_type);
 				while (tblParametersModel.getRowCount() > 0) {
 					tblParametersModel.removeRow(0);
 				}
@@ -493,13 +503,6 @@ public class Sniffer extends Agent implements RouterClient {
 				txtState.setVisible(true);
 				lblType.setVisible(true);
 				txtType.setVisible(true);
-				if (info.type.equals(Constants.COMP_SENSOR) || info.type.equals(Constants.COMP_ACTUATOR)) {
-					lblEvent.setVisible(true);
-					txtEvent.setVisible(true);
-				} else {
-					lblEvent.setVisible(false);
-					txtEvent.setVisible(false);
-				}
 				pnlParameters.setVisible(true);
 				btnAddComponent.setVisible(false);
 				btnDestroyAgent.setVisible(false);
@@ -507,6 +510,57 @@ public class Sniffer extends Agent implements RouterClient {
 				btnCreateAgent.setVisible(false);
 				btnSendCommand.setEnabled(true);
 				btnFacts.setVisible(info.type.equals(Constants.COMP_KB));
+			} else if (nodeInfo instanceof EventServerInfo) {
+				EventServerInfo info = (EventServerInfo)nodeInfo;
+				txtName.setText(info.evt_type);
+				txtClass.setText(info.className);
+				txtState.setText(info.state);
+				while (tblParametersModel.getRowCount() > 0) {
+					tblParametersModel.removeRow(0);
+				}
+				for (String key : info.parameters.keySet()) {
+					tblParametersModel.addRow(new String[] {key, info.parameters.get(key)});
+				}
+				lblName.setVisible(true);
+				txtName.setVisible(true);
+				lblClass.setVisible(true);
+				txtClass.setVisible(true);
+				lblState.setVisible(true);
+				txtState.setVisible(true);
+				lblType.setVisible(false);
+				txtType.setVisible(false);
+				pnlParameters.setVisible(true);
+				btnAddComponent.setVisible(false);
+				btnDestroyAgent.setVisible(false);
+				btnRemoveComponent.setVisible(false);
+				btnCreateAgent.setVisible(false);
+				btnSendCommand.setEnabled(true);
+				btnFacts.setVisible(false);
+			} else if (nodeInfo instanceof WorldInfo) {
+				WorldInfo info = (WorldInfo)nodeInfo;
+				txtName.setText(Constants.WORLD);
+				txtClass.setText(info.className);
+				while (tblParametersModel.getRowCount() > 0) {
+					tblParametersModel.removeRow(0);
+				}
+				for (String key : info.parameters.keySet()) {
+					tblParametersModel.addRow(new String[] {key, info.parameters.get(key)});
+				}
+				lblName.setVisible(true);
+				txtName.setVisible(true);
+				lblClass.setVisible(true);
+				txtClass.setVisible(true);
+				lblState.setVisible(false);
+				txtState.setVisible(false);
+				lblType.setVisible(false);
+				txtType.setVisible(false);
+				pnlParameters.setVisible(true);
+				btnAddComponent.setVisible(false);
+				btnDestroyAgent.setVisible(false);
+				btnRemoveComponent.setVisible(false);
+				btnCreateAgent.setVisible(false);
+				btnSendCommand.setEnabled(true);
+				btnFacts.setVisible(false);
 			} else {
 				lblName.setVisible(false);
 				txtName.setVisible(false);
@@ -516,8 +570,6 @@ public class Sniffer extends Agent implements RouterClient {
 				txtState.setVisible(false);
 				lblType.setVisible(false);
 				txtType.setVisible(false);
-				lblEvent.setVisible(false);
-				txtEvent.setVisible(false);
 				pnlParameters.setVisible(false);
 				btnAddComponent.setVisible(false);
 				btnDestroyAgent.setVisible(false);
@@ -625,7 +677,7 @@ public class Sniffer extends Agent implements RouterClient {
 
 	@Override
 	public void receiveCommand(Command cmd) {
-		System.out.println("SNIFFER: Recebi mensagem - " + cmd.toString());
+//		System.out.println("SNIFFER: Recebi mensagem - " + cmd.toString());
 		if (cmd.getCommand().equals("CREATE")) {
 			String agentName = cmd.getParameter("AGENT");
 			// It is a component
@@ -651,7 +703,32 @@ public class Sniffer extends Agent implements RouterClient {
 						treeModel.insertNodeInto(compNode, agentNode, agentNode.getChildCount());
 					}
 				}
-			} 
+			}
+			// It is an Event Server
+			else if (cmd.containsParameter("EVENT_SERVER")) {
+				// Searches for agent's node
+				EventServerInfo esInfo = new EventServerInfo();
+				esInfo.evt_type = cmd.getParameter("EVENT_SERVER");
+				esInfo.state = "CREATED";
+				String className = cmd.getParameter("CLASS");
+				esInfo.className = className.substring(6); 
+				esInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+				DefaultMutableTreeNode esNode = new DefaultMutableTreeNode(esInfo);
+				treeModel.insertNodeInto(esNode, envNode, envNode.getChildCount());
+			}
+			// It is an Event Server
+			else if (cmd.containsParameter("WORLD")) {
+				WorldInfo worldInfo = new WorldInfo();
+				String className = cmd.getParameter("CLASS");
+				worldInfo.className = className.substring(6); 
+				worldInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+				DefaultMutableTreeNode worldNode = new DefaultMutableTreeNode(worldInfo);
+				treeModel.insertNodeInto(worldNode, envNode, envNode.getChildCount());
+			}
+			// It is an Event Server
+			else if (cmd.containsParameter("LAW")) {
+				
+			}
 			// It is an agent
 			else {
 				AgentInfo agentInfo = new AgentInfo();
@@ -663,6 +740,9 @@ public class Sniffer extends Agent implements RouterClient {
 				DefaultMutableTreeNode agentNode = new DefaultMutableTreeNode(agentInfo);
 				treeModel.insertNodeInto(agentNode, rootNode, rootNode.getChildCount());
 				tree.expandRow(0);
+				if (agentName.equals(Constants.ENVIRONMENT_AGENT)) {
+					envNode = agentNode;
+				}
 			}
 		}
 		else if (cmd.getCommand().equals("UPDATE")) {
@@ -696,16 +776,56 @@ public class Sniffer extends Agent implements RouterClient {
 					System.err.println("[Sniffer] ERROR: component does not exist!");
 					return;
 				}
-				if (cmd.getParameter("NAME").equals("STATE")) {
-					((ComponentInfo)compNode.getUserObject()).state = cmd.getParameter("VALUE");
+				if (cmd.containsParameter("STATE")) {
+					((ComponentInfo)compNode.getUserObject()).state = cmd.getParameter("STATE");
 				} else {
 					((ComponentInfo)compNode.getUserObject()).parameters.put(cmd.getParameter("NAME"), cmd.getParameter("VALUE"));
 				}
 			}
+			// If it is an event server
+			else if (cmd.containsParameter("EVENT_SERVER")) {
+				// Searches for comp's node
+				DefaultMutableTreeNode esNode = null;
+				String esName = cmd.getParameter("EVENT_SERVER");
+				for (int i = 0; i < agentNode.getChildCount(); i++) {
+					esNode = (DefaultMutableTreeNode)agentNode.getChildAt(i);
+					if (esNode.toString().equals(esName)) {
+						break;
+					}
+					esNode = null;
+				}
+				if (esNode == null) {
+					System.err.println("[Sniffer] ERROR: component does not exist!");
+					return;
+				}
+				if (cmd.containsParameter("STATE")) {
+					((EventServerInfo)esNode.getUserObject()).state = cmd.getParameter("STATE");
+				} else {
+					((EventServerInfo)esNode.getUserObject()).parameters.put(cmd.getParameter("NAME"), cmd.getParameter("VALUE"));
+				}
+			}
+			// If it is a component
+			else if (cmd.containsParameter("WORLD")) {
+				// Searches for comp's node
+				DefaultMutableTreeNode worldNode = null;
+				String worldName = cmd.getParameter("WORLD");
+				for (int i = 0; i < agentNode.getChildCount(); i++) {
+					worldNode = (DefaultMutableTreeNode)agentNode.getChildAt(i);
+					if (worldNode.toString().equals(Constants.WORLD)) {
+						break;
+					}
+					worldNode = null;
+				}
+				if (worldNode == null) {
+					System.err.println("[Sniffer] ERROR: component does not exist!");
+					return;
+				}
+				((WorldInfo)worldNode.getUserObject()).parameters.put(cmd.getParameter("NAME"), cmd.getParameter("VALUE"));
+			}
 			// If it is an agent
 			else {
-				if (cmd.getParameter("NAME").equals("STATE")) {
-					((AgentInfo)agentNode.getUserObject()).state = cmd.getParameter("VALUE");
+				if (cmd.containsParameter("STATE")) {
+					((AgentInfo)agentNode.getUserObject()).state = cmd.getParameter("STATE");
 				} else {
 					((AgentInfo)agentNode.getUserObject()).parameters.put(cmd.getParameter("NAME"), cmd.getParameter("VALUE"));
 				}
@@ -784,17 +904,6 @@ class ComponentInfo {
 	}
 }
 
-class EnvironmentInfo {
-	String 		className;
-	String		state;
-	Parameters 	parameters;
-
-	@Override
-	public String toString() {
-		return Constants.ENVIRONMENT_AGENT;
-	}
-}
-
 class EventServerInfo {
 	String 		evt_type;
 	String		state;
@@ -808,5 +917,12 @@ class EventServerInfo {
 }
 
 class WorldInfo {
-	String[] laws;
+	String 	 	className;
+	Parameters 	parameters;
+	String[] 	laws;
+
+	@Override
+	public String toString() {
+		return Constants.WORLD;
+	}
 }

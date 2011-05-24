@@ -71,8 +71,7 @@ public class Reasoning extends MusicalAgentComponent {
 		cmd = new Command(getAddress(), "/console", "UPDATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("COMPONENT", getComponentName());
-		cmd.addParameter("NAME", "STATE");
-		cmd.addParameter("VALUE", "INITIALIZED");
+		cmd.addParameter("STATE", "INITIALIZED");
 		sendCommand(cmd);
 		
 		// Cycle Behaviour que controla o raciocínio

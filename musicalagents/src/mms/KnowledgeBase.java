@@ -67,8 +67,7 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		cmd = new Command(getAddress(), "/console", "UPDATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("COMPONENT", getComponentName());
-		cmd.addParameter("NAME", "STATE");
-		cmd.addParameter("VALUE", "INITIALIZED");
+		cmd.addParameter("STATE", "INITIALIZED");
 		sendCommand(cmd);
 
 		return true;
@@ -217,7 +216,5 @@ public class KnowledgeBase extends MusicalAgentComponent {
 	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
-
-	
 
 }

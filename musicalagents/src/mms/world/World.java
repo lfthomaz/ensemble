@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Acting;
+import mms.Command;
 import mms.Constants;
 import mms.EnvironmentAgent;
 import mms.LifeCycle;
@@ -13,14 +14,16 @@ import mms.MMSAgent;
 import mms.MusicalAgent;
 import mms.Parameters;
 import mms.Sensing;
+import mms.Constants.EA_STATE;
 import mms.clock.VirtualClockHelper;
+import mms.router.RouterClient;
 import mms.world.law.Law;
 
 /**
  * Represents the actual state of the world, with all its entities.
  */
 //TODO Criar métodos genéricos para obter o estado do agente no mundo, posição etc...
-public class World implements LifeCycle {
+public class World implements LifeCycle, RouterClient {
 	
 	/**
 	 * Locks
@@ -81,6 +84,10 @@ public class World implements LifeCycle {
 		return this.parameters;
 	}
 
+	public void setEnvAgent(EnvironmentAgent envAgent) {
+		this.envAgent = envAgent;
+	}
+	
 	/**
      * Constructor
      */
@@ -88,27 +95,13 @@ public class World implements LifeCycle {
     public boolean start() {
 
     	// Parameters
-    	if (parameters == null) {
+    	if (parameters == null || envAgent == null) {
 			System.err.println("[World] Parameters not set! World not initialized!");
-			return false;
-		}
-		try {
-			this.envAgent = (EnvironmentAgent)parameters.getObject(Constants.PARAM_WORLD_AGENT);
-		} catch (Exception e) {
-			e.printStackTrace();
 			return false;
 		}
     	
     	this.clock = envAgent.getClock();
 
-    	// Laws
-    	if (getParameters().containsKey("LAW")) {
-	    	String[] laws = getParameters().get("LAW").split(" ");
-	    	for (int i = 0; i < laws.length; i++) {
-				addLaw(laws[i], null); 
-			}
-    	}
-    	
     	// Basic world attributes
 		this.dimensions = Integer.valueOf(parameters.get("dimensions", "3"));
 		this.structure	= parameters.get("structure", "continuous");
@@ -132,8 +125,21 @@ public class World implements LifeCycle {
 			return false;
 		}
 		
+		// Starts world laws
+		for (String lawName : laws.keySet()) {
+			Law law = (Law)(laws.get(lawName));
+			law.start();
+		}
+		
 //		System.out.println("[WORLD] " + "Initialized");
 		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":WORLD] " + "Initialized");
+		
+		Command cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", envAgent.getAgentName());
+		cmd.addParameter("WORLD", Constants.WORLD);
+		cmd.addParameter("CLASS", this.getClass().toString());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
 		
 		return true;
 	
@@ -141,6 +147,11 @@ public class World implements LifeCycle {
     
 	@Override
 	public boolean stop() {
+		// Terminates world laws
+		for (String lawName : laws.keySet()) {
+			Law law = (Law)(laws.get(lawName));
+			law.stop();
+		}
 		return true;
 	}
 	
@@ -225,6 +236,9 @@ public class World implements LifeCycle {
 			} else {
 				laws.put(law.getType(), law);
 			}
+			if (envAgent.getEAState() == EA_STATE.INITIALIZED) {
+				law.start();
+			}
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			System.err.println("ERROR: Not possible to create an instance of " + className);
@@ -239,7 +253,8 @@ public class World implements LifeCycle {
 		
     public final void removeLaw(String type) {
     	if (laws.containsKey(type)) {
-			laws.remove(type);
+			Law law = laws.remove(type);
+			law.stop();
 		} else {
 			System.err.println("["+envAgent.getAgentName()+"] Law " + type + " does not exist.");
 		}
@@ -305,7 +320,47 @@ public class World implements LifeCycle {
     
     }
     
-    //--------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------
+	// Command Interface
+	//--------------------------------------------------------------------------------
+	
+	@Override
+	public final String getAddress() {
+		return "/" + Constants.FRAMEWORK_NAME + "/" + envAgent.getAgentName() + "/" + Constants.WORLD;
+	}
+
+	@Override
+	public final void receiveCommand(Command cmd) {
+//        System.out.println("[" + getAddress() +"] Command received: " + cmd);
+		if (cmd.getCommand().equals(Constants.CMD_PARAMETER)) {
+			String param = cmd.getParameter("NAME");
+			String value = cmd.getParameter("VALUE");
+			if (param != null && value != null && parameters.containsKey(param)) {
+				// TODO Alguns parâmetros não podem ser mudados!
+				// Calls user method
+				if (!parameterUpdate(param, value)) {
+					return;
+				}
+				parameters.put(param, value);
+				// Let the console knows about the updated parameter
+				cmd = new Command(getAddress(), "/console", "UPDATE");
+				cmd.addParameter("AGENT", Constants.ENVIRONMENT_AGENT);
+				cmd.addParameter("WORLD", Constants.WORLD);
+				cmd.addParameter("NAME", param);
+				cmd.addParameter("VALUE", value);
+				sendCommand(cmd);
+			}
+		} else {
+		    processCommand(cmd);
+		}
+	}
+	
+	@Override
+	public final void sendCommand(Command cmd) {
+		envAgent.sendCommand(cmd);
+	}
+	
+	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
     
@@ -317,6 +372,11 @@ public class World implements LifeCycle {
 	@Override
 	public boolean init() {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "init()");
+		return true;
+	}
+	
+	@Override
+	public boolean parameterUpdate(String name, Object newValue) {
 		return true;
 	}
 	
@@ -341,4 +401,9 @@ public class World implements LifeCycle {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "entityRemoved()");
 	}
 
+	@Override
+	public void processCommand(Command cmd) {
+		
+	}
+	
 }

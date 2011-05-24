@@ -107,15 +107,17 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 
 	@Override
 	public void receiveCommand(Command cmd) {
-        System.out.println("[" + getAddress() +"] Command received: " + cmd);
+//        System.out.println("[" + getAddress() +"] Command received: " + cmd);
 		if (cmd.getCommand().equals(Constants.CMD_PARAMETER)) {
 			String param = cmd.getParameter("NAME");
 			String value = cmd.getParameter("VALUE");
 			if (param != null && value != null && parameters.containsKey(param)) {
+				// Calls user method
+				if (!parameterUpdate(param, value)) {
+					return;
+				}
 				// TODO Alguns parâmetros não podem ser mudados!
 				parameters.put(param, value);
-				// Calls user method
-				parameterUpdated(param);
 				// Let the console knows about the updated parameter
 				cmd = new Command(getAddress(), "/console", "UPDATE");
 				cmd.addParameter("AGENT", getAgent().getAgentName());
@@ -154,21 +156,14 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 		return true;
 	}
 	
-	/**
-	 * 
-	 */
 	@Override
 	public void processCommand(Command cmd) {
-//		System.out.println("[" + this.getAgent().getAgentName() + ":" + getComponentName()  +"] " + "User command received: " + cmd);
+	}
+	
+	@Override
+	public boolean parameterUpdate(String name, Object newValue) {
+		return true;
 	}
 
-	/**
-	 * Called when a parameter has been updated
-	 * @param paramName
-	 */
-	public void parameterUpdated(String paramName) {
-	
-	}
-	
 }
 

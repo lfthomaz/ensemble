@@ -41,8 +41,7 @@ public class Sensor extends EventHandler implements Sensing {
 		cmd = new Command(getAddress(), "/console", "UPDATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("COMPONENT", getComponentName());
-		cmd.addParameter("NAME", "STATE");
-		cmd.addParameter("VALUE", "INITIALIZED");
+		cmd.addParameter("STATE", "INITIALIZED");
 		sendCommand(cmd);
 
 		return true;

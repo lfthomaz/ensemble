@@ -8,6 +8,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.EA_STATE;
+import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.world.World;
 
@@ -52,7 +53,7 @@ public class EnvironmentAgent extends MMSAgent {
 	/**
 	 * Descrição do Mundo Virtual
 	 */
-	protected World world;
+	protected World world = null;
 
 	/**
 	 * Event Servers registrados (por tipo de evento)
@@ -122,6 +123,10 @@ public class EnvironmentAgent extends MMSAgent {
 	// Agente getters / setters
 	// --------------------------------------------------------------------------------
 
+	public final EA_STATE getEAState() {
+		return state;
+	}
+	
 	public final World getWorld() {
 		return world;
 	}
@@ -143,6 +148,13 @@ public class EnvironmentAgent extends MMSAgent {
 		logger.info("[" + getAgentName() + "] " + "Starting initialization...");
 		// System.out.println("EA start()");
 
+		// Sends a message to the console
+		Command cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		cmd.addParameter("CLASS", this.getClass().toString());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
+
 		lock.lock();
 		try {
 
@@ -152,20 +164,12 @@ public class EnvironmentAgent extends MMSAgent {
 			waitTimeTurn = Long.valueOf(getParameters().get(
 					Constants.WAIT_TIME_TURN, "100"));
 
-			// Cria um mundo genérico
-			Class worldClass;
-			try {
-				worldClass = Class.forName(parameters.get(
-						Constants.CLASS_WORLD, "mms.world.World"));
-				world = (World) worldClass.newInstance();
-				getParameters().put(Constants.PARAM_WORLD_AGENT, this);
-				world.setParameters(getParameters());
-				world.configure();
-				world.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(-1);
+			// If no world has been configured, creates a generic world
+			if (world == null) {
+				System.out.println("ENTREI!!!!");
+				addWorld("mms.world.World", new Parameters());
 			}
+			world.start();
 
 			// Executa o método de inicialização do usuário
 			init();
@@ -182,9 +186,14 @@ public class EnvironmentAgent extends MMSAgent {
 			this.registerService(getAgentName(), Constants.ENVIRONMENT_AGENT);
 
 			state = EA_STATE.INITIALIZED;
+
 			logger.info("[" + getAgentName() + "] " + "Initialized");
-			// System.out.println("[" + this.getAID().getAgentName() + "] " +
-			// "Initialized");
+//			 System.out.println("[" + this.getAID().getAgentName() + "] " + "Initialized");
+
+			cmd = new Command(getAddress(), "/console", "UPDATE");
+			cmd.addParameter("AGENT", getAgent().getAgentName());
+			cmd.addParameter("STATE", "INITIALIZED"); 
+			sendCommand(cmd);
 
 		} finally {
 			lock.unlock();
@@ -224,6 +233,23 @@ public class EnvironmentAgent extends MMSAgent {
 		return true;
 	}
 
+	public void addWorld(String className, Parameters parameters) {
+		if (state == EA_STATE.CREATED) {
+			try {
+				Class worldClass = Class.forName(className);
+				world = (World) worldClass.newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			world.setParameters(parameters);
+			world.setEnvAgent(this);
+			world.configure();
+		} else {
+			System.err.println("[" + getAgentName() + "] Trying to add a World in runtime!");
+		}
+	}
+	
 	/**
 	 * Registra um tipo de evento tratado por este Agente Ambiente no diretório
 	 * do JADE
@@ -277,13 +303,12 @@ public class EnvironmentAgent extends MMSAgent {
 				Class esClass = Class.forName(className);
 				EventServer es = (EventServer) esClass.newInstance();
 				// Configurar o EventServer
-				esParam.put(Constants.PARAM_ES_AGENT, this);
+				es.setEnvAgent(this);
 				es.setParameters(esParam);
 				es.configure();
 				// Adicionar na tabela
 				if (eventServers.containsKey(es.getEventType())) {
-					System.err
-							.println("ERROR: There is already an Event Server with event type "
+					System.err.println("ERROR: There is already an Event Server with event type "
 									+ es.getEventType());
 					return;
 				} else {
@@ -394,8 +419,7 @@ public class EnvironmentAgent extends MMSAgent {
 
 			String agentName = cmd.getParameter("NAME");
 			String agentClass = cmd.getParameter("CLASS");
-			Parameters parameters = Parameters.parse(cmd
-					.getParameter("PARAMETERS"));
+			Parameters parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
 			createMusicalAgent(agentName, agentClass, parameters);
 
 		} else if (command.equals(Constants.CMD_DESTROY_AGENT)) {
@@ -452,7 +476,7 @@ public class EnvironmentAgent extends MMSAgent {
 		} else if (command.equals(Constants.CMD_AGENT_REGISTER)) {
 
 			String sender = cmd.getParameter("sender").split("/")[2];
-			MusicalAgent.logger.info("[" + getAgentName() + "] "
+			MusicalAgent.logger.info("[" + getAgentName() + "] " 
 					+ "Recebi pedido de registro de " + sender);
 			registerAgent(sender, cmd.getParameters());
 
@@ -493,6 +517,24 @@ public class EnvironmentAgent extends MMSAgent {
 			String fact = cmd.getParameter(Constants.PARAM_FACT_NAME);
 			String value = cmd.getParameter(Constants.PARAM_FACT_VALUE);
 			agentsPublicFacts.put(sender + ":" + fact, value);
+
+		} else if (command.equals(Constants.CMD_PARAMETER)) {
+			String param = cmd.getParameter("NAME");
+			String value = cmd.getParameter("VALUE");
+			if (param != null && value != null && parameters.containsKey(param)) {
+				// TODO Alguns parâmetros não podem ser mudados!
+				if (!parameterUpdate(param, value)) {
+					return;
+				}
+				parameters.put(param, value);
+				// Calls user method
+				// Sends a message to the console 
+				cmd = new Command(getAddress(), "/console", "UPDATE");
+				cmd.addParameter("AGENT", getAgent().getAgentName());
+				cmd.addParameter("NAME", param);
+				cmd.addParameter("VALUE", value);
+				sendCommand(cmd);
+			}
 
 		} else {
 
@@ -557,7 +599,10 @@ public class EnvironmentAgent extends MMSAgent {
 			// passa para o processCommand()
 			processControlCommand(cmd);
 		} else if (str.length > 3) {
-			if (eventServers.containsKey(str[3])) {
+			if (str[3].equals(Constants.WORLD)) {
+				getWorld().receiveCommand(cmd);
+			}
+			else if (eventServers.containsKey(str[3])) {
 				EventServer es = eventServers.get(str[3]);
 				// Se for mudança de parâmetros, faz diretamente, caso contrário
 				// envia o comando para o componente
@@ -942,26 +987,6 @@ public class EnvironmentAgent extends MMSAgent {
 	// --------------------------------------------------------------------------------
 	// User implemented methods
 	// --------------------------------------------------------------------------------
-
-	@Override
-	public boolean configure() {
-		return true;
-	}
-
-	@Override
-	public boolean init() {
-		return true;
-	}
-
-	@Override
-	public boolean finit() {
-		return true;
-	}
-
-	@Override
-	public void processCommand(Command cmd) {
-
-	}
 
 	/**
 	 * Método executado pelo Ambiente, quando em modo BATCH, imediatamente antes

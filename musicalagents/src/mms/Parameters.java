@@ -17,7 +17,9 @@ public class Parameters extends HashMap<String, Object> {
 	public synchronized void merge(Parameters param) {
 		Set<String> keys = param.keySet();
 		for (String key: keys) {
-			this.put(key, param.get(key));
+			if (!this.containsKey(key)) {
+				this.put(key, param.get(key));
+			}
 		}
 	}
 	

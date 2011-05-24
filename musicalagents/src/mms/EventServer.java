@@ -110,17 +110,17 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	@Override
 	public final boolean start() {
 		
-		// TODO Verificar se está configurado, caso contrário, não libera a inicialização 
+		// TODO Verificar se está configurado, caso contrário, não libera a inicialização
+		Command cmd = new Command(getAddress(), "/console", "CREATE");
+		cmd.addParameter("AGENT", envAgent.getAgentName());
+		cmd.addParameter("EVENT_SERVER", this.getEventType());
+		cmd.addParameter("CLASS", this.getClass().toString());
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
 		
 		// Gets the Environment Agent
-		try {
-			envAgent = (EnvironmentAgent)parameters.getObject(Constants.PARAM_ES_AGENT);
-			if (envAgent == null) {
-				System.err.println("[EventServer] There is no EnvironmentAgent in the parameters!");
-				return false;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (envAgent == null) {
+			System.err.println("[EventServer] There is no EnvironmentAgent in the parameters!");
 			return false;
 		}
 
@@ -202,9 +202,17 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		}
 		
 		eventServerState = ES_STATE.INITIALIZED;
+
 		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
 //		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
-		
+
+		cmd = new Command(getAddress(), "/console", "UPDATE");
+		cmd.addParameter("AGENT", envAgent.getAgentName());
+		cmd.addParameter("EVENT_SERVER", this.getEventType());
+		cmd.addParameter("STATE", "INITIALIZED");
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
+
 		return true;
 		
 	}
@@ -224,6 +232,13 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 
 		// Finalizar o PeriodScheduler, se for o caso
 		eventServerState = ES_STATE.TERMINATED;
+
+		Command cmd = new Command(getAddress(), "/console", "TERMINATED");
+		cmd.addParameter("AGENT", envAgent.getAgentName());
+		cmd.addParameter("EVENT_SERVER", this.getEventType());
+		cmd.addParameter("STATE", "INITIALIZED");
+		cmd.addParameter("PARAMETERS", parameters.toString());
+		sendCommand(cmd);
 
 		// Deregistrar todos os atuadores
 		for (Enumeration<String> a = actuators.keys(); a.hasMoreElements();) {
@@ -278,6 +293,10 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	
 	public Parameters getParameters() {
 		return parameters;
+	}
+	
+	public void setEnvAgent(EnvironmentAgent envAgent) {
+		this.envAgent = envAgent;
 	}
 
 	public void setCommType(String commType) {
@@ -423,8 +442,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		if (extraParameters != null) {
 			cmd.addUserParameters(extraParameters);
 		}
-		
-		System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + " [" + envAgent.getAgentName() + "] " + "Recebi pedido de registro de " + agentName + ":" + eventHandlerName);
 		
 		// Send the message
 		sendCommand(cmd);
@@ -787,9 +804,28 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 
 	@Override
 	public final void receiveCommand(Command cmd) {
-        System.out.println("[" + getAddress() +"] Command received: " + cmd);
-        // TODO Se existir algum comando de controle, processar aqui
-        processCommand(cmd);
+//        System.out.println("[" + getAddress() +"] Command received: " + cmd);
+		if (cmd.getCommand().equals(Constants.CMD_PARAMETER)) {
+			String param = cmd.getParameter("NAME");
+			String value = cmd.getParameter("VALUE");
+			if (param != null && value != null && parameters.containsKey(param)) {
+				// TODO Alguns parâmetros não podem ser mudados!
+				// Calls user method
+				if (!parameterUpdate(param, value)) {
+					return;
+				}
+				parameters.put(param, value);
+				// Let the console knows about the updated parameter
+				cmd = new Command(getAddress(), "/console", "UPDATE");
+				cmd.addParameter("AGENT", Constants.ENVIRONMENT_AGENT);
+				cmd.addParameter("EVENT_SERVER", getEventType());
+				cmd.addParameter("NAME", param);
+				cmd.addParameter("VALUE", value);
+				sendCommand(cmd);
+			}
+		} else {
+		    processCommand(cmd);
+		}
 	}
 	
 	@Override
@@ -800,6 +836,21 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------
+	
+	@Override
+	public boolean init() {
+		return true;
+	}
+
+	@Override
+	public boolean parameterUpdate(String name, Object newValue) {
+		return true;
+	}
+	
+	@Override
+	public boolean finit() {
+		return true;
+	}
 	
 	/**
 	 * Método chamado ao receber um evento. Deve armazenar os eventos recebidos em uma estrutura de dados, para depois ser processado.
@@ -845,14 +896,6 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	
 	protected void sensorDeregistered(String agentName, String eventHandlerName) throws Exception {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "sensorDeregistered()");
-	}
-
-	/**
-	 * Called when a parameter has been updated
-	 * @param paramName
-	 */
-	public void parameterUpdated(String paramName) {
-		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType()  +"] " + "Parameter '" + paramName + "'updated");
 	}
 
 	@Override

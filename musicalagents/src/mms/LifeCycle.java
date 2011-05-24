@@ -4,7 +4,6 @@ public interface LifeCycle {
 
 	/**
 	 * User-implemented method that configures the component, setting up arguments and essential properties
-	 * @param args
 	 */
 	public boolean configure();
 	
@@ -20,6 +19,11 @@ public interface LifeCycle {
 	public boolean init();
 	
 //	public void process();
+	
+	/**
+	 * User-implement method called when a parameter has been updated
+	 */
+	public boolean parameterUpdate(String name, Object newValue);
 	
 	/**
 	 * User-implemented finalization method, called by end()

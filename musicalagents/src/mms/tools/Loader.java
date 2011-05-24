@@ -20,6 +20,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.sun.xml.internal.ws.wsdl.writer.document.ParamType;
+
 import mms.Constants;
 import mms.EnvironmentAgent;
 import mms.MusicalAgent;
@@ -113,7 +115,7 @@ public class Loader {
 		rt.shutDown();
 		
 	}
-	
+
 	private static String readAttribute(Element elem, String attributeName, String defaultValue) {
 
 		String ret;
@@ -137,7 +139,9 @@ public class Loader {
 		NodeList nl_attrib = elem.getElementsByTagName(CONF_ARG);
 		for (int j = 0; j < nl_attrib.getLength(); j++) {
 			Element elem_arg = (Element)nl_attrib.item(j);
-			parameters.put(readAttribute(elem_arg, CONF_NAME, null), readAttribute(elem_arg, CONF_VALUE, null));
+			if (elem_arg.getParentNode() == elem) {
+				parameters.put(readAttribute(elem_arg, CONF_NAME, null), readAttribute(elem_arg, CONF_VALUE, null));
+			}
 		}
 		
 		return parameters;
@@ -208,6 +212,7 @@ public class Loader {
 			String ea_name = Constants.ENVIRONMENT_AGENT;
 			String ea_class = readAttribute(elem_ea, CONF_CLASS, "mms.EnvironmentAgent");
 			Parameters ea_parameters = readArguments(elem_ea);
+			System.out.println("param: " + ea_parameters);
 			
 			try {
 				// Criar nova instância do EA solicitado
@@ -222,18 +227,23 @@ public class Loader {
 				nl = elem_ea.getElementsByTagName("WORLD");
 				if (nl.getLength() == 1) {
 					Element elem_gp = (Element)nl.item(0);
-					ea_parameters.put(Constants.CLASS_WORLD, readAttribute(elem_gp, Constants.CLASS_WORLD, "mms.world.World"));
+					String world_class = readAttribute(elem_gp, CONF_CLASS, null);
+					if (world_class == null) {
+						System.err.println("ERROR: World class not defined");
+						world_class = "mms.world.World";
+					}
+					Parameters world_param = readArguments(elem_gp);
+					System.out.println("world_param: " + world_param);
+					ea.addWorld(world_class, world_param);
 					nl = elem_gp.getElementsByTagName("LAW");
 					if (nl.getLength() > 0) {
-						String laws = "";
 						for (int i = 0; i < nl.getLength(); i++) {
 							Element elem_law = (Element)nl.item(i);
-							laws = laws + readAttribute(elem_law, CONF_CLASS, null);
-							if (i != nl.getLength()-1) {
-								laws = laws + " ";
-							}
+							String law_class = readAttribute(elem_law, CONF_CLASS, null);
+							Parameters law_param = readArguments(elem_law);
+							System.out.println("law_param: " + world_param);
+							ea.getWorld().addLaw(law_class, law_param);
 						}
-						ea_parameters.put("LAW", laws);
 					}
 				}
 								
@@ -297,6 +307,7 @@ public class Loader {
 					ma_name = ma_name_pre;
 				}
 				
+				// Reads Musical Agent instance arguments
 				Parameters parameters = readArguments(elem_ma);
 				
 				// Le os facts a serem carregados na KB
@@ -315,6 +326,9 @@ public class Loader {
 							String ma_class_class = readAttribute(elem_ma_class, CONF_CLASS, "mms.rt.MusicalAgent");
 							Class maClass = Class.forName(ma_class_class);
 							MusicalAgent ma = (MusicalAgent)maClass.newInstance();
+							Parameters class_parameters = readArguments(elem_ma_class);
+							parameters.merge(readArguments(elem_ma_class));
+							// Coloca os argumentos (os da instância tem precedência sobre os da classe
 							Object[] arguments;
 							arguments = new Object[1];
 							arguments[0] = parameters;
@@ -327,7 +341,7 @@ public class Loader {
 							if (nl_ma_class_kb.getLength() == 1) {
 								Element elem_ma_class_kb = (Element)nl_ma_class_kb.item(0);
 								String kb_class = readAttribute(elem_ma_class_kb, CONF_CLASS, "mms.KnowledgeBase");
-								Parameters args = readArguments(elem_ma_class);
+								Parameters args = readArguments(elem_ma_class_kb);
 								ma.addComponent("KnowledgeBase", kb_class, args);
 								System.out.println("\tKNOWLEDGE_BASE" + "KnowledgeBase");
 								NodeList nl_facts = elem_ma_class_kb.getElementsByTagName(CONF_FACT);

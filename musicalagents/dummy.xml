@@ -6,10 +6,14 @@
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
 		<ARG NAME="arg_ea" VALUE="eaeaea" />
-		<WORLD CLASS_WORLD="mms.world.World">
+		<WORLD CLASS="mms.world.World">
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:loop" />
+			<LAW CLASS="mms.movement.MovementLaw">
+				<ARG NAME="friction_coefficient" VALUE="0.25" />
+				<ARG NAME="gravity" VALUE="10" />
+			</LAW>
 		</WORLD>
 		<EVENT_SERVER CLASS="mms.apps.dummy.DummyEventServer" COMM="mms.comm.CommMessage" PERIOD="500 250 450 2000" />
 	</ENVIRONMENT_AGENT_CLASS>
@@ -17,9 +21,14 @@
   <!-- ********** MUSICAL AGENT CLASSES ********** -->
 
 	<MUSICAL_AGENT_CLASS NAME="DUMMY" CLASS="mms.MusicalAgent">
-		<ARG NAME="BLA" VALUE="1.0" /> <!-- NÃO ESTÁ INDO!!! -->
+		<ARG NAME="BLA" VALUE="1.0" />
+		<KB>
+			<FACT NAME="filename" VALUE="bla.wav" />
+		</KB>
 		<COMPONENTS>
-			<REASONING NAME="DummyReasoning" CLASS="mms.apps.dummy.DummyReasoning" />
+			<REASONING NAME="DummyReasoning" CLASS="mms.apps.dummy.DummyReasoning">
+				<ARG NAME="BLE" VALUE="blebleble" />
+			</REASONING>
 			<ACTUATOR NAME="DummyActuator" CLASS="mms.Actuator" EVENT_TYPE="DUMMY" COMM="mms.comm.CommMessage" />
 			<SENSOR NAME="DummySensor" CLASS="mms.apps.dummy.DummySensor" EVENT_TYPE="DUMMY" COMM="mms.comm.CommMessage" />
 		</COMPONENTS>
@@ -28,7 +37,15 @@
   <!-- ********** MUSICAL AGENT INSTANCES ********** -->
 
 	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="1" >
-		<ARG NAME="BLA" VALUE="2.0" />
+		<ARG_COMP COMP="DummySensor" NAME="pos" VALUE="(2;-10;0)" />
+		<ARG_COMP COMP="DummySensor" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="DummyReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
 	</MUSICAL_AGENT>
 
+	<MUSICAL_AGENT NAME="Dummy_2" CLASS="DUMMY" QUANTITY="1" >
+		<FACT NAME="filename" VALUE="bla_2.wav" />
+		<ARG_COMP COMP="DummySensor" NAME="pos" VALUE="(2;-10;0)" />
+		<ARG_COMP COMP="DummySensor" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="DummyReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
+	</MUSICAL_AGENT>
 </MMS>

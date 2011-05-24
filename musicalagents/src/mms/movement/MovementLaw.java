@@ -19,9 +19,24 @@ public class MovementLaw extends Law {
 	@Override
 	public boolean configure() {
 		setType("MOVEMENT");
+		if (parameters.containsKey("gravity")) {
+			this.gravity = Double.valueOf(parameters.get("gravity"));
+		}
+		if (parameters.containsKey("friction_coefficient")) {
+			this.friction_coefficient = Double.valueOf(parameters.get("friction_coefficient"));
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean init() {
 		frictionAcceleration = new Vector(world.dimensions);
-		// TODO Pegar os parâmetros de gravidade/fricção
 		warmup();
+		return true;
+	}
+	
+	@Override
+	public boolean finit() {
 		return true;
 	}
 	
