@@ -12,6 +12,7 @@ import mms.Constants.EH_STATUS;
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.world.Vector;
+import mms.world.World;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -135,21 +136,19 @@ public class MusicalAgent extends MMSAgent {
 				return false;
 			}
 			
+			// If no kb has been configured, creates a generic kb
+			if (kb == null) {
+				addKB("mms.KnowledgeBase", new Parameters());
+			}
+			kb.start();
+
 			// TODO Registras os fatos públicos do KB
 			
 			// Executa o método de inicialização do usuário
 			// TODO Tratar o caso retornar false
-			init();
-			
-			// Inicializa o KB
-			// TODO Deve ser inicializado antes, mas não deveria ter um código separado
-			kb = (KnowledgeBase)components.get("KnowledgeBase");
-			// Se não foi definido, cria agora
-			if (kb == null) {
-				addComponent("KnowledgeBase", "mms.KnowledgeBase", new Parameters());
-				kb = (KnowledgeBase)components.get("KnowledgeBase");
+			if (!init()) {
+				return false;
 			}
-			kb.start();
 			
 			// Inicializa os componentes
 			Collection<MusicalAgentComponent> comps = components.values();
@@ -205,6 +204,10 @@ public class MusicalAgent extends MMSAgent {
 			return false;
 		}
 		
+		// Stops the KnowledgeBase
+		kb.stop();
+		
+		// Warns the Sniffer
 		Command cmd = new Command(getAddress(), "/console", "DESTROY");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		sendCommand(cmd);
@@ -213,6 +216,24 @@ public class MusicalAgent extends MMSAgent {
 		
 	}
 
+	public final void addKB(String className, Parameters parameters) {
+		if (state == MA_STATE.CREATED) {
+			try {
+				Class kbClass = Class.forName(className);
+				kb = (KnowledgeBase) kbClass.newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+			kb.setComponentName(Constants.KNOWLEDGE_BASE);
+			kb.setAgent(this);
+			kb.setParameters(parameters);
+			kb.configure();
+		} else {
+			System.err.println("[" + getAgentName() + "] Trying to add a World in runtime!");
+		}
+	}
+	
 	/** 
 	 * Adiciona um componente ao agente, seja um raciocínio, sensor, atuador etc. Deve configurar o componente e iniciar sua execução.
 	 * @param compName
@@ -246,15 +267,6 @@ public class MusicalAgent extends MMSAgent {
 				comp.setParameters(arguments);
 				comp.configure();
 				
-				if (comp instanceof KnowledgeBase) {
-					if (kb != null) {
-						System.out.println("[" + this.getAgentName() + "] Agent already has a Knowledge Base!");
-						return;
-					} else {
-						kb = (KnowledgeBase)comp;
-					}
-				}
-
 				// Sets the position of the EventHandler in Agent's "body"
 				if (comp instanceof EventHandler) {
 					if (arguments.containsKey(Constants.PARAM_REL_POS)) {
@@ -508,7 +520,7 @@ public class MusicalAgent extends MMSAgent {
 				cmd.addParameter("AGENT", getAgent().getAgentName());
 				cmd.addParameter("STATE", "TERMINATING");
 				sendCommand(cmd);
-				// Deregisters EventHandlers
+				// Deregisters componentes
 				for (MusicalAgentComponent existingComp : components.values()) {
 					removeComponent(existingComp.getComponentName());
 				}

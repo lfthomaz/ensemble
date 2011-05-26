@@ -2,10 +2,6 @@ package mms.audio;
 
 import jade.util.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -28,7 +24,20 @@ public class AudioEventServer extends EventServer {
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-    private enum PROCESS_MODE {NORMAL, LIN_INT, POL_INT};
+    private enum PROCESS_MODE {NORMAL, LIN_INT, POL_INT;
+    	public static PROCESS_MODE fromInt(int i) {
+    		switch (i) {
+			case 0:
+				return NORMAL;
+			case 1:
+				return LIN_INT;
+			case 2:
+				return POL_INT;
+			default:
+				return NORMAL;
+			}
+    	}
+    };
 
     //---- WORK VARIABLES ----
 	// Newton function's variables 
@@ -48,17 +57,22 @@ public class AudioEventServer extends EventServer {
 	private final double 	EPSILON 		= 1E-6;
 	private final int 		MAX_ITERATIONS 	= 10;
 
-	// TODO Tornar parametrizável os valores utilizados em AudioEventServer
-	private double	SPEED_SOUND			= 343.3; // speed of sound (m/s)
-	private double 	REFERENCE_DISTANCE 	= 1.0;
-	private double 	ROLLOFF_FACTOR 		= 1.0;
-    private int 	SAMPLE_RATE 		= 44100;
-    private double 	STEP 				= 1 / SAMPLE_RATE;
-    private int 	CHUNK_SIZE 			= 4410;
-    private int 	NUMBER_OF_POINTS	= 3;
-    private PROCESS_MODE mode 			= PROCESS_MODE.POL_INT;
-    private boolean LOOP_HEARING 		= false;
-	
+	// AudioEventServer Parameters
+	private double			SPEED_SOUND			= 343.3; // speed of sound (m/s)
+	private double 			REFERENCE_DISTANCE 	= 1.0;
+	private double 			ROLLOFF_FACTOR 		= 1.0;
+    private int 			SAMPLE_RATE 		= 44100;
+    private int 			NUMBER_POINTS		= 3;
+    private PROCESS_MODE 	INTERPOLATION_MODE 	= PROCESS_MODE.POL_INT;
+    private boolean 		LOOP_HEARING 		= false;
+
+    // Working variables
+    private double 			STEP 				= 1 / SAMPLE_RATE;
+    private int 			CHUNK_SIZE 			= 4410;
+
+    // When a parameter has changed, only applies it in the next cycle 
+    private boolean 		PARAM_CHANGED 		= false;
+
     // Table that stores the last calculated delta of each pair
 //    double[] deltas, deltas_1, deltas_2, deltas_3;
     double[] deltas;
@@ -92,23 +106,27 @@ public class AudioEventServer extends EventServer {
 		} else {
 			setEventExchange(500, 200, 400, 1000);
 		}
+		if (parameters.containsKey("SOUND_SPEED")) {
+			
+		}
 		return true;
 	}
 
 	@Override
 	public boolean init() {
 
-		// Inicialização dos parâmetros
+	    // Inicialização dos parâmetros
 		this.SPEED_SOUND		= Double.valueOf(parameters.get("SPEED_SOUND", "343.3"));
 		this.REFERENCE_DISTANCE = Double.valueOf(parameters.get("REFERENCE_DISTANCE", "1.0"));
 		this.ROLLOFF_FACTOR 	= Double.valueOf(parameters.get("ROLLOFF_FACTOR", "1.0"));
-		
-		// TODO Parametrizar
-		this.SAMPLE_RATE 		= 44100;
-		this.STEP 				= 1 / (double)SAMPLE_RATE;
+		this.NUMBER_POINTS 		= Integer.valueOf(parameters.get("NUMBER_OF_POINTS", "3"));
+		this.INTERPOLATION_MODE = PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("MODE", "0")));
+		this.LOOP_HEARING 		= Boolean.valueOf(parameters.get("LOOP_HEARING", "FALSE"));
+		this.SAMPLE_RATE 		= Integer.valueOf(parameters.get("SAMPLE_RATE", "44100"));
 		
 		// Chunk size deve ser baseado na freqüência
 		// TODO Cuidado com aproximações aqui!
+		this.STEP 				= 1 / (double)SAMPLE_RATE;
 		this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
 		this.deltas 			= new double[CHUNK_SIZE];
 //		System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
@@ -154,21 +172,21 @@ public class AudioEventServer extends EventServer {
 	@Override
 	public Parameters actuatorRegistered(String agentName, String eventHandlerName, Parameters userParam) {
 		
-		Parameters userParameters = new Parameters();
-		userParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(CHUNK_SIZE));
-		userParameters.put(Constants.PARAM_SAMPLE_RATE, String.valueOf(SAMPLE_RATE));
-		userParameters.put(Constants.PARAM_STEP, String.valueOf(STEP));
-		userParameters.put(Constants.PARAM_PERIOD, String.valueOf(period));
-		userParameters.put(Constants.PARAM_START_TIME, String.valueOf(startTime));
+		Parameters retParameters = new Parameters();
+		retParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(CHUNK_SIZE));
+		retParameters.put(Constants.PARAM_SAMPLE_RATE, String.valueOf(SAMPLE_RATE));
+		retParameters.put(Constants.PARAM_STEP, String.valueOf(STEP));
+		retParameters.put(Constants.PARAM_PERIOD, String.valueOf(period));
+		retParameters.put(Constants.PARAM_START_TIME, String.valueOf(startTime));
 		
 		// Cria uma memória para o atuador
 		// TODO Memória do atuador deveria ser parametrizável!!!
 		String memoryName = agentName+":"+eventHandlerName;
 		Memory memory = new AudioMemory();
-		memory.start(envAgent, Constants.EVT_AUDIO, 5.0, 5.0, userParameters);
+		memory.start(envAgent, Constants.EVT_AUDIO, 1.0, 1.0, retParameters);
 		memories.put(memoryName, memory);
 
-		return userParameters;
+		return retParameters;
 		
 	}
 	
@@ -186,10 +204,45 @@ public class AudioEventServer extends EventServer {
 		// TODO Memória do sensor deve ser parametrizável
 		String memoryName = agentName+":"+eventHandlerName;
 		Memory memory = new AudioMemory();
-		memory.start(envAgent, Constants.EVT_AUDIO, 5.0, 5.0, userParameters);
+		memory.start(envAgent, Constants.EVT_AUDIO, 1.0, 1.0, userParameters);
 		memories.put(memoryName, memory);
 		
 		return userParameters;
+	}
+	
+	@Override
+	public boolean parameterUpdate(String name, String newValue) {
+		if (name.equals(SAMPLE_RATE)) {
+			// TODO Verifies if it's a valid sample rate
+			this.SAMPLE_RATE 		= Integer.valueOf(newValue); 
+			this.STEP 				= 1 / (double)SAMPLE_RATE;
+			this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
+			this.deltas 			= new double[CHUNK_SIZE];
+//			System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
+		} 
+		else if (name.equals(SPEED_SOUND)) {
+			this.SPEED_SOUND		= Double.valueOf(parameters.get("SPEED_SOUND"));
+		} 
+		else if (name.equals(REFERENCE_DISTANCE)) {
+			this.REFERENCE_DISTANCE = Double.valueOf(parameters.get("REFERENCE_DISTANCE"));
+		} 
+		else if (name.equals(ROLLOFF_FACTOR)) {
+			this.ROLLOFF_FACTOR 	= Double.valueOf(parameters.get("ROLLOFF_FACTOR"));
+		} 
+		else if (name.equals(LOOP_HEARING)) {
+			this.LOOP_HEARING 		= Boolean.valueOf(parameters.get("LOOP_HEARING"));
+		} 
+		else if (name.equals(INTERPOLATION_MODE)) {
+			this.INTERPOLATION_MODE 				= PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("MODE")));
+		} 
+		else if (name.equals(NUMBER_POINTS)) {
+			this.NUMBER_POINTS 	= Integer.valueOf(parameters.get("NUMBER_OF_POINTS"));
+		} 
+		else {
+			return false;
+		}
+		PARAM_CHANGED = true;
+		return true;
 	}
 	
 	// TODO Verificar problemas de concorrência!
@@ -213,6 +266,11 @@ public class AudioEventServer extends EventServer {
 		
 //		long time_process = System.nanoTime();
 
+		if (PARAM_CHANGED) {
+			// TODO COMO MUDAR?!?!?!?!??!?!?
+			PARAM_CHANGED = false;
+		}
+		
 		// TODO Ver se vamos trabalhar com milisegundos ou segundos
 		double instant = (double)(startTime + workingFrame * period) / 1000;
 
@@ -290,7 +348,7 @@ public class AudioEventServer extends EventServer {
 							// Finds the deltas for all the samples in the chunk, according to the chosen process mode
 							double delta = 0.0, delta_i = 0.0, delta_f = 0.0;
 		
-							switch (mode) {
+							switch (INTERPOLATION_MODE) {
 							case NORMAL:
 		//						long start = System.nanoTime();
 								// For each sample...
@@ -308,19 +366,19 @@ public class AudioEventServer extends EventServer {
 								break;
 							case POL_INT:
 		//						start = System.nanoTime();
-								double[] xa = new double[NUMBER_OF_POINTS]; 
-								double[] ya = new double[NUMBER_OF_POINTS]; 
+								double[] xa = new double[NUMBER_POINTS]; 
+								double[] ya = new double[NUMBER_POINTS]; 
 		
 								// calculates points for the polinomial interpolation
 								xa[0] = instant;
 								ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
-								int samples_jump = CHUNK_SIZE / NUMBER_OF_POINTS;
-								for (int i = 1; i < NUMBER_OF_POINTS-1; i++) {							
+								int samples_jump = CHUNK_SIZE / NUMBER_POINTS;
+								for (int i = 1; i < NUMBER_POINTS-1; i++) {							
 									xa[i] = instant + (i * samples_jump * STEP);
 									ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], ya[i-1], 0.0, mem_mov_src.getPast());
 								}
-								xa[NUMBER_OF_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
-								ya[NUMBER_OF_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_OF_POINTS-1], ya[NUMBER_OF_POINTS-2], 0.0, mem_mov_src.getPast());
+								xa[NUMBER_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
+								ya[NUMBER_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_POINTS-1], ya[NUMBER_POINTS-2], 0.0, mem_mov_src.getPast());
 		
 								// For each sample in this division...
 								for (int i = 0; i < CHUNK_SIZE; i++) {

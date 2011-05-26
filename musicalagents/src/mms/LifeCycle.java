@@ -23,7 +23,7 @@ public interface LifeCycle {
 	/**
 	 * User-implement method called when a parameter has been updated
 	 */
-	public boolean parameterUpdate(String name, Object newValue);
+	public boolean parameterUpdate(String name, String newValue);
 	
 	/**
 	 * User-implemented finalization method, called by end()

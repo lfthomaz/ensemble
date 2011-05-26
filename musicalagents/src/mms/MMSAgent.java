@@ -218,7 +218,7 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 	}
 	
 	@Override
-	public boolean parameterUpdate(String name, Object newValue) {
+	public boolean parameterUpdate(String name, String newValue) {
 		return true;
 	}
 	

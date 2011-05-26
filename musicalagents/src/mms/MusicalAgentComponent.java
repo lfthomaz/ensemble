@@ -106,7 +106,7 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 	}
 
 	@Override
-	public void receiveCommand(Command cmd) {
+	public final void receiveCommand(Command cmd) {
 //        System.out.println("[" + getAddress() +"] Command received: " + cmd);
 		if (cmd.getCommand().equals(Constants.CMD_PARAMETER)) {
 			String param = cmd.getParameter("NAME");
@@ -133,7 +133,7 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 	}
 	
 	@Override
-	public void sendCommand(Command cmd) {
+	public final void sendCommand(Command cmd) {
 		getAgent().sendCommand(cmd);
 	}
 
@@ -161,7 +161,7 @@ public abstract class MusicalAgentComponent implements LifeCycle, RouterClient {
 	}
 	
 	@Override
-	public boolean parameterUpdate(String name, Object newValue) {
+	public boolean parameterUpdate(String name, String newValue) {
 		return true;
 	}
 

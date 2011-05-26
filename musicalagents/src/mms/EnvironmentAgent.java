@@ -8,7 +8,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.EA_STATE;
-import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.world.World;
 
@@ -166,7 +165,6 @@ public class EnvironmentAgent extends MMSAgent {
 
 			// If no world has been configured, creates a generic world
 			if (world == null) {
-				System.out.println("ENTREI!!!!");
 				addWorld("mms.world.World", new Parameters());
 			}
 			world.start();
@@ -227,8 +225,13 @@ public class EnvironmentAgent extends MMSAgent {
 			es.stop();
 		}
 
-		// Stop World
+		// Stops World
 		world.stop();
+
+		// Warns the Sniffer
+		Command cmd = new Command(getAddress(), "/console", "DESTROY");
+		cmd.addParameter("AGENT", getAgent().getAgentName());
+		sendCommand(cmd);
 
 		return true;
 	}

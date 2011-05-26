@@ -103,5 +103,10 @@ public abstract class Comm implements LifeCycle {
 	 * Event source
 	 */
 	public abstract void send(Event evt);
+	
+	@Override
+	public boolean parameterUpdate(String name, String newValue) {
+		return false;
+	}
 
 }

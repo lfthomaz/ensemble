@@ -212,7 +212,6 @@ public class Loader {
 			String ea_name = Constants.ENVIRONMENT_AGENT;
 			String ea_class = readAttribute(elem_ea, CONF_CLASS, "mms.EnvironmentAgent");
 			Parameters ea_parameters = readArguments(elem_ea);
-			System.out.println("param: " + ea_parameters);
 			
 			try {
 				// Criar nova instância do EA solicitado
@@ -233,7 +232,6 @@ public class Loader {
 						world_class = "mms.world.World";
 					}
 					Parameters world_param = readArguments(elem_gp);
-					System.out.println("world_param: " + world_param);
 					ea.addWorld(world_class, world_param);
 					nl = elem_gp.getElementsByTagName("LAW");
 					if (nl.getLength() > 0) {
@@ -241,7 +239,6 @@ public class Loader {
 							Element elem_law = (Element)nl.item(i);
 							String law_class = readAttribute(elem_law, CONF_CLASS, null);
 							Parameters law_param = readArguments(elem_law);
-							System.out.println("law_param: " + world_param);
 							ea.getWorld().addLaw(law_class, law_param);
 						}
 					}
@@ -342,7 +339,7 @@ public class Loader {
 								Element elem_ma_class_kb = (Element)nl_ma_class_kb.item(0);
 								String kb_class = readAttribute(elem_ma_class_kb, CONF_CLASS, "mms.KnowledgeBase");
 								Parameters args = readArguments(elem_ma_class_kb);
-								ma.addComponent("KnowledgeBase", kb_class, args);
+								ma.addKB(kb_class, args);
 								System.out.println("\tKNOWLEDGE_BASE" + "KnowledgeBase");
 								NodeList nl_facts = elem_ma_class_kb.getElementsByTagName(CONF_FACT);
 								for (int k = 0; k < nl_facts.getLength(); k++) {
@@ -357,9 +354,6 @@ public class Loader {
 										ma.getKB().updateFact(fact_name, facts.get(fact_name));
 									}
 								}
-							} else {
-								ma.addComponent("KnowledgeBase", "mms.KnowledgeBase", new Parameters());
-								System.out.println("\tKNOWLEDGE_BASE" + "KnowledgeBase");
 							}
 							
 							// Inserir Componentes Musicais no MA

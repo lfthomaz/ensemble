@@ -46,14 +46,22 @@ public class PAInputReasoning extends Reasoning {
 	@Override
 	public boolean init() {
 		
-		String[] str = getParameter("channel", "").split(";");
+		// It must be in the format "sensor:device,channel;sensor2:device,channel..."
+		String[] str = getParameter("mapping", "").split(";");
+		
+		if (str.length == 0) {
+			System.err.println("[" + getComponentName() + "] No channels configured... Aborting PA");
+			return false;
+		}
+		
+		System.out.println(getParameter("mapping", ""));
 		for (int i = 0; i < str.length; i++) {
 			String[] str2 = str[i].split(":");
 			String[] str3 = str2[1].split(",");
 			devices.put(str2[0], Integer.valueOf(str3[0]));
 			channels.put(str2[0], Integer.valueOf(str3[1]));
 		}
-		
+
 		// Initializes PortAudio
 		pa = portaudio.getInstance();
 

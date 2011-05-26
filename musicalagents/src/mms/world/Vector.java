@@ -41,7 +41,7 @@ public class Vector {
 	public static Vector parse(String str) {
 		Vector vec = new Vector();
 		if (str.startsWith("(") && str.endsWith(")")) {
-			String str2[] = str.substring(1, str.length()-1).split(";");
+			String str2[] = str.substring(1, str.length()-1).split("[; ]");
 			for (int i = 0; i < str2.length; i++) {
 				try {
 					vec.values[i] = Double.valueOf(str2[i]);

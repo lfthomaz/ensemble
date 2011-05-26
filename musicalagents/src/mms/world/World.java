@@ -76,15 +76,15 @@ public class World implements LifeCycle, RouterClient {
 	public long time_1 = 0;
 	public long time_2 = 0;
 
-	public void setParameters(Parameters parameters) {
+	public final void setParameters(Parameters parameters) {
 		this.parameters = parameters;
 	}
 	
-	public Parameters getParameters() {
+	public final Parameters getParameters() {
 		return this.parameters;
 	}
 
-	public void setEnvAgent(EnvironmentAgent envAgent) {
+	public final void setEnvAgent(EnvironmentAgent envAgent) {
 		this.envAgent = envAgent;
 	}
 	
@@ -92,7 +92,7 @@ public class World implements LifeCycle, RouterClient {
      * Constructor
      */
 	@Override
-    public boolean start() {
+    public final boolean start() {
 
     	// Parameters
     	if (parameters == null || envAgent == null) {
@@ -146,7 +146,7 @@ public class World implements LifeCycle, RouterClient {
     }
     
 	@Override
-	public boolean stop() {
+	public final boolean stop() {
 		// Terminates world laws
 		for (String lawName : laws.keySet()) {
 			Law law = (Law)(laws.get(lawName));
@@ -297,13 +297,13 @@ public class World implements LifeCycle, RouterClient {
      * Retorna o estado atual de uma entidade
      * @return variável do estado de uma entidade
      */
-    public Object getEntityStateAttribute(String entityName, String attribute) {
+    public final Object getEntityStateAttribute(String entityName, String attribute) {
 
     	return (entities.get(entityName)).getEntityStateAttribute(attribute);
     	
     }
 
-    public void addEntityStateAttribute(String entityName, String attribute, Object value) {
+    public final void addEntityStateAttribute(String entityName, String attribute, Object value) {
 
     	EntityState entity = entities.get(entityName);
     	if (entity != null) {
@@ -314,7 +314,7 @@ public class World implements LifeCycle, RouterClient {
     
     }
     
-    public Object removeEntityStateAttribute(String entityName, String attribute) {
+    public final Object removeEntityStateAttribute(String entityName, String attribute) {
 
     	return entities.get(entityName).attributes.remove(attribute);
     
@@ -376,7 +376,7 @@ public class World implements LifeCycle, RouterClient {
 	}
 	
 	@Override
-	public boolean parameterUpdate(String name, Object newValue) {
+	public boolean parameterUpdate(String name, String newValue) {
 		return true;
 	}
 	

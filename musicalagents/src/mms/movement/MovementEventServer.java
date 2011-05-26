@@ -1,7 +1,6 @@
 
 package mms.movement;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -25,20 +24,20 @@ import mms.world.law.Law;
  * O MovementServer representa as leis físicas do movimento no mundo virtual.
  */
 public class MovementEventServer extends EventServer {
-
-	public static final String CMD_WALK = "WALK";
-	public static final String CMD_TURN = "TURN";
-	public static final String CMD_TRANSPORT = "TRANSPORT";
-	public static final String CMD_STOP = "STOP";
-	public static final String CMD_INFO = "INFO";
 	
-	long time_1 = 0;
-	long time_2 = 0;
-	long time_3 = 0;
-	long time_4 = 0;
-	long time_5 = 0;
-	long time_6 = 0;
+	public static final String MOVEMENT = "MOVEMENT";
 
+	public static final String CMD_WALK 		= "WALK";
+	public static final String CMD_TURN 		= "TURN";
+	public static final String CMD_TRANSPORT 	= "TRANSPORT";
+	public static final String CMD_STOP 		= "STOP";
+	public static final String CMD_INFO 		= "INFO";
+	
+	public static final String PARAM_AGENT 		= "AGENT";
+	public static final String PARAM_POS 		= "POS";
+	public static final String PARAM_VEL 		= "VEL";
+	public static final String PARAM_ACC 		= "ACC";
+	
 	private static Lock lock = new ReentrantLock();
 
 	private boolean osc = true;
@@ -52,14 +51,10 @@ public class MovementEventServer extends EventServer {
 	HashMap<String,Vector> acc_command = new HashMap<String, Vector>();
 	HashMap<String,Double> stop_command = new HashMap<String,Double>();
 	
-	private int dx = 0;
-	private int dy = 0;
-	private double coeficient = 0.1;
-
 	@Override
 	public boolean configure() {
 		setCommType("mms.comm.direct.CommDirect");
-		setEventType("MOVEMENT");
+		setEventType(MOVEMENT);
 		String[] period = getParameters().get("PERIOD", "100 1000").split(" ");
 		setEventExchange(Long.valueOf(period[0]), Long.valueOf(period[1]));
 		return true;
@@ -69,7 +64,7 @@ public class MovementEventServer extends EventServer {
 	public boolean init() {
 		
 		this.world = envAgent.getWorld();
-		this.movLaw = world.getLaw("MOVEMENT");
+		this.movLaw = world.getLaw(MOVEMENT);
 
 		return true;
 		
@@ -85,11 +80,12 @@ public class MovementEventServer extends EventServer {
 	private Memory createEntityMemory(String entityName) {
 		
 		// Gets the Movement Memory
-		Memory movMemory = (Memory)world.getEntityStateAttribute(entityName, "MOVEMENT");
+		Memory movMemory = (Memory)world.getEntityStateAttribute(entityName, MOVEMENT);
 		// If there is no memory, creates one for this entity
 		if (movMemory == null) {
 			movMemory = new EventMemory();
-			movMemory.start(envAgent, entityName, 5.0, 0, null);
+			movMemory.start(envAgent, entityName, 1.0, 0, null);
+			world.addEntityStateAttribute(entityName, MOVEMENT, movMemory);
 		}
 
 		return movMemory;
@@ -124,10 +120,7 @@ public class MovementEventServer extends EventServer {
 	@Override
 	public void process() {
 
-//		long start = System.nanoTime();
-
 		double t = clock.getCurrentTime(TimeUnit.SECONDS);
-//		System.out.println("Process - t = " + t + " s");
 		
 		lock.lock();
 		try {
@@ -136,8 +129,6 @@ public class MovementEventServer extends EventServer {
 			Set<String> entities = world.getEntityList();
 			for (String entity : entities) {
 				
-//				System.out.println("Processing movement of '" + entity + "'");
-
 				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, "MOVEMENT");
 				
 				boolean positionChanged = false;
@@ -199,12 +190,6 @@ public class MovementEventServer extends EventServer {
 			lock.unlock();
 		}
 		
-//		time_1 = time_1 + (System.nanoTime() - start);
-//		
-//		System.out.printf("MS time = %.3f\n", ((double)time_1/1000000));
-//		
-//		time_1 = 0;
-    	
 	}
 
 	@Override
@@ -414,18 +399,12 @@ public class MovementEventServer extends EventServer {
 	@Override
 	public void processCommand(Command cmd) {
 
-		// TODO Problemas com a conversão de arguments para Float
-		// TODO Se eu mudar a posição aqui, vai mandar uma atualizaçai de volta para o gui??
-		if (cmd.getCommand().equals("MOVEMENT_UPDATE")) {
-			String agentName = cmd.getParameter("NAME");
-
-			//recupera a nova posicao
+		if (cmd.getCommand().equals(CMD_TRANSPORT)) {
+			
+			String agentName = cmd.getParameter("AGENT");
 			Vector pos = Vector.parse(cmd.getParameter("POS"));
 			
-			System.out.printf("Incoming OSC: pos %s %s\n", agentName, pos);
-			
-			//acc_command.put(agentName,new Vector(x,y,z));
-			Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
+			Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, MOVEMENT);
 			
 			MovementState movState = new MovementState(world.dimensions);
 			movState.position = pos;
@@ -437,28 +416,8 @@ public class MovementEventServer extends EventServer {
 	              e.printStackTrace();
 	         }
 			
-			
 		}
-//		else if (arguments[0].equals("mouse")) {
-//			String agentName = (String)arguments[1];
-//			int delta_x = (Integer)arguments[2];
-//			int delta_y = (Integer)arguments[3];
-////			System.out.printf("frame: %d - recebi dx=%d dy=%d\n", workingFrame, delta_x, delta_y);
-//			if (Math.abs(delta_y) > 50) {
-//				dx = (-delta_y);
-//			}
-//			if (Math.abs(delta_x) > 50) {
-//				dy = (-delta_x);
-//			}
-//			
-//			// TODO Vai mudar a força do próximo frame, mas não diretamente no process()
-////			world.getEntityState(state, agentName);
-//			if (dx != 0 || dy != 0) {
-//				System.out.printf("dx=%d dy=%d\n", dx, dy);
-//				acc_command.put(agentName, new Vector(dx*coeficient, dy*coeficient, 0.0));
-////				System.out.println("Acc = " + state.acceleration);
-//			}
-//		}
+
 	}
 	
 }

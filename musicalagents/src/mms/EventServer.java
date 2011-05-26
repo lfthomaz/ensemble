@@ -805,23 +805,33 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	@Override
 	public final void receiveCommand(Command cmd) {
 //        System.out.println("[" + getAddress() +"] Command received: " + cmd);
+		// Command is a change of parameter
 		if (cmd.getCommand().equals(Constants.CMD_PARAMETER)) {
 			String param = cmd.getParameter("NAME");
 			String value = cmd.getParameter("VALUE");
 			if (param != null && value != null && parameters.containsKey(param)) {
-				// TODO Alguns parâmetros não podem ser mudados!
-				// Calls user method
-				if (!parameterUpdate(param, value)) {
-					return;
+				// Change of period
+				if (param.equals(Constants.PARAM_PERIOD)) {
+
+				} 
+				// Change of event type
+				else if (param.equals(Constants.PARAM_EVT_TYPE)) {
+					// ignores! 
 				}
-				parameters.put(param, value);
-				// Let the console knows about the updated parameter
-				cmd = new Command(getAddress(), "/console", "UPDATE");
-				cmd.addParameter("AGENT", Constants.ENVIRONMENT_AGENT);
-				cmd.addParameter("EVENT_SERVER", getEventType());
-				cmd.addParameter("NAME", param);
-				cmd.addParameter("VALUE", value);
-				sendCommand(cmd);
+				// Calls user method
+				else {
+					if (!parameterUpdate(param, value)) {
+						return;
+					}
+					parameters.put(param, value);
+					// Let the console knows about the updated parameter
+					cmd = new Command(getAddress(), "/console", "UPDATE");
+					cmd.addParameter("AGENT", Constants.ENVIRONMENT_AGENT);
+					cmd.addParameter("EVENT_SERVER", getEventType());
+					cmd.addParameter("NAME", param);
+					cmd.addParameter("VALUE", value);
+					sendCommand(cmd);
+				}
 			}
 		} else {
 		    processCommand(cmd);
@@ -843,7 +853,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	}
 
 	@Override
-	public boolean parameterUpdate(String name, Object newValue) {
+	public boolean parameterUpdate(String name, String newValue) {
 		return true;
 	}
 	

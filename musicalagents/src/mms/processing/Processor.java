@@ -48,6 +48,11 @@ public abstract class Processor implements LifeCycle {
 		return true;
 	}
 	
+	@Override
+	public boolean parameterUpdate(String name, String newValue) {
+		return true;
+	}
+	
 	/**
 	 * Process method
 	 * @param arguments

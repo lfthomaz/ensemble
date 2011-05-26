@@ -179,10 +179,8 @@ public class RouterAgent extends Agent {
 				sb.append(m.getArg(i));
 				sb.append(" ");
 			}
-			System.out.println("SB = " + sb.toString());
 			Command cmd = Command.parse(sb.toString());
 			cmd.addParameter("recipient", m.getName());
-			System.out.println(cmd);
 			processCommand(cmd);
 		}
 		

@@ -98,6 +98,7 @@ public final class Constants {
 	// 
 	public static final String 	ENVIRONMENT_AGENT 		= "Environment";
 	public static final String 	WORLD 					= "World";
+	public static final String 	KNOWLEDGE_BASE 			= "KnowledgeBase";
 	
 	// EventHandler Status
 	public static enum EH_STATUS {REGISTERED, NOT_REGISTERED};

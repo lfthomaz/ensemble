@@ -62,7 +62,7 @@ public abstract class Law implements LifeCycle {
 	//--------------------------------------------------------------------------------
 
 	@Override
-	public boolean parameterUpdate(String name, Object newValue) {
+	public boolean parameterUpdate(String name, String newValue) {
 		return true;
 	}
 	

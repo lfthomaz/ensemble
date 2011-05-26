@@ -44,6 +44,7 @@ public class PAOutputReasoning extends Reasoning {
 	@Override
 	public boolean init() {
 		
+		// It must be in the format "sensor:device,channel;sensor2:device,channel..."
 		String[] str = getParameter("mapping", "").split(";");
 		
 		if (str.length == 0) {
@@ -51,6 +52,7 @@ public class PAOutputReasoning extends Reasoning {
 			return false;
 		}
 		
+		System.out.println(getParameter("mapping", ""));
 		for (int i = 0; i < str.length; i++) {
 			String[] str2 = str[i].split(":");
 			String[] str3 = str2[1].split(",");
