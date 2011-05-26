@@ -25,6 +25,7 @@ import mms.Constants;
 import mms.Command;
 import mms.Parameters;
 import mms.router.RouterClient;
+import mms.tools.Loader;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -80,6 +81,7 @@ public class Sniffer extends Agent implements RouterClient {
 	private DefaultTableModel tblParametersModel;
 	private JTable tblParameters;
 	private JScrollPane scrollPane_1;
+	private JTextField txtXMLFile;
 
 	/**
 	 * Create the application.
@@ -383,7 +385,7 @@ public class Sniffer extends Agent implements RouterClient {
 				btnStopSimulation.setEnabled(false);
 			}
 		});
-		btnStopSimulation.setBounds(166, 484, 150, 29);
+		btnStopSimulation.setBounds(472, 484, 150, 29);
 		frame.getContentPane().add(btnStopSimulation);
 		
 		lblName.setVisible(false);
@@ -400,6 +402,12 @@ public class Sniffer extends Agent implements RouterClient {
 		btnFacts.setVisible(false);
 		btnStartSimulation.setEnabled(false);
 		btnStopSimulation.setEnabled(true);
+		
+		txtXMLFile = new JTextField();
+		txtXMLFile.setEnabled(false);
+		txtXMLFile.setBounds(166, 486, 266, 25);
+		frame.getContentPane().add(txtXMLFile);
+		txtXMLFile.setColumns(10);
 	}
 	
 	class MyTreeCellRenderer extends DefaultTreeCellRenderer {

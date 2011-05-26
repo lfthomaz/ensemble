@@ -1,10 +1,8 @@
-package mms.world.law;
+package mms.world;
 
 import mms.Constants;
 import mms.LifeCycle;
 import mms.Parameters;
-import mms.world.EntityState;
-import mms.world.World;
 
 public abstract class Law implements LifeCycle {
 	
@@ -66,6 +64,6 @@ public abstract class Law implements LifeCycle {
 		return true;
 	}
 	
-	public abstract void changeState(final State oldState, double instant, State newState);
+	public abstract void changeState(final LawState oldState, double instant, LawState newState);
 
 }

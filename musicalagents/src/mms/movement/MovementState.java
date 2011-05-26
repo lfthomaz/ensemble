@@ -1,9 +1,9 @@
 package mms.movement;
 
+import mms.world.LawState;
 import mms.world.Vector;
-import mms.world.law.State;
 
-public class MovementState extends State {
+public class MovementState extends LawState {
 	
 	public Vector position;
 	public Vector velocity;

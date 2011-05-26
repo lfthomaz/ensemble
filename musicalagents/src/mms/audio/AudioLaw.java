@@ -1,4 +1,7 @@
-package mms.world.law;
+package mms.audio;
+
+import mms.world.Law;
+import mms.world.LawState;
 
 public class AudioLaw extends Law {
 
@@ -20,7 +23,7 @@ public class AudioLaw extends Law {
 	}
 
 	@Override
-	public void changeState(State oldState, double instant, State newState) {
+	public void changeState(LawState oldState, double instant, LawState newState) {
 				
 	}
 

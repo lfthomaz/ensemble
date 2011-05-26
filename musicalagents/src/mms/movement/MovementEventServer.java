@@ -1,6 +1,7 @@
 
 package mms.movement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -16,9 +17,9 @@ import mms.clock.TimeUnit;
 import mms.memory.EventMemory;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
+import mms.world.Law;
 import mms.world.Vector;
 import mms.world.World;
-import mms.world.law.Law;
 
 /**
  * O MovementServer representa as leis físicas do movimento no mundo virtual.
@@ -50,7 +51,7 @@ public class MovementEventServer extends EventServer {
 	 */
 	HashMap<String,Vector> acc_command = new HashMap<String, Vector>();
 	HashMap<String,Double> stop_command = new HashMap<String,Double>();
-	
+
 	@Override
 	public boolean configure() {
 		setCommType("mms.comm.direct.CommDirect");
@@ -92,168 +93,12 @@ public class MovementEventServer extends EventServer {
 		
 	}
 
-	private MovementState updateMovementState(String entity, MovementState movState, Memory movMemory, double t) {
-
-		// Updates the movement state
-//		System.out.println("t = " + t);
-//		System.out.println("old state = " + movState.instant + " " + movState.position + " " + movState.velocity + " " + movState.acceleration);
-		MovementState newState = new MovementState(world.dimensions);
-		movLaw.changeState(movState, t, newState);
-//		System.out.println("new state = " + newState.instant + " " + newState.position + " " + newState.velocity + " " + newState.acceleration);
-		try {
-			movMemory.writeMemory(newState);
-		} catch (MemoryException e) {
-			e.printStackTrace();
-		}
-
-//		System.out.println(entity + " newState = " + newState.position);
-//		System.out.println("\tpos = " + newState.position);
-//		System.out.println("\tvel = " + newState.velocity);
-//		System.out.println("\tacc = " + newState.acceleration);
-//		System.out.println("\tori = " + newState.orientation);
-//		System.out.println("\tang = " + newState.angularVelocity);
-		
-		return newState;
-
-	}
-	
-	@Override
-	public void process() {
-
-		double t = clock.getCurrentTime(TimeUnit.SECONDS);
-		
-		lock.lock();
-		try {
-
-			// Process the movement of each entity
-			Set<String> entities = world.getEntityList();
-			for (String entity : entities) {
-				
-				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, "MOVEMENT");
-				
-				boolean positionChanged = false;
-				if (movMemory != null) {
-
-					MovementState movState = (MovementState)movMemory.readMemory(t, TimeUnit.SECONDS);
-					
-					// If necessary, updates the movement state
-					if (movState.acceleration.magnitude > 0 || 
-							movState.velocity.magnitude > 0 || 
-							movState.angularVelocity.magnitude > 0) {
-
-						// Checks if the movement has a duration and updates the acceleration 
-						if (stop_command.containsKey(entity)) {
-							double dur = stop_command.get(entity);
-							if (dur >= movState.instant && dur < t) {
-								movState.acceleration.zero();
-								movState.angularVelocity.zero();
-								stop_command.remove(entity);
-							}
-						}
-
-						movState = updateMovementState(entity, movState, movMemory, t);
-						positionChanged = true;
-
-					}
-
-					// Sends an OSC message
-					if (osc && positionChanged) {
-						sendOSCPosition(entity, movState);
-					}
-					
-					// Creates a response event if there is a sensor registered
-					String[] sensors = searchRegisteredEventHandler(entity, "", Constants.EVT_MOVEMENT, Constants.COMP_SENSOR);
-//							System.out.println("Found " + sensors.length + " sensors!");
-					if (sensors.length == 1) {
-						EventHandlerInfo info = EventHandlerInfo.parse(sensors[0]);
-						Event evt = new Event();
-						Command cmd2 = new Command("INFO");
-						cmd2.addParameter("pos", movState.position.toString());
-						cmd2.addParameter("vel", movState.velocity.toString());
-						cmd2.addParameter("ori", movState.orientation.toString());
-						evt.objContent = cmd2.toString();
-						addOutputEvent(info.agentName, info.componentName, evt);
-					}
-						
-				}
-				
-			}
-					
-			// Sends events
-			try {
-				act();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} finally {
-			lock.unlock();
-		}
-		
-	}
-
-	@Override
-	// TODO Só pode mudar o estado no próximo frame
-	public void processSense(Event evt) {
-		
-		lock.lock();
-		
-		try {
-			double t = clock.getCurrentTime(TimeUnit.SECONDS);
-	
-	//		System.out.println("[MovementEventServer] processSense() = " + evt.objContent);
-			String strContent = (String)evt.objContent;
-			String entity = evt.oriAgentName;
-//			System.out.println("Processing command of '" + entity + "' at t = " + t + " " + strContent);
-	
-			// Processar novo comando
-			Command cmd = Command.parse(strContent);
-			if (cmd != null) {
-				// Gerar um novo estado
-				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, "MOVEMENT");
-				MovementState movState = new MovementState(world.dimensions);
-				((MovementState)movMemory.readMemory(t, TimeUnit.SECONDS)).copy(movState);
-				movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
-				if (movState != null) {
-			//		System.out.println("\tCommand found - " + cmd.toString());
-					if (cmd.getCommand().equals(CMD_WALK)) {
-						// TODO Aqui deveria avaliar a possibilidade da mudança (mudanças bruscas não poderiam acontecer)
-						movState.acceleration = Vector.parse(cmd.getParameter("acc"));
-					} else if (cmd.getCommand().equals(CMD_TURN)) {
-						movState.angularVelocity = Vector.parse(cmd.getParameter("ang_vel"));
-					} else if (cmd.getCommand().equals(CMD_STOP)) {
-						movState.velocity.zero();
-						movState.acceleration.zero();
-						movState.angularVelocity.zero();
-						stop_command.remove(entity);
-					} else if (cmd.getCommand().equals(CMD_TRANSPORT)) {
-						movState.position = Vector.parse(cmd.getParameter("pos"));
-					}
-					// No caso do comando ter uma duração pré-definida, guardar na lista o momento em que deve parar
-					String str_dur = cmd.getParameter("dur");
-					if (str_dur != null) {
-						double dur = Double.valueOf(str_dur); 
-						if (dur > 0.0) {
-							stop_command.put(entity, (t+dur));
-						}
-					}
-	
-					updateMovementState(entity, movState, movMemory, t);
-				}
-			}
-
-		} finally {
-			lock.unlock();
-		}
-			
-	}
-	
 	@Override
 	protected Parameters actuatorRegistered(String agentName,
 			String eventHandlerName, Parameters userParam) throws Exception {
 		
 		// Gets the Movement Memory
-		Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
+		Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, MOVEMENT);
 		// If there is no memory, creates one for this entity
 		if (movMemory == null) {
 			movMemory = createEntityMemory(agentName);
@@ -299,7 +144,7 @@ public class MovementEventServer extends EventServer {
 		movMemory.writeMemory(movState);
 
 		// Inserts an attribute in the Entity State
-    	world.addEntityStateAttribute(agentName, "MOVEMENT", movMemory);
+    	world.addEntityStateAttribute(agentName, MOVEMENT, movMemory);
     	
 		String[] sensors = searchRegisteredEventHandler(agentName, "", Constants.EVT_MOVEMENT, Constants.COMP_SENSOR);
 		if (sensors.length == 1) {
@@ -343,7 +188,7 @@ public class MovementEventServer extends EventServer {
 	protected Parameters sensorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
 		
 		// Gets the Movement Memory
-		Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, "MOVEMENT");
+		Memory movMemory = (Memory)world.getEntityStateAttribute(agentName, MOVEMENT);
 		// If there is no memory, creates one for this entity
 		if (movMemory == null) {
 			movMemory = createEntityMemory(agentName);
@@ -368,9 +213,156 @@ public class MovementEventServer extends EventServer {
 			e.printStackTrace();
 		}
 
+		// Sends the position to the sensor
+		Event evt = new Event();
+		Command cmd = new Command("INFO");
+		cmd.addParameter("pos", movState.position.toString());
+		cmd.addParameter("vel", movState.velocity.toString());
+		cmd.addParameter("ori", movState.orientation.toString());
+		evt.objContent = cmd.toString();
+		addOutputEvent(agentName, eventHandlerName, evt);
+		
 		return userParam;
 	}
 	
+	@Override
+	// TODO Só pode mudar o estado no próximo frame
+	public void processSense(Event evt) {
+		
+		lock.lock();
+		
+		try {
+			double t = clock.getCurrentTime(TimeUnit.SECONDS);
+	
+	//		System.out.println("[MovementEventServer] processSense() = " + evt.objContent);
+			String strContent = (String)evt.objContent;
+			String entity = evt.oriAgentName;
+//			System.out.println("Processing command of '" + entity + "' at t = " + t + " " + strContent);
+	
+			// Processar novo comando
+			Command cmd = Command.parse(strContent);
+			if (cmd != null) {
+				// Gerar um novo estado
+				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, MOVEMENT);
+				MovementState oldState = ((MovementState)movMemory.readMemory(t, TimeUnit.SECONDS));
+				if (oldState != null) {
+					MovementState newState = new MovementState(world.dimensions);
+					movLaw.changeState(oldState, clock.getCurrentTime(TimeUnit.SECONDS), newState);
+					if (cmd.getCommand().equals(CMD_WALK)) {
+						// TODO Aqui deveria avaliar a possibilidade da mudança (mudanças bruscas não poderiam acontecer)
+						newState.acceleration = Vector.parse(cmd.getParameter("acc"));
+					} else if (cmd.getCommand().equals(CMD_TURN)) {
+						newState.angularVelocity = Vector.parse(cmd.getParameter("ang_vel"));
+					} else if (cmd.getCommand().equals(CMD_STOP)) {
+						newState.velocity.zero();
+						newState.acceleration.zero();
+						newState.angularVelocity.zero();
+						stop_command.remove(entity);
+					} else if (cmd.getCommand().equals(CMD_TRANSPORT)) {
+						newState.position = Vector.parse(cmd.getParameter("pos"));
+					}
+					// No caso do comando ter uma duração pré-definida, guardar na lista o momento em que deve parar
+					String str_dur = cmd.getParameter("dur");
+					if (str_dur != null) {
+						double dur = Double.valueOf(str_dur); 
+						if (dur > 0.0) {
+							stop_command.put(entity, (t+dur));
+						}
+					}
+//					System.out.println("new state = " + newState.instant + " " + newState.position + " " + newState.velocity + " " + newState.acceleration);
+					try {
+						movMemory.writeMemory(newState);
+					} catch (MemoryException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} finally {
+			lock.unlock();
+		}
+			
+	}
+	
+	@Override
+	public void process() {
+
+		double t = clock.getCurrentTime(TimeUnit.SECONDS);
+		
+		lock.lock();
+		try {
+
+			// Process the movement of each entity
+			Set<String> entities = world.getEntityList();
+			for (String entity : entities) {
+				
+				Memory movMemory = (Memory)world.getEntityStateAttribute(entity, MOVEMENT);
+				
+				boolean positionChanged = false;
+				if (movMemory != null) {
+
+					MovementState oldState = (MovementState)movMemory.readMemory(t, TimeUnit.SECONDS);
+					
+					// If necessary, updates the movement state
+					if (oldState != null && (oldState.acceleration.magnitude > 0 || 
+											oldState.velocity.magnitude > 0 || 
+											oldState.angularVelocity.magnitude > 0)) {
+
+						MovementState newState = new MovementState(world.dimensions);
+						movLaw.changeState(oldState, clock.getCurrentTime(TimeUnit.SECONDS), newState);
+
+						// Checks if the movement has a duration and updates the acceleration 
+						if (stop_command.containsKey(entity)) {
+							double dur = stop_command.get(entity);
+							if (dur >= newState.instant && dur < t) {
+								newState.acceleration.zero();
+								newState.angularVelocity.zero();
+								stop_command.remove(entity);
+							}
+						}
+
+						try {
+							movMemory.writeMemory(newState);
+						} catch (MemoryException e) {
+							e.printStackTrace();
+						}
+						positionChanged = true;
+
+						// Sends an OSC message
+						if (osc && positionChanged) {
+							sendOSCPosition(entity, newState);
+						}
+						
+						// Creates a response event if there is a sensor registered
+						String[] sensors = searchRegisteredEventHandler(entity, "", Constants.EVT_MOVEMENT, Constants.COMP_SENSOR);
+	//							System.out.println("Found " + sensors.length + " sensors!");
+						if (sensors.length == 1) {
+							EventHandlerInfo info = EventHandlerInfo.parse(sensors[0]);
+							Event evt = new Event();
+							Command cmd2 = new Command("INFO");
+							cmd2.addParameter("pos", newState.position.toString());
+							cmd2.addParameter("vel", newState.velocity.toString());
+							cmd2.addParameter("ori", newState.orientation.toString());
+							evt.objContent = cmd2.toString();
+							addOutputEvent(info.agentName, info.componentName, evt);
+						}
+							
+					}
+				}
+			}
+					
+			// Sends events
+			try {
+				act();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} finally {
+			lock.unlock();
+		}
+		
+	}
+
 	/**
 	 * Sends entity's position via OSC protocol
 	 * @param state

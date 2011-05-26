@@ -1,10 +1,8 @@
 package mms.movement;
 
-import mms.world.EntityState;
+import mms.world.Law;
+import mms.world.LawState;
 import mms.world.Vector;
-import mms.world.World;
-import mms.world.law.Law;
-import mms.world.law.State;
 
 public class MovementLaw extends Law {
 
@@ -73,7 +71,7 @@ public class MovementLaw extends Law {
 	}
 	
 	@Override
-	public void changeState(final State prevState, double instant, State newState) {
+	public void changeState(final LawState prevState, double instant, LawState newState) {
 		
 		// If not the right kind of State, returns
 		if (!(prevState instanceof MovementState) && !(newState instanceof MovementState)) {

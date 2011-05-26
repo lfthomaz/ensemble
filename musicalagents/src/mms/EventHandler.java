@@ -212,6 +212,13 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getComponentName());
 		
+		if (this instanceof Sensor) {
+			Sensor sensor = (Sensor)this;
+			for (Event evt : ((Sensor)this).early_events) {
+				sensor.sense(evt);
+			}
+		}
+		
 //		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Register of '" + getComponentName() + "' confirmed");
 		
 	}

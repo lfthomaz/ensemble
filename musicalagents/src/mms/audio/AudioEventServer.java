@@ -24,17 +24,16 @@ public class AudioEventServer extends EventServer {
 	// Log
 	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-    private enum PROCESS_MODE {NORMAL, LIN_INT, POL_INT;
-    	public static PROCESS_MODE fromInt(int i) {
-    		switch (i) {
-			case 0:
-				return NORMAL;
-			case 1:
-				return LIN_INT;
-			case 2:
-				return POL_INT;
-			default:
-				return NORMAL;
+    private enum INTERPOLATION_MODE {NONE, LINEAR, POLINOMIAL;
+    	public static INTERPOLATION_MODE fromString(String str) {
+    		if (str.equals("NONE")) {
+				return NONE;
+    		} else if (str.equals("LINEAR")) {
+				return LINEAR;
+    		} else if (str.equals("POLINOMIAL")) {
+				return POLINOMIAL;
+    		} else {
+				return LINEAR;
 			}
     	}
     };
@@ -58,20 +57,28 @@ public class AudioEventServer extends EventServer {
 	private final int 		MAX_ITERATIONS 	= 10;
 
 	// AudioEventServer Parameters
-	private double			SPEED_SOUND			= 343.3; // speed of sound (m/s)
-	private double 			REFERENCE_DISTANCE 	= 1.0;
-	private double 			ROLLOFF_FACTOR 		= 1.0;
-    private int 			SAMPLE_RATE 		= 44100;
-    private int 			NUMBER_POINTS		= 3;
-    private PROCESS_MODE 	INTERPOLATION_MODE 	= PROCESS_MODE.POL_INT;
-    private boolean 		LOOP_HEARING 		= false;
+	private static final String PARAM_SPEED_SOUND = "SPEED_SOUND";
+	private static final String PARAM_REFERENCE_DISTANCE = "REFERENCE_DISTANCE";
+	private static final String PARAM_ROLLOFF_FACTOR = "ROLLOFF_FACTOR";
+	private static final String PARAM_SAMPLE_RATE = "SAMPLE_RATE";
+	private static final String PARAM_LOOP_HEARING = "LOOP_HEARING";
+	private static final String PARAM_INTERPOLATION_MODE = "INTERPOLATION_MODE";
+	private static final String PARAM_NUMBER_POINTS = "NUMBER_POINTS";
+	
+	private double			speed_sound			= 343.3; // speed of sound (m/s)
+	private double 			reference_distance 	= 1.0;
+	private double 			rolloff_factor 		= 1.0;
+    private int 			sample_rate 		= 44100;
+    private INTERPOLATION_MODE 	interpolation_mode 	= INTERPOLATION_MODE.LINEAR;
+    private int 			number_points		= 3;
+    private boolean 		loop_hearing 		= false;
 
     // Working variables
-    private double 			STEP 				= 1 / SAMPLE_RATE;
-    private int 			CHUNK_SIZE 			= 4410;
+    private double 			step 				= 1 / sample_rate;
+    private int 			chunk_size 			= 4410;
 
     // When a parameter has changed, only applies it in the next cycle 
-    private boolean 		PARAM_CHANGED 		= false;
+    private boolean 		param_changed 		= false;
 
     // Table that stores the last calculated delta of each pair
 //    double[] deltas, deltas_1, deltas_2, deltas_3;
@@ -116,19 +123,19 @@ public class AudioEventServer extends EventServer {
 	public boolean init() {
 
 	    // Inicialização dos parâmetros
-		this.SPEED_SOUND		= Double.valueOf(parameters.get("SPEED_SOUND", "343.3"));
-		this.REFERENCE_DISTANCE = Double.valueOf(parameters.get("REFERENCE_DISTANCE", "1.0"));
-		this.ROLLOFF_FACTOR 	= Double.valueOf(parameters.get("ROLLOFF_FACTOR", "1.0"));
-		this.NUMBER_POINTS 		= Integer.valueOf(parameters.get("NUMBER_POINTS", "3"));
-		this.INTERPOLATION_MODE = PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("INTERPOLATION_MODE", "0")));
-		this.LOOP_HEARING 		= Boolean.valueOf(parameters.get("LOOP_HEARING", "FALSE"));
-		this.SAMPLE_RATE 		= Integer.valueOf(parameters.get("SAMPLE_RATE", "44100"));
+		this.speed_sound		= Double.valueOf(parameters.get(PARAM_SPEED_SOUND, "343.3"));
+		this.reference_distance = Double.valueOf(parameters.get(PARAM_REFERENCE_DISTANCE, "1.0"));
+		this.rolloff_factor 	= Double.valueOf(parameters.get(PARAM_ROLLOFF_FACTOR, "1.0"));
+		this.number_points 		= Integer.valueOf(parameters.get(PARAM_NUMBER_POINTS, "3"));
+		this.interpolation_mode = INTERPOLATION_MODE.fromString(parameters.get(PARAM_INTERPOLATION_MODE, "LINEAR"));
+		this.loop_hearing 		= Boolean.valueOf(parameters.get(PARAM_LOOP_HEARING, "FALSE"));
+		this.sample_rate 		= Integer.valueOf(parameters.get(PARAM_SAMPLE_RATE, "44100"));
 		
 		// Chunk size deve ser baseado na freqüência
 		// TODO Cuidado com aproximações aqui!
-		this.STEP 				= 1 / (double)SAMPLE_RATE;
-		this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
-		this.deltas 			= new double[CHUNK_SIZE];
+		this.step 				= 1 / (double)sample_rate;
+		this.chunk_size 		= (int)Math.round(sample_rate * ((double)period / 1000));
+		this.deltas 			= new double[chunk_size];
 //		System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
 		
 		this.world = envAgent.getWorld();
@@ -173,9 +180,9 @@ public class AudioEventServer extends EventServer {
 	public Parameters actuatorRegistered(String agentName, String eventHandlerName, Parameters userParam) {
 		
 		Parameters retParameters = new Parameters();
-		retParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(CHUNK_SIZE));
-		retParameters.put(Constants.PARAM_SAMPLE_RATE, String.valueOf(SAMPLE_RATE));
-		retParameters.put(Constants.PARAM_STEP, String.valueOf(STEP));
+		retParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(chunk_size));
+		retParameters.put(Constants.PARAM_SAMPLE_RATE, String.valueOf(sample_rate));
+		retParameters.put(Constants.PARAM_STEP, String.valueOf(step));
 		retParameters.put(Constants.PARAM_PERIOD, String.valueOf(period));
 		retParameters.put(Constants.PARAM_START_TIME, String.valueOf(startTime));
 		
@@ -194,9 +201,9 @@ public class AudioEventServer extends EventServer {
 	public Parameters sensorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
 		
 		Parameters userParameters = new Parameters();
-		userParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(CHUNK_SIZE));
-		userParameters.put(Constants.PARAM_SAMPLE_RATE, String.valueOf(SAMPLE_RATE));
-		userParameters.put(Constants.PARAM_STEP, String.valueOf(STEP));
+		userParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(chunk_size));
+		userParameters.put(Constants.PARAM_SAMPLE_RATE, String.valueOf(sample_rate));
+		userParameters.put(Constants.PARAM_STEP, String.valueOf(step));
 		userParameters.put(Constants.PARAM_PERIOD, String.valueOf(period));
 		userParameters.put(Constants.PARAM_START_TIME, String.valueOf(startTime));
 
@@ -212,36 +219,36 @@ public class AudioEventServer extends EventServer {
 	
 	@Override
 	public boolean parameterUpdate(String name, String newValue) {
-		if (name.equals(SAMPLE_RATE)) {
+		if (name.equals(sample_rate)) {
 			// TODO Verifies if it's a valid sample rate
-			this.SAMPLE_RATE 		= Integer.valueOf(newValue); 
-			this.STEP 				= 1 / (double)SAMPLE_RATE;
-			this.CHUNK_SIZE 		= (int)Math.round(SAMPLE_RATE * ((double)period / 1000));
-			this.deltas 			= new double[CHUNK_SIZE];
+			this.sample_rate 		= Integer.valueOf(newValue); 
+			this.step 				= 1 / (double)sample_rate;
+			this.chunk_size 		= (int)Math.round(sample_rate * ((double)period / 1000));
+			this.deltas 			= new double[chunk_size];
 //			System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
 		} 
-		else if (name.equals(SPEED_SOUND)) {
-			this.SPEED_SOUND		= Double.valueOf(parameters.get("SPEED_SOUND"));
+		else if (name.equals(PARAM_SPEED_SOUND)) {
+			this.speed_sound		= Double.valueOf(parameters.get(PARAM_SPEED_SOUND));
 		} 
-		else if (name.equals(REFERENCE_DISTANCE)) {
-			this.REFERENCE_DISTANCE = Double.valueOf(parameters.get("REFERENCE_DISTANCE"));
+		else if (name.equals(PARAM_REFERENCE_DISTANCE)) {
+			this.reference_distance = Double.valueOf(parameters.get(PARAM_REFERENCE_DISTANCE));
 		} 
-		else if (name.equals(ROLLOFF_FACTOR)) {
-			this.ROLLOFF_FACTOR 	= Double.valueOf(parameters.get("ROLLOFF_FACTOR"));
+		else if (name.equals(PARAM_ROLLOFF_FACTOR)) {
+			this.rolloff_factor 	= Double.valueOf(parameters.get(PARAM_ROLLOFF_FACTOR));
 		} 
-		else if (name.equals(LOOP_HEARING)) {
-			this.LOOP_HEARING 		= Boolean.valueOf(parameters.get("LOOP_HEARING"));
+		else if (name.equals(PARAM_LOOP_HEARING)) {
+			this.loop_hearing 		= Boolean.valueOf(parameters.get(PARAM_LOOP_HEARING));
 		} 
-		else if (name.equals(INTERPOLATION_MODE)) {
-			this.INTERPOLATION_MODE 				= PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("MODE")));
+		else if (name.equals(PARAM_INTERPOLATION_MODE)) {
+			this.interpolation_mode = INTERPOLATION_MODE.fromString(parameters.get(PARAM_INTERPOLATION_MODE));
 		} 
-		else if (name.equals(NUMBER_POINTS)) {
-			this.NUMBER_POINTS 	= Integer.valueOf(parameters.get("NUMBER_POINTS"));
+		else if (name.equals(PARAM_NUMBER_POINTS)) {
+			this.number_points 	= Integer.valueOf(parameters.get(PARAM_NUMBER_POINTS));
 		} 
 		else {
 			return false;
 		}
-		PARAM_CHANGED = true;
+		param_changed = true;
 		return true;
 	}
 	
@@ -266,9 +273,9 @@ public class AudioEventServer extends EventServer {
 		
 //		long time_process = System.nanoTime();
 
-		if (PARAM_CHANGED) {
+		if (param_changed) {
 			// TODO COMO MUDAR?!?!?!?!??!?!?
-			PARAM_CHANGED = false;
+			param_changed = false;
 		}
 		
 		// TODO Ver se vamos trabalhar com milisegundos ou segundos
@@ -285,10 +292,10 @@ public class AudioEventServer extends EventServer {
 			Event evt = new Event();
 			evt.destAgentName = sensor[0];
 			evt.destAgentCompName = sensor[1];
-			double[] buf = new double[CHUNK_SIZE];
+			double[] buf = new double[chunk_size];
 			evt.objContent = buf;
 			evt.instant = instant;
-			evt.duration = (double)(CHUNK_SIZE * STEP);
+			evt.duration = (double)(chunk_size * step);
 			
 			// Calculates the contribution of each sound source
 			for (Enumeration<String> a = actuators.keys(); a.hasMoreElements();) {
@@ -302,8 +309,8 @@ public class AudioEventServer extends EventServer {
 				String[] actuator = a_key.split(":");
 				
 				// If it's the same agent, 
-				if (actuator[0].equals(sensor[0]) && LOOP_HEARING) {
-					double[] buf_act = (double[])mem.readMemory(instant, (double)(CHUNK_SIZE * STEP), TimeUnit.SECONDS);
+				if (actuator[0].equals(sensor[0]) && loop_hearing) {
+					double[] buf_act = (double[])mem.readMemory(instant, (double)(chunk_size * step), TimeUnit.SECONDS);
 					for (int i = 0; i < buf.length; i++) {
 						buf[i] =+ buf_act[i];
 					}
@@ -341,19 +348,19 @@ public class AudioEventServer extends EventServer {
 								rcv_state.position.add(rcv_comp_pos);
 								
 								double distance = src_state.position.getDistance(rcv_state.position);
-								guess = distance / SPEED_SOUND;
+								guess = distance / speed_sound;
 		//						System.out.println("initial guess for " + pair + " = " + guess);
 							}
 		
 							// Finds the deltas for all the samples in the chunk, according to the chosen process mode
 							double delta = 0.0, delta_i = 0.0, delta_f = 0.0;
 		
-							switch (INTERPOLATION_MODE) {
-							case NORMAL:
+							switch (interpolation_mode) {
+							case NONE:
 		//						long start = System.nanoTime();
 								// For each sample...
-								for (int j = 0; j < CHUNK_SIZE; j++) {
-									t = instant + (j * STEP);
+								for (int j = 0; j < chunk_size; j++) {
+									t = instant + (j * step);
 									delta = newton_raphson(mem_mov_src, mem_mov_rcv, t, guess, 0.0, mem_mov_src.getPast());
 									if (delta < 0.0) {
 										System.err.println("[ERROR] delta = " + delta);
@@ -364,39 +371,39 @@ public class AudioEventServer extends EventServer {
 								}
 		//						proc_time_1 = System.nanoTime() - start;
 								break;
-							case POL_INT:
+							case POLINOMIAL:
 		//						start = System.nanoTime();
-								double[] xa = new double[NUMBER_POINTS]; 
-								double[] ya = new double[NUMBER_POINTS]; 
+								double[] xa = new double[number_points]; 
+								double[] ya = new double[number_points]; 
 		
 								// calculates points for the polinomial interpolation
 								xa[0] = instant;
 								ya[0] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[0], guess, 0.0, mem_mov_src.getPast());
-								int samples_jump = CHUNK_SIZE / NUMBER_POINTS;
-								for (int i = 1; i < NUMBER_POINTS-1; i++) {							
-									xa[i] = instant + (i * samples_jump * STEP);
+								int samples_jump = chunk_size / number_points;
+								for (int i = 1; i < number_points-1; i++) {							
+									xa[i] = instant + (i * samples_jump * step);
 									ya[i] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[i], ya[i-1], 0.0, mem_mov_src.getPast());
 								}
-								xa[NUMBER_POINTS-1] = instant + ((CHUNK_SIZE-1) * STEP);
-								ya[NUMBER_POINTS-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[NUMBER_POINTS-1], ya[NUMBER_POINTS-2], 0.0, mem_mov_src.getPast());
+								xa[number_points-1] = instant + ((chunk_size-1) * step);
+								ya[number_points-1] = newton_raphson(mem_mov_src, mem_mov_rcv, xa[number_points-1], ya[number_points-2], 0.0, mem_mov_src.getPast());
 		
 								// For each sample in this division...
-								for (int i = 0; i < CHUNK_SIZE; i++) {
-									t = instant + (i * STEP);
+								for (int i = 0; i < chunk_size; i++) {
+									t = instant + (i * step);
 									delta = polint(xa, ya, t);
 									deltas[i] = delta;
 								}
 		//						proc_time_2 = System.nanoTime() - start;
 								break;
-							case LIN_INT:
+							case LINEAR:
 		//						start = System.nanoTime();
 								// first delta of the chunk
 								delta_i = newton_raphson(mem_mov_src, mem_mov_rcv, instant, guess, 0.0, mem_mov_src.getPast());
-								delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((CHUNK_SIZE-1) * STEP)), delta_i, 0.0, mem_mov_src.getPast());
+								delta_f = newton_raphson(mem_mov_src, mem_mov_rcv, (instant + ((chunk_size-1) * step)), delta_i, 0.0, mem_mov_src.getPast());
 								// For each sample in this division...
-								for (int i = 0; i < CHUNK_SIZE; i++) {
-									t = instant + (i * STEP);
-									delta = delta_i + ((t-instant)/((CHUNK_SIZE-1) * STEP))*(delta_f-delta_i);
+								for (int i = 0; i < chunk_size; i++) {
+									t = instant + (i * step);
+									delta = delta_i + ((t-instant)/((chunk_size-1) * step))*(delta_f-delta_i);
 									deltas[i] = delta;
 								}
 		//						proc_time_3 = System.nanoTime() - start;
@@ -408,9 +415,9 @@ public class AudioEventServer extends EventServer {
 		//					file_perf.printf("proc_time %f %f %f\n", ((double)proc_time_1/1000000), ((double)proc_time_2/1000000), ((double)proc_time_3/1000000));
 							
 							// Fills the buffer
-							for (int i = 0; i < CHUNK_SIZE; i++) {
-								t = instant + (i * STEP);
-								double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((deltas[i] * SPEED_SOUND) - REFERENCE_DISTANCE)));
+							for (int i = 0; i < chunk_size; i++) {
+								t = instant + (i * step);
+								double gain = Math.min(1.0, reference_distance / (reference_distance + rolloff_factor * ((deltas[i] * speed_sound) - reference_distance)));
 								double value = 0.0;
 								value = mem.readMemoryDouble(t-deltas[i], TimeUnit.SECONDS);
 								buf[i] = buf[i] + (value * gain);
@@ -438,10 +445,10 @@ public class AudioEventServer extends EventServer {
 						((Vector)world.getEntityStateAttribute(sensor[0], "POSITION")).copy(vec_aux_2);
 						vec_aux_2.add(rcv_comp_pos);
 						// Calculates the delay between them
-						double delta = (vec_aux.getDistance(vec_aux_2)) / SPEED_SOUND;
-						double gain = Math.min(1.0, REFERENCE_DISTANCE / (REFERENCE_DISTANCE + ROLLOFF_FACTOR * ((delta * SPEED_SOUND) - REFERENCE_DISTANCE)));
-						for (int i = 0; i < CHUNK_SIZE; i++) {
-							t = instant + (i * STEP);
+						double delta = (vec_aux.getDistance(vec_aux_2)) / speed_sound;
+						double gain = Math.min(1.0, reference_distance / (reference_distance + rolloff_factor * ((delta * speed_sound) - reference_distance)));
+						for (int i = 0; i < chunk_size; i++) {
+							t = instant + (i * step);
 							double value = mem.readMemoryDouble(t-delta, TimeUnit.SECONDS);
 							buf[i] = buf[i] + (value * gain);
 						}
@@ -471,10 +478,10 @@ public class AudioEventServer extends EventServer {
     	Vector p = src_state.position;
     	Vector v = src_state.velocity;
     	
-    	f_res[0] 	= (q.magnitude * q.magnitude) - 2 * q.dotProduct(p) + (p.magnitude * p.magnitude) - (delta * delta * SPEED_SOUND * SPEED_SOUND);
+    	f_res[0] 	= (q.magnitude * q.magnitude) - 2 * q.dotProduct(p) + (p.magnitude * p.magnitude) - (delta * delta * speed_sound * speed_sound);
     	p.copy(vec_aux);
     	vec_aux.subtract(q);
-    	f_res[1] 	= 2 * v.dotProduct(vec_aux) - (2 * delta * SPEED_SOUND * SPEED_SOUND);
+    	f_res[1] 	= 2 * v.dotProduct(vec_aux) - (2 * delta * speed_sound * speed_sound);
 
     }
     

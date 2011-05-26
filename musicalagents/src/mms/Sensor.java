@@ -2,12 +2,16 @@ package mms;
 
 //import java.io.PrintWriter;
 
+import java.util.ArrayList;
+
 import mms.Constants.EA_STATE;
 import mms.Constants.EH_STATUS;
 import mms.clock.TimeUnit;
 import mms.memory.MemoryException;
 
 public class Sensor extends EventHandler implements Sensing {
+	
+	protected ArrayList<Event> early_events = new ArrayList<Event>();
 	
 	@Override
 	public final boolean start() {
@@ -118,6 +122,10 @@ public class Sensor extends EventHandler implements Sensing {
 			}
 			
 			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Processei evento " + evt.timestamp);
+		}
+		else if (evt.eventType.equals(eventType)) {
+			// Stores this event for later, since it was sent between the REGSITER-EVENT and REGISTER-EVENT-ACK
+			early_events.add(evt);
 		}
 		
 	}

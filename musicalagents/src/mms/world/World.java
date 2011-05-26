@@ -17,7 +17,6 @@ import mms.Sensing;
 import mms.Constants.EA_STATE;
 import mms.clock.VirtualClockHelper;
 import mms.router.RouterClient;
-import mms.world.law.Law;
 
 /**
  * Represents the actual state of the world, with all its entities.

@@ -70,7 +70,7 @@ public class Loader {
 	// System initialization / termination
 	//--------------------------------------------------------------------------------
 	
-	private static void startJADE(Element elem_mms) {
+	private static void startJADE(Element elem_mms, boolean withSniffer) {
 
 		// Cria o Container JADE
 		rt = Runtime.instance();
@@ -104,8 +104,10 @@ public class Loader {
 			ac = cc.createNewAgent("Router", "mms.router.RouterAgent", null);
 			ac.start();
 			// Sniffer
-			ac = cc.createNewAgent("Sniffer", "mms.sniffer.Sniffer", null);
-			ac.start();
+			if (withSniffer) {
+				ac = cc.createNewAgent("Sniffer", "mms.sniffer.Sniffer", null);
+				ac.start();
+			}
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
@@ -465,48 +467,6 @@ public class Loader {
 	}
 	
 	//--------------------------------------------------------------------------------
-	// Factory methods / Change agents during running time
-	//--------------------------------------------------------------------------------
-	
-	public void createEnvironmentAgent(String agentClass, String agentName, Parameters parameters) {
-		
-		// Checa se a classe é realmente um EnvironmentAgent
-		
-		// Cria uma instância no Jade
-		
-		// SINGLETON
-		
-	}
-	
-	public void createEventServer() {
-		
-	}
-	
-	public void deleteEventServer() {
-		
-	}
-	
-	public void createAgent() {
-
-		// Passar o pedido para o Agente Ambiente
-		
-	}
-	
-	public void deleteAgent() {
-
-		// Passar o pedido para o Agente Ambiente
-		
-	}
-	
-	public void addComponent(String musicalAgent, String componentClass, String componentName, Parameters parameters) {
-		
-	}
-	
-	public void removeComponent() {
-		
-	}
-	
-	//--------------------------------------------------------------------------------
 	// Main method
 	//--------------------------------------------------------------------------------
 
@@ -514,33 +474,32 @@ public class Loader {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		// check the program arguments
-		if (args.length != 1) {
-			System.out.println("Loader usage: java Loader <mms.properties>");
+
+//		// check the program arguments
+//		if (args.length == 2 || args.length == 3) {
+//			if (args[0].equals("-start")) {
+				// Start the system
+		if (args.length == 1) {
+			System.out.println("------------ Loading MMS ------------");
+			Element elem_mms = Loader.loadXMLFile(args[0]).getDocumentElement();
+			Loader.startJADE(elem_mms, true);
+			Loader.loadSystem(elem_mms);
+		}
+//			}
+//			if (args.length == 3 && args[0].equals("-nogui")) {
+//				// Does not create Sniffer 
+//			} else {
+//				// Creates sniffer
+//			}
+//		}
+//		else if (args == 0) {
+//			Loader.startJADE(elem_mms, true);
+//		}
+		else {
+			System.out.println("Loader usage: java Loader [-start <mms.properties> [-nogui]]");
 			System.exit(-1);
 		}
 		
-		// load the configuration file
-		Properties properties = new Properties();
-		try {
-			FileInputStream in = new FileInputStream(new File(args[0]));
-			properties.load(in);
-			in.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("[Loader] file '" + args[0] + "' not found!");
-			System.exit(-1);
-		} catch (IOException e) {
-			System.out.println("[Loader] problems reading file '" + args[0] + "'!");
-			System.exit(-1);
-		}
-				
-		// Start the system
-		System.out.println("------------ Loading MMS ------------");
-		Element elem_mms = Loader.loadXMLFile(args[0]).getDocumentElement();
-		Loader.startJADE(elem_mms);
-		Loader.loadSystem(elem_mms);
-			
 		// TODO Colocar alguma condição para que o usuário possa encerrar a execução do sistema
 //		while (true) {}
 
