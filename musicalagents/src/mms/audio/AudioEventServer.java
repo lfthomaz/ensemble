@@ -119,8 +119,8 @@ public class AudioEventServer extends EventServer {
 		this.SPEED_SOUND		= Double.valueOf(parameters.get("SPEED_SOUND", "343.3"));
 		this.REFERENCE_DISTANCE = Double.valueOf(parameters.get("REFERENCE_DISTANCE", "1.0"));
 		this.ROLLOFF_FACTOR 	= Double.valueOf(parameters.get("ROLLOFF_FACTOR", "1.0"));
-		this.NUMBER_POINTS 		= Integer.valueOf(parameters.get("NUMBER_OF_POINTS", "3"));
-		this.INTERPOLATION_MODE = PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("MODE", "0")));
+		this.NUMBER_POINTS 		= Integer.valueOf(parameters.get("NUMBER_POINTS", "3"));
+		this.INTERPOLATION_MODE = PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("INTERPOLATION_MODE", "0")));
 		this.LOOP_HEARING 		= Boolean.valueOf(parameters.get("LOOP_HEARING", "FALSE"));
 		this.SAMPLE_RATE 		= Integer.valueOf(parameters.get("SAMPLE_RATE", "44100"));
 		
@@ -236,7 +236,7 @@ public class AudioEventServer extends EventServer {
 			this.INTERPOLATION_MODE 				= PROCESS_MODE.fromInt(Integer.valueOf(parameters.get("MODE")));
 		} 
 		else if (name.equals(NUMBER_POINTS)) {
-			this.NUMBER_POINTS 	= Integer.valueOf(parameters.get("NUMBER_OF_POINTS"));
+			this.NUMBER_POINTS 	= Integer.valueOf(parameters.get("NUMBER_POINTS"));
 		} 
 		else {
 			return false;

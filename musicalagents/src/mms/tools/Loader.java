@@ -88,6 +88,7 @@ public class Loader {
 			String jack = readAttribute(elem_gp, Constants.JACK, "FALSE");
 			p.setParameter(Constants.JACK, jack);
 			if (Boolean.valueOf(jack)) {
+				System.out.println("JACK = " + jack);
 				services += "mms.audio.jack.JACKServerService;";
 			}
 		}

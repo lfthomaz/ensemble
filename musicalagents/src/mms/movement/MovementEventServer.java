@@ -324,11 +324,6 @@ public class MovementEventServer extends EventServer {
 		// Mensagem OSC
     	if (osc) {
     		// Register the agent
-//    		Command cmd = new Command("REGISTER_AGENT");
-//    		cmd.addParameter("NAME", agentName);
-//    		cmd.addParameter("TYPE", "src");
-//    		cmd.addParameter("POS", movState.position.toString());
-//    		cmd.addParameter("BLA", ".,<>/?]~}{[^jkh;/;");
     		String str = "agent " + agentName + " src";
     		for (int i = 0; i < movState.position.dimensions; i++) {
 				str += " " + movState.position.getValue(i);
@@ -336,6 +331,8 @@ public class MovementEventServer extends EventServer {
     		Command cmd = new Command(getAddress(), "/pd", "OSC");
     		cmd.addParameter("CONTENT", str);
     		sendCommand(cmd); 
+    		// Informs the position
+    		sendOSCPosition(agentName, movState);
     	}
     	
 		return userParam;

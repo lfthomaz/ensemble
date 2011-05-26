@@ -774,8 +774,6 @@ public class EnvironmentAgent extends MMSAgent {
 
 			if (world.getEntityList().size() == 0) {
 
-				System.out.println("Entrei no CheckAgentDeregister()");
-				
 				myAgent.addBehaviour(new KillAgent());
 				
 				// Finaliza o behaviour cíclico
@@ -795,8 +793,6 @@ public class EnvironmentAgent extends MMSAgent {
 		@Override
 		public void action() {
 			
-			System.out.println("Entrei no KillAgent()");
-
 			MusicalAgent.logger.info("[" + getAgent().getName() + " Killing agent '" + getAgent().getAgentName() + "'");
 			// Calls JADE finalization method
 			doDelete();

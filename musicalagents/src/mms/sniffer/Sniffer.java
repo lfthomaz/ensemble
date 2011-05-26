@@ -362,6 +362,12 @@ public class Sniffer extends Agent implements RouterClient {
 		commandPanel.add(btnSendCommand);
 		
 		btnStartSimulation = new JButton("Start Simulation");
+		btnStartSimulation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnStartSimulation.setEnabled(false);
+				btnStopSimulation.setEnabled(true);
+			}
+		});
 		btnStartSimulation.setBounds(6, 484, 150, 29);
 		frame.getContentPane().add(btnStartSimulation);
 		
@@ -372,6 +378,9 @@ public class Sniffer extends Agent implements RouterClient {
 						"/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT,
 						"STOP_SIMULATION");
 				sendCommand(cmd);
+				btnCreateAgent.setEnabled(false);
+				btnStartSimulation.setEnabled(true);
+				btnStopSimulation.setEnabled(false);
 			}
 		});
 		btnStopSimulation.setBounds(166, 484, 150, 29);
@@ -389,6 +398,8 @@ public class Sniffer extends Agent implements RouterClient {
 		btnDestroyAgent.setVisible(false);
 		btnRemoveComponent.setVisible(false);
 		btnFacts.setVisible(false);
+		btnStartSimulation.setEnabled(false);
+		btnStopSimulation.setEnabled(true);
 	}
 	
 	class MyTreeCellRenderer extends DefaultTreeCellRenderer {
