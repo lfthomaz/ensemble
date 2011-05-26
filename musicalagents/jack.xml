@@ -59,26 +59,26 @@
  	-->
  	 
 	<MUSICAL_AGENT NAME="Listener_1" CLASS="LISTENER">
-		<ARG_COMP COMP="AudioReasoning_left" NAME="mapping" VALUE="ear_left;system:playback_1" />
-		<ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right;system:playback_2" />
+		<ARG_COMP COMP="AudioReasoning_left" NAME="mapping" VALUE="ear_left:system,playback_1" />
+		<ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right:system,playback_2" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Listener_2" CLASS="LISTENER">
-		<ARG_COMP COMP="AudioReasoning_left" NAME="mapping" VALUE="ear_left;system:playback_1" />
-		<ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right;system:playback_2" />
+		<ARG_COMP COMP="AudioReasoning_left" NAME="mapping" VALUE="ear_left:system,playback_1" />
+		<ARG_COMP COMP="AudioReasoning_right" NAME="mapping" VALUE="ear_right:system,playback_2" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Player_1" CLASS="PLAYER">
-		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output1" />
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth:pure_data_0,output1" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Player_2" CLASS="PLAYER">
-		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output1" />
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth:pure_data_0,output1" />
 	</MUSICAL_AGENT>
 
 	<!-- 
 	<MUSICAL_AGENT NAME="Player_2" CLASS="PLAYER">
-		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth;pure_data_0:output0" />
+		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="mouth:pure_data_0,output0" />
 	</MUSICAL_AGENT>
 	 -->
 </MMS>

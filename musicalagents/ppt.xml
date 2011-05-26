@@ -1,17 +1,17 @@
 <MMS NAME="Prepared Piano Test">
 
-	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" OSC="TRUE"/>
+	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME"/>
 	
   	<!-- ********** ENVIRONMENT AGENT ********** -->
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
-		<ARG NAME="arg_ea" VALUE="eaeaea" />
-		<WORLD CLASS_WORLD="mms.world.World" CLASS_ENTITY_STATE="mms.world.EntityState3D">
-			<LAW CLASS="mms.movement.MovementLaw" />
+		<WORLD CLASS="mms.world.World" CLASS_ENTITY_STATE="mms.world.EntityState3D">
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
 			<ARG NAME="form" VALUE="cube:200:infinite" />
-			<ARG NAME="friction_coefficient" VALUE="0.25" />
+			<LAW CLASS="mms.movement.MovementLaw" >
+				<ARG NAME="friction_coefficient" VALUE="0.25" />
+			</LAW>
 		</WORLD>
 		<EVENT_SERVER CLASS="mms.audio.AudioEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="200 100 160 2000">
 			<ARG NAME="SPEED_SOUND" VALUE="343.3" />

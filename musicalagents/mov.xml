@@ -5,7 +5,7 @@
   <!-- ********** ENVIRONMENT AGENT ********** -->
 
 	<ENVIRONMENT_AGENT_CLASS NAME="ENVIRONMENT" CLASS="mms.EnvironmentAgent">
-		<WORLD CLASS_WORLD="mms.world.World">
+		<WORLD CLASS="mms.world.World">
 			<LAW CLASS="mms.movement.MovementLaw" />
 			<ARG NAME="dimensions" VALUE="3" />
 			<ARG NAME="structure" VALUE="continuous" />
