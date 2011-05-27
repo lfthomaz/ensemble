@@ -8,6 +8,7 @@ import jade.util.Logger;
 import mms.Constants;
 import mms.MMSAgent;
 import mms.Parameters;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 
@@ -23,7 +24,7 @@ public class AudioMemory extends Memory {
 //	public BufferedWriter os;
 
 	private final double EPSILON = 1E-9; 
-	private final String MEMORY_TYPE = Constants.EVT_AUDIO;
+	private final String MEMORY_TYPE = AudioConstants.EVT_TYPE_AUDIO;
 	
 	// TODO Musical Agent ou qualquer tipo de Agent?
 	private double		step;

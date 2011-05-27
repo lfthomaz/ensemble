@@ -6,6 +6,7 @@ import mms.EventHandler;
 import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
@@ -62,7 +63,7 @@ public class RT_Reasoning extends Reasoning {
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		
 		// Checar se é um atuador de som e adicionar na lista
-		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 			mouth = (Actuator)evtHdl;
 			mouth.registerListener(this);
 			mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
@@ -70,7 +71,7 @@ public class RT_Reasoning extends Reasoning {
 		}
 
 		// Checar se é um atuador de som e adicionar na lista
-		if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 			ear = (Sensor)evtHdl;
 			ear.registerListener(this);
 			earMemory = getAgent().getKB().getMemory(ear.getComponentName());

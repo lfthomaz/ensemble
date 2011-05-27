@@ -8,12 +8,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import mms.Actuator;
 import mms.Command;
+import mms.Constants;
 import mms.EventHandler;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
+import mms.movement.MovementConstants;
 import mms.world.Vector;
 
 import org.w3c.dom.Document;
@@ -167,12 +169,12 @@ public class PP_MovementReasoning extends Reasoning {
 
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
-		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals("MOVEMENT")) {
+		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(MovementConstants.EVT_TYPE_MOVEMENT)) {
 			legs = (Actuator)evtHdl;
 			legs.registerListener(this);
 			legsMemory = getAgent().getKB().getMemory(legs.getComponentName());
 		}
-		else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals("MOVEMENT")) {
+		else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(MovementConstants.EVT_TYPE_MOVEMENT)) {
 			eyes = (Sensor)evtHdl;
 			eyes.registerListener(this);
 			eyesMemory = getAgent().getKB().getMemory(eyes.getComponentName());
@@ -185,9 +187,9 @@ public class PP_MovementReasoning extends Reasoning {
 		String str = (String)eyesMemory.readMemory(instant, TimeUnit.SECONDS);
 		Command cmd = Command.parse(str);
 		if (cmd != null) {
-			actual_pos = Vector.parse(cmd.getParameter("pos"));
-			actual_vel = Vector.parse(cmd.getParameter("vel"));
-			actual_ori = Vector.parse(cmd.getParameter("ori"));
+			actual_pos = Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS));
+			actual_vel = Vector.parse(cmd.getParameter(MovementConstants.PARAM_VEL));
+			actual_ori = Vector.parse(cmd.getParameter(MovementConstants.PARAM_ORI));
 		}
 		//System.out.println("New position " + actual_pos + " velocity " + actual_vel);
 

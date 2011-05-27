@@ -13,6 +13,7 @@ import mms.EventHandler;
 import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
@@ -81,7 +82,7 @@ public class PAInputReasoning extends Reasoning {
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		
-		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 			Actuator mouth = (Actuator)evtHdl;
 			String actuatorName = evtHdl.getComponentName();
 			mouth.registerListener(this);

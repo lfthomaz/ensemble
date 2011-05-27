@@ -67,12 +67,12 @@ public class MovementReasoning extends Reasoning {
 
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
-		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals("MOVEMENT")) {
+		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(MovementConstants.EVT_TYPE_MOVEMENT)) {
 			legs = (Actuator)evtHdl;
 			legs.registerListener(this);
 			legsMemory = getAgent().getKB().getMemory(legs.getComponentName());
 		}
-		else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals("MOVEMENT")) {
+		else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(MovementConstants.EVT_TYPE_MOVEMENT)) {
 			eyes = (Sensor)evtHdl;
 			eyes.registerListener(this);
 			eyesMemory = getAgent().getKB().getMemory(eyes.getComponentName());
@@ -85,9 +85,9 @@ public class MovementReasoning extends Reasoning {
 		String str = (String)eyesMemory.readMemory(instant, TimeUnit.SECONDS);
 		Command cmd = Command.parse(str);
 		if (cmd != null) {
-			actual_pos = Vector.parse(cmd.getParameter("pos"));
-			actual_vel = Vector.parse(cmd.getParameter("vel"));
-			actual_ori = Vector.parse(cmd.getParameter("ori"));
+			actual_pos = Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS));
+			actual_vel = Vector.parse(cmd.getParameter(MovementConstants.PARAM_VEL));
+			actual_ori = Vector.parse(cmd.getParameter(MovementConstants.PARAM_ORI));
 		}
 //		System.out.println(getAgent().getAgentName() + " - new position " + actual_pos + " velocity " + actual_vel);
 
@@ -96,7 +96,7 @@ public class MovementReasoning extends Reasoning {
 	@Override
 	public void processCommand(Command cmd) {
 		
-		if (cmd.getCommand().equals("WALK")) {
+		if (cmd.getCommand().equals(MovementConstants.CMD_WALK)) {
 			if (cmd.containsParameter("DESTINATION") && cmd.containsParameter("TIME")) {
 				System.out.println("Walking...");
 				waypoints.clear();
@@ -188,7 +188,7 @@ public class MovementReasoning extends Reasoning {
 	}
 	
 	private void sendStopCommand() {
-		String cmd = "STOP";
+		String cmd = MovementConstants.CMD_STOP;
 //		System.out.println(cmd);
 		try {
 			legsMemory.writeMemory(cmd);
@@ -199,7 +199,9 @@ public class MovementReasoning extends Reasoning {
 	}
 	
 	private void sendAccCommand(Vector acc, double dur) {
-		String cmd = "WALK :acc " + acc.toString() + " :dur " + Double.toString(dur);
+		String cmd = MovementConstants.CMD_WALK + 
+			" :" + MovementConstants.PARAM_ACC + " " + acc.toString() + 
+			" :" + MovementConstants.PARAM_DUR + " " + Double.toString(dur);
 //		System.out.println("acc command: " + cmd);
 		try {
 			legsMemory.writeMemory(cmd);

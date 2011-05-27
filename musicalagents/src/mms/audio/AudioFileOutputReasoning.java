@@ -60,7 +60,7 @@ public class AudioFileOutputReasoning extends Reasoning {
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 	
-		if (evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 
 			// Stores ear's memory
 			Sensor ear = (Sensor)evtHdl;

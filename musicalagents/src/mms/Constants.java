@@ -59,10 +59,6 @@ public final class Constants {
 	public static final String	PARAM_PERIOD			= "PERIOD";
 	public static final String	PARAM_RCV_DEADLINE		= "RCV_DEADLINE";
 	
-	// Tipos de eventos
-	public static final String	EVT_AUDIO				= "AUDIO";
-	public static final String	EVT_MOVEMENT			= "MOVEMENT";
-
 	// Parâmetros de áudio
 	public static final String	PARAM_CHUNK_SIZE		= "CHUNK_SIZE";
 	public static final String	PARAM_SAMPLE_RATE		= "SAMPLE_RATE";

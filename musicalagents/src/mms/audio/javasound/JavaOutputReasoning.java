@@ -16,6 +16,7 @@ import mms.EventHandler;
 import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.tools.AudioTools;
@@ -67,7 +68,7 @@ public class JavaOutputReasoning extends Reasoning {
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 
-		if (evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 
 			// Stores ear's memory
 			Sensor ear = (Sensor)evtHdl;

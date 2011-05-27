@@ -298,7 +298,11 @@ public class World implements LifeCycle, RouterClient {
      */
     public final Object getEntityStateAttribute(String entityName, String attribute) {
 
-    	return (entities.get(entityName)).getEntityStateAttribute(attribute);
+    	if (entities.containsKey(entityName)) {
+    		return (entities.get(entityName)).getEntityStateAttribute(attribute);
+    	} else {
+    		return "";
+    	}
     	
     }
 

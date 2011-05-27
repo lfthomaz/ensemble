@@ -15,6 +15,7 @@ import mms.EventHandler;
 import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
@@ -77,7 +78,7 @@ public class JACKInputReasoning extends Reasoning {
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		
-		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 			String actuatorName = evtHdl.getComponentName();
 			if (mapping.containsKey(actuatorName)) {
 				mouth = (Actuator)evtHdl;

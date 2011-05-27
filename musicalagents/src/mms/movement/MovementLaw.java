@@ -16,7 +16,7 @@ public class MovementLaw extends Law {
 
 	@Override
 	public boolean configure() {
-		setType("MOVEMENT");
+		setType(MovementConstants.EVT_TYPE_MOVEMENT);
 		if (parameters.containsKey("gravity")) {
 			this.gravity = Double.valueOf(parameters.get("gravity"));
 		}

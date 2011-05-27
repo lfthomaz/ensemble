@@ -14,6 +14,7 @@ import mms.clock.TimeUnit;
 import mms.memory.AudioMemory;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
+import mms.movement.MovementConstants;
 import mms.movement.MovementLaw;
 import mms.movement.MovementState;
 import mms.world.Vector;
@@ -101,7 +102,7 @@ public class AudioEventServer extends EventServer {
 	
 	@Override
 	public boolean configure() {
-		setEventType(Constants.EVT_AUDIO);
+		setEventType(AudioConstants.EVT_TYPE_AUDIO);
 		if (parameters.containsKey(Constants.PARAM_COMM_CLASS)) {
 			setCommType(parameters.get(Constants.PARAM_COMM_CLASS));
 		} else {
@@ -141,8 +142,8 @@ public class AudioEventServer extends EventServer {
 		this.world = envAgent.getWorld();
 
 		// Verifies if there is a MovementEventServer and a MovementLaw
-		this.movLaw = (MovementLaw)world.getLaw("MOVEMENT");
-		if (envAgent.getEventServer("MOVEMENT") != null && movLaw != null) {
+		this.movLaw = (MovementLaw)world.getLaw(MovementConstants.EVT_TYPE_MOVEMENT);
+		if (envAgent.getEventServer(MovementConstants.EVT_TYPE_MOVEMENT) != null && movLaw != null) {
 			movementPresent = true;
 		} else {
 			movementPresent = false;
@@ -190,7 +191,7 @@ public class AudioEventServer extends EventServer {
 		// TODO Memória do atuador deveria ser parametrizável!!!
 		String memoryName = agentName+":"+eventHandlerName;
 		Memory memory = new AudioMemory();
-		memory.start(envAgent, Constants.EVT_AUDIO, 1.0, 1.0, retParameters);
+		memory.start(envAgent, AudioConstants.EVT_TYPE_AUDIO, 1.0, 1.0, retParameters);
 		memories.put(memoryName, memory);
 
 		return retParameters;
@@ -211,7 +212,7 @@ public class AudioEventServer extends EventServer {
 		// TODO Memória do sensor deve ser parametrizável
 		String memoryName = agentName+":"+eventHandlerName;
 		Memory memory = new AudioMemory();
-		memory.start(envAgent, Constants.EVT_AUDIO, 1.0, 1.0, userParameters);
+		memory.start(envAgent, AudioConstants.EVT_TYPE_AUDIO, 1.0, 1.0, userParameters);
 		memories.put(memoryName, memory);
 		
 		return userParameters;
@@ -228,22 +229,23 @@ public class AudioEventServer extends EventServer {
 //			System.out.printf("%d %f %d\n", SAMPLE_RATE, STEP, CHUNK_SIZE);
 		} 
 		else if (name.equals(PARAM_SPEED_SOUND)) {
-			this.speed_sound		= Double.valueOf(parameters.get(PARAM_SPEED_SOUND));
+			this.speed_sound		= Double.valueOf(newValue);
 		} 
 		else if (name.equals(PARAM_REFERENCE_DISTANCE)) {
-			this.reference_distance = Double.valueOf(parameters.get(PARAM_REFERENCE_DISTANCE));
+			this.reference_distance = Double.valueOf(newValue);
 		} 
 		else if (name.equals(PARAM_ROLLOFF_FACTOR)) {
-			this.rolloff_factor 	= Double.valueOf(parameters.get(PARAM_ROLLOFF_FACTOR));
+			this.rolloff_factor 	= Double.valueOf(newValue);
+			System.out.println("ATUALIZEI: " + rolloff_factor);
 		} 
 		else if (name.equals(PARAM_LOOP_HEARING)) {
-			this.loop_hearing 		= Boolean.valueOf(parameters.get(PARAM_LOOP_HEARING));
+			this.loop_hearing 		= Boolean.valueOf(newValue);
 		} 
 		else if (name.equals(PARAM_INTERPOLATION_MODE)) {
-			this.interpolation_mode = INTERPOLATION_MODE.fromString(parameters.get(PARAM_INTERPOLATION_MODE));
+			this.interpolation_mode = INTERPOLATION_MODE.fromString(newValue);
 		} 
 		else if (name.equals(PARAM_NUMBER_POINTS)) {
-			this.number_points 	= Integer.valueOf(parameters.get(PARAM_NUMBER_POINTS));
+			this.number_points 	= Integer.valueOf(newValue);
 		} 
 		else {
 			return false;
@@ -323,8 +325,8 @@ public class AudioEventServer extends EventServer {
 					if (movementPresent) {
 					
 						// Gets the movement memory
-						Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], "MOVEMENT");
-						Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], "MOVEMENT");
+						Memory mem_mov_src = (Memory)world.getEntityStateAttribute(actuator[0], MovementConstants.EVT_TYPE_MOVEMENT);
+						Memory mem_mov_rcv = (Memory)world.getEntityStateAttribute(sensor[0], MovementConstants.EVT_TYPE_MOVEMENT);
 
 						// TODO Must use the POSITION attribute instead of giving up the pair 
 						if (mem_mov_rcv != null && mem_mov_src != null) {

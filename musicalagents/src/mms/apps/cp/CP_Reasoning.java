@@ -10,9 +10,11 @@ import mms.MusicalAgent;
 import mms.Parameters;
 import mms.Reasoning;
 import mms.Sensor;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
+import mms.movement.MovementConstants;
 import mms.processing.Processor;
 import mms.processing.ProcessorFactory;
 import mms.processing.ProcessorFactory.AudioOperation;
@@ -204,7 +206,7 @@ public class CP_Reasoning extends Reasoning {
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 		
 		// Checar se é um atuador de som e adicionar na lista
-		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 			
 			mouth = (Actuator)evtHdl;
 			mouth.registerListener(this);
@@ -218,19 +220,19 @@ public class CP_Reasoning extends Reasoning {
 				System.out.println("start_playing_time = " + start_playing_time);
 			}
 			
-		} else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_AUDIO)) {
+		} else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 			
 			ear = (Sensor)evtHdl;
 			ear.registerListener(this);
 			earMemory = getAgent().getKB().getMemory(ear.getComponentName());
 			
-		} else if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(Constants.EVT_MOVEMENT)) {
+		} else if (evtHdl instanceof Actuator && evtHdl.getEventType().equals(MovementConstants.EVT_TYPE_MOVEMENT)) {
 			
 			legs = (Actuator)evtHdl;
 			legs.registerListener(this);
 			legsMemory = getAgent().getKB().getMemory(legs.getComponentName());
 				
-		} else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(Constants.EVT_MOVEMENT)) {
+		} else if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(MovementConstants.EVT_TYPE_MOVEMENT)) {
 			
 			eyes = (Sensor)evtHdl;
 			eyes.registerListener(this);
@@ -445,7 +447,7 @@ public class CP_Reasoning extends Reasoning {
 				String str = (String)eyesMemory.readMemory(instant, TimeUnit.SECONDS);
 				Command cmd = Command.parse(str);
 				if (cmd != null) {
-					start_position = Vector.parse(cmd.getParameter("pos"));
+					start_position = Vector.parse(cmd.getParameter("POS"));
 					radius = start_position.getDistance(master_position);
 //					System.out.println("start_position: " + start_position);
 				}

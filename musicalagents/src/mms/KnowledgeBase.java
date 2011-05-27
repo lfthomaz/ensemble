@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 import mms.Constants.EA_STATE;
+import mms.audio.AudioConstants;
 import mms.memory.AudioMemory;
 import mms.memory.EventMemory;
 import mms.memory.Memory;
@@ -179,7 +180,7 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		if (!memories.containsKey(name)) {
 			// Caso negativo, criar uma nova memória
 			// TODO Senão existir o tipo solicitado, criar uma SimpleMemory
-			if (eventType.equals(Constants.EVT_AUDIO)) {
+			if (eventType.equals(AudioConstants.EVT_TYPE_AUDIO)) {
 //				mem = new AudioMemory(myAgent, name, expiration, expiration, parameters);
 				mem = new AudioMemory();
 				mem.start(getAgent(), name, expiration, expiration, parameters);

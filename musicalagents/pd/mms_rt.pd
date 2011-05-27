@@ -1,19 +1,75 @@
-#N canvas 399 59 546 655 10;
+#N canvas 399 59 967 772 10;
 #X obj 20 -329 audce_gui_grid 500 500 0.2;
-#X obj 24 -405 dumpOSC 57110;
-#X obj 39 -357 print osc_rcv;
-#X obj 24 -382 OSCroute /pd;
-#X obj 20 222 print osc_pos;
+#X obj 20 -402 dumpOSC 57110;
+#X obj 35 -354 print osc_rcv;
+#X obj 20 -379 OSCroute /pd;
 #X msg 20 181 send /mms/ENVIRONMENT/MOVEMENT TRANSPORT :AGENT \$1 :POS
 (\$2 \$3 \$4);
-#X obj 241 224 sendOSC;
-#X obj 392 178 loadbang;
-#X msg 392 202 connect localhost 57111;
-#X connect 0 0 5 0;
+#X obj 213 -352 sendOSC;
+#X obj 139 -402 loadbang;
+#X msg 139 -378 connect localhost 57111;
+#X obj 20 222 print osc_pos;
+#X msg 195 267 send /mms/ENVIRONMENT/MOVEMENT STOP :AGENT Guitarist
+;
+#X obj 563 79 s osc;
+#X obj 304 -378 r osc;
+#X obj 185 289 s osc;
+#X msg 185 229 send /mms/ENVIRONMENT/MOVEMENT WALK :AGENT Guitarist
+:ACC (0 1 0);
+#X floatatom 655 -392 5 0 0 0 - - x;
+#X floatatom 655 -366 5 0 0 0 - - y;
+#X obj 601 -397 vradio 15 1 0 3 cmd empty empty 0 -8 0 10 -262144 -1
+-1 0;
+#X obj 582 -136 select 0 1 2;
+#X msg 571 -112 WALK;
+#X msg 608 -112 TURN;
+#X msg 646 -112 STOP;
+#X obj 616 105 print msg;
+#X obj 563 16 pack b s s f f;
+#X obj 563 -390 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 628 -397 vradio 15 1 0 4 agent empty empty 0 -8 0 10 -262144
+-1 -1 2;
+#X obj 709 -130 select 0 1 2 3;
+#X msg 690 -105 Listener_1;
+#X msg 710 -82 Guitarist;
+#X msg 774 -101 Drummer;
+#X msg 790 -75 Bassist;
+#X obj 582 -163 r cmd;
+#X obj 709 -155 r agent;
+#X obj 654 -22 r x;
+#X obj 682 -19 r y;
+#X msg 563 48 send /mms/ENVIRONMENT/MOVEMENT \$2 :AGENT \$3 :ACC (\$4
+\$5 0);
+#X connect 0 0 4 0;
 #X connect 1 0 3 0;
 #X connect 3 0 2 0;
 #X connect 3 0 0 0;
-#X connect 5 0 4 0;
-#X connect 5 0 6 0;
-#X connect 7 0 8 0;
-#X connect 8 0 6 0;
+#X connect 4 0 8 0;
+#X connect 6 0 7 0;
+#X connect 7 0 5 0;
+#X connect 9 0 12 0;
+#X connect 11 0 5 0;
+#X connect 13 0 12 0;
+#X connect 17 0 18 0;
+#X connect 17 1 19 0;
+#X connect 17 2 20 0;
+#X connect 18 0 22 1;
+#X connect 19 0 22 1;
+#X connect 20 0 22 1;
+#X connect 22 0 34 0;
+#X connect 23 0 22 0;
+#X connect 25 0 26 0;
+#X connect 25 1 27 0;
+#X connect 25 2 28 0;
+#X connect 25 3 29 0;
+#X connect 26 0 22 2;
+#X connect 27 0 22 2;
+#X connect 28 0 22 2;
+#X connect 29 0 22 2;
+#X connect 30 0 17 0;
+#X connect 31 0 25 0;
+#X connect 32 0 22 3;
+#X connect 33 0 22 4;
+#X connect 34 0 10 0;
+#X connect 34 0 21 0;

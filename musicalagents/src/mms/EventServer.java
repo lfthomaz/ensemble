@@ -221,7 +221,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	@Override
 	public final boolean stop() {
 		
-		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalizing the Event Server...");
+//		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalizing the Event Server...");
 
 		// Chamar o código do usuário
 		try {
