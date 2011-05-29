@@ -257,7 +257,7 @@ public class MovementEventServer extends EventServer {
 				}
 			}
 			
-		//		System.out.println("new state = " + newState.instant + " " + newState.position + " " + newState.velocity + " " + newState.acceleration);
+				System.out.println("new state = " + newState.instant + " " + newState.position + " " + newState.velocity + " " + newState.acceleration);
 		
 			// Registers the new state in memory
 			try {
@@ -346,7 +346,9 @@ public class MovementEventServer extends EventServer {
 							evt.objContent = cmd2.toString();
 							addOutputEvent(info.agentName, info.componentName, evt);
 						}
-							
+
+						System.out.printf("pos = %s, vel = %s, acc = %s\n", newState.position, newState.velocity, newState.acceleration);
+						
 					}
 				}
 			}
