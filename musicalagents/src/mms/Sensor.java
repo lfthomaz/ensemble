@@ -82,9 +82,8 @@ public class Sensor extends EventHandler implements Sensing {
 	public void sense(Event evt) {
 
 		if (status == EH_STATUS.REGISTERED && evt.eventType.equals(eventType)) {
-			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Event received");
-			
-//			System.out.println(getAgent().getClock().getCurrentTime() + " [" + getAgent().getAgentName() + ":" + getName() + "] " + " Recebi um evento frame = " + evt.frame);
+//			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Event received");
+//			System.out.println("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Event received - " + evt.objContent);
 			
 			// Chama o método do usuário
 			// TODO Melhor antes ou depois? Ou ter os dois?

@@ -152,6 +152,7 @@ public class AudioMemory extends Memory {
 		// Determinar a distância, em samples, entre o ptrBegin e o ptrNow
 		if (displaced_samples < 0) {
 			System.err.println("ERRO!!! getNow() voltou no tempo!!!");
+			return;
 		}
 		else if (displaced_samples == 0) {
 			// não houve mudança no tempo, retornar sem alterar nada

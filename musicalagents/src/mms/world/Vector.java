@@ -188,6 +188,12 @@ public class Vector {
 		
 	}
 	
+	public void inverse() {
+		for (int i = 0; i < values.length; i++) {
+			values[i] = -values[i];
+		}
+	}
+	
 	public void normalizeVectorInverse() {
 		
 		normalizeVector();

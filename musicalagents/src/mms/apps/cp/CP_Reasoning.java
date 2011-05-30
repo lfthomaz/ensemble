@@ -513,7 +513,7 @@ public class CP_Reasoning extends Reasoning {
 //					System.out.println(radius);
 					double x = master_position.getValue(0) + (radius * Math.cos(angle));
 					double y = master_position.getValue(1) + (radius * Math.sin(angle));
-					cmd.addParameter("DESTINATION", "("+x+";"+y+";0)");
+					cmd.addParameter("POS", "("+x+";"+y+";0)");
 					cmd.addParameter("TIME", "1");
 					sendCommand(cmd);
 					System.out.println(getAgent().getAgentName() + " new destination =  " + "("+x+";"+y+";0)");

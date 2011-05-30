@@ -2,14 +2,10 @@ package mms.movement;
 
 import java.util.ArrayList;
 
-import javax.activity.ActivityRequiredException;
-
 import mms.Actuator;
 import mms.Command;
-import mms.Constants;
-import mms.Event;
 import mms.EventHandler;
-import mms.MusicalAgent;
+import mms.KnowledgeBase;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.clock.TimeUnit;
@@ -24,6 +20,8 @@ import mms.world.Vector;
  */
 public class MovementReasoning extends Reasoning {
 
+//	private KnowledgeBase kb;
+	
 	private Actuator	legs;
 	private Sensor 		eyes;
 	
@@ -35,8 +33,11 @@ public class MovementReasoning extends Reasoning {
 	private ArrayList<Double> 	time_constrains = new ArrayList<Double>();
 	private boolean 			loop = false;
 	private int					active_waypoint = 0;;
-	private double 				precision = 1.0;
-	private double 				last_distance = 0.0; 
+	private double 				precision = 0.5;
+	private double 				last_distance = 0.0;
+	private double 				total_distance = 0.0;
+	private Vector 				last_acc;
+	private boolean 			inverted;
 	
 	// 
 	private Vector 				actual_pos = null;
@@ -47,6 +48,8 @@ public class MovementReasoning extends Reasoning {
 	private double MAX_ACELERATION = 10.0;
 	
 	public boolean init() {
+		
+//		kb = getAgent().getKB();
 		
 		String str = getParameter("waypoints", null);
 		if (str != null) {
@@ -97,15 +100,15 @@ public class MovementReasoning extends Reasoning {
 	public void processCommand(Command cmd) {
 		
 		if (cmd.getCommand().equals(MovementConstants.CMD_WALK)) {
-			if (cmd.containsParameter("DESTINATION") && cmd.containsParameter("TIME")) {
-				System.out.println("Walking...");
+			if (cmd.containsParameter("POS") && cmd.containsParameter("TIME")) {
+				System.out.println("[" + getAgent().getAgentName() + "] Walking...");
 				waypoints.clear();
 				time_constrains.clear();
 				active_waypoint = 0;
 				last_distance = 0;
 				loop = false;
 				time_constrains.add(Double.valueOf(cmd.getParameter("TIME")));
-				waypoints.add(Vector.parse(cmd.getParameter("DESTINATION")));
+				waypoints.add(Vector.parse(cmd.getParameter("POS")));
 			}
 		}
 		
@@ -114,11 +117,23 @@ public class MovementReasoning extends Reasoning {
 	@Override
 	public void process() {
 
+		if (actual_pos == null) {
+			System.out.println("actual_pos = null");
+		}
+
 		if (legsMemory != null && actual_pos != null && waypoints.size() != 0) {
 			// Tenho destino?
 			if (active_waypoint < waypoints.size()) {
 				Vector dest_pos = waypoints.get(active_waypoint);
 				double actual_distance = actual_pos.getDistance(dest_pos);
+				// Se passei da metade, desacelarar?
+				if (!inverted && actual_distance < (total_distance/2)) {
+					// Vou inverter a minha aceleração
+//					System.out.println("METADE DO CAMINHO!!!");
+					inverted = true;
+					last_acc.inverse();
+					sendAccCommand(last_acc, 0.0);
+				}
 				// Cheguei?
 				if (actual_distance < precision) {
 //					System.out.println("Cheguei no waypoint " + active_waypoint + " - " + waypoints.get(active_waypoint));
@@ -130,6 +145,9 @@ public class MovementReasoning extends Reasoning {
 //					System.out.println("active wp = " + active_waypoint);
 					if (active_waypoint == waypoints.size() && loop) {
 						active_waypoint = 0;
+					} else {
+						waypoints.clear();
+						time_constrains.clear();
 					}
 				}
 				else {
@@ -163,6 +181,7 @@ public class MovementReasoning extends Reasoning {
 						}
 
 						// Calcular a direção na qual deve andar
+						total_distance = actual_pos.getDistance(dest_pos);
 						Vector acc = new Vector((dest_pos.getValue(0)-actual_pos.getValue(0)), 
 								(dest_pos.getValue(1)-actual_pos.getValue(1)), 
 								(dest_pos.getValue(2)-actual_pos.getValue(2)));
@@ -170,7 +189,10 @@ public class MovementReasoning extends Reasoning {
 						acc.product(acc_mag);
 //						System.out.println("acc_vec = " + acc);
 						// Enviar comando
-						sendAccCommand(acc, t1);
+						last_acc = acc;
+						inverted = false;
+						sendAccCommand(acc, 0.0);
+//						sendAccCommand(acc, t1);
 					}
 					last_distance = actual_distance;
 				}
@@ -200,8 +222,10 @@ public class MovementReasoning extends Reasoning {
 	
 	private void sendAccCommand(Vector acc, double dur) {
 		String cmd = MovementConstants.CMD_WALK + 
-			" :" + MovementConstants.PARAM_ACC + " " + acc.toString() + 
-			" :" + MovementConstants.PARAM_DUR + " " + Double.toString(dur);
+			" :" + MovementConstants.PARAM_ACC + " " + acc.toString();
+		if (dur > 0.0) {
+			cmd += " :" + MovementConstants.PARAM_DUR + " " + Double.toString(dur);
+		}
 //		System.out.println("acc command: " + cmd);
 		try {
 			legsMemory.writeMemory(cmd);
