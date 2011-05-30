@@ -63,8 +63,8 @@
 	<MUSICAL_AGENT NAME="L" CLASS="MUSICIAN">
 		<FACT NAME="role" VALUE="master" />
 		<FACT NAME="wavetable" VALUE="media/woodblock_low.wav" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(0;0;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="POS" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="VEL" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="F1" CLASS="MUSICIAN">
@@ -72,8 +72,8 @@
 		<FACT NAME="wavetable" VALUE="media/woodblock_high.wav" />
 		<FACT NAME="phase" VALUE="1" />
 		<FACT NAME="slide" VALUE="1" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(10;0;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="POS" VALUE="(10;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="VEL" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="F2" CLASS="MUSICIAN">
@@ -81,8 +81,8 @@
 		<FACT NAME="wavetable" VALUE="media/woodblock_high.wav" />
 		<FACT NAME="phase" VALUE="1" />
 		<FACT NAME="slide" VALUE="2" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(20;0;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="POS" VALUE="(20;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="VEL" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 	<!-- 	
@@ -91,8 +91,8 @@
 		<FACT NAME="wavetable" VALUE="media/cowbell.wav" />
 		<FACT NAME="phase" VALUE="2" />
 		<FACT NAME="slide" VALUE="2" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(5;5;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="POS" VALUE="(5;5;0)" />
+		<ARG_COMP COMP="Legs" NAME="VEL" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Follower_4" CLASS="MUSICIAN">
@@ -100,14 +100,14 @@
 		<FACT NAME="wavetable" VALUE="media/cowbell.wav" />
 		<FACT NAME="phase" VALUE="2" />
 		<FACT NAME="slide" VALUE="2" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(5;5;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="POS" VALUE="(5;5;0)" />
+		<ARG_COMP COMP="Legs" NAME="VEL" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 	 -->
 	<MUSICAL_AGENT NAME="Listener" CLASS="LISTENER">
 		<ARG_COMP COMP="AudioReasoning" NAME="mapping" VALUE="Ear:2,0" />
-		<ARG_COMP COMP="Legs" NAME="pos" VALUE="(50;-20;0)" />
-		<ARG_COMP COMP="Legs" NAME="vel" VALUE="(0;0;0)" />
+		<ARG_COMP COMP="Legs" NAME="POS" VALUE="(50;-20;0)" />
+		<ARG_COMP COMP="Legs" NAME="VEL" VALUE="(0;0;0)" />
 	</MUSICAL_AGENT>
 
 </MMS>
