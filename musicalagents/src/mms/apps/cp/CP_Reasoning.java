@@ -253,10 +253,6 @@ public class CP_Reasoning extends Reasoning {
 
 		double start = System.currentTimeMillis();
 		
-		if (master) {
-			System.out.println("needAction()");
-		}
-		
 		// Limpa chunk de saída
 		for (int i = 0; i < chunk.length; i++) {
 			chunk[i] = 0.0f;
@@ -309,7 +305,6 @@ public class CP_Reasoning extends Reasoning {
 				
 				// Mudança de compasso dentro deste frame
 				if (tf < ti) {
-					System.out.println("mudança de compasso");
 					// atualiza o contador
 					measure_counter++;
 //					System.out.println("Tem começo de compasso!!!");
@@ -392,7 +387,7 @@ public class CP_Reasoning extends Reasoning {
 				if (onsetproc != null) {
 					long now = System.currentTimeMillis();
 					Object out = onsetproc.process(onset_args, buf);
-					System.out.println("time = " + (System.currentTimeMillis() - now));
+//					System.out.println("time = " + (System.currentTimeMillis() - now));
 					
 					// Beats
 					if (out != null && out instanceof double[]) {
@@ -442,7 +437,7 @@ public class CP_Reasoning extends Reasoning {
 					}
 				}
 				
-				String str = "time = [ ";
+				String str = "[" + getAgent().getAgentName() + "] time = [ ";
 				for (int i = 0; i < detected_beats_time.size(); i++) {
 					str = str + String.format("%d ", detected_beats_time.get(i));
 				}
