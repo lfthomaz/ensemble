@@ -27,7 +27,7 @@ import mmsportaudio.portaudio;
 public class PAInputReasoning extends Reasoning {
 
 	// Log
-	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	// PortAudio
 	portaudio 					pa;

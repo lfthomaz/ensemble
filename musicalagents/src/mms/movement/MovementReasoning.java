@@ -100,7 +100,7 @@ public class MovementReasoning extends Reasoning {
 	public void processCommand(Command cmd) {
 		
 		if (cmd.getCommand().equals(MovementConstants.CMD_WALK)) {
-			if (cmd.containsParameter("POS") && cmd.containsParameter("TIME")) {
+			if (cmd.containsParameter(MovementConstants.PARAM_POS) && cmd.containsParameter("TIME")) {
 				System.out.println("[" + getAgent().getAgentName() + "] Walking...");
 				waypoints.clear();
 				time_constrains.clear();
@@ -108,7 +108,7 @@ public class MovementReasoning extends Reasoning {
 				last_distance = 0;
 				loop = false;
 				time_constrains.add(Double.valueOf(cmd.getParameter("TIME")));
-				waypoints.add(Vector.parse(cmd.getParameter("POS")));
+				waypoints.add(Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS)));
 			}
 		}
 		
@@ -118,7 +118,11 @@ public class MovementReasoning extends Reasoning {
 	public void process() {
 
 		if (actual_pos == null) {
-			System.out.println("actual_pos = null");
+			String str = (String)eyesMemory.readMemory(eyesMemory.getLastInstant(), TimeUnit.SECONDS);
+			Command cmd = Command.parse(str);
+			if (cmd != null) {
+				actual_pos = Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS));
+			}
 		}
 
 		if (legsMemory != null && actual_pos != null && waypoints.size() != 0) {

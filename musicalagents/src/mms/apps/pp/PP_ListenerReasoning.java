@@ -24,7 +24,7 @@ import mms.tools.AudioTools;
 public class PP_ListenerReasoning extends Reasoning {
 
 	// Log
-	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	// Memories
 	private HashMap<String, Memory> earMemories = new HashMap<String, Memory>();
@@ -45,7 +45,7 @@ public class PP_ListenerReasoning extends Reasoning {
 		format = new AudioFormat(44100f, 16, 1, true, false);
 		info = new DataLine.Info(SourceDataLine.class, format);
 		if (!AudioSystem.isLineSupported(info)) {
-			logger.severe("[" + getComponentName() + "] " + "Line not supported");
+//			logger.severe("[" + getComponentName() + "] " + "Line not supported");
 			return false;
 		}
 		
@@ -110,7 +110,7 @@ public class PP_ListenerReasoning extends Reasoning {
 			    // Stores the line
 			    lines.put(ear.getComponentName(), line);
 			} catch (LineUnavailableException ex) {
-				logger.severe("[" + getComponentName() + "] " + "Line Unavailable");
+//				logger.severe("[" + getComponentName() + "] " + "Line Unavailable");
 			}
 			
 		}

@@ -17,7 +17,7 @@ import mms.clock.VirtualClockHelper;
 public abstract class Memory {
 
 	// Log
-	public static Logger logger = Logger.getMyLogger(MMSAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MMSAgent.class.getName());
 
 	protected VirtualClockHelper clock;
 

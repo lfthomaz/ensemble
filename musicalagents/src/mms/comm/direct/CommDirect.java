@@ -10,7 +10,7 @@ public class CommDirect extends Comm {
 	
 	//----------------------------------------------------------
 	// Log
-	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	//----------------------------------------------------------
 	// Serviço de CommDirect
@@ -56,7 +56,7 @@ public class CommDirect extends Comm {
 		if (mySensor != null) {
 			mySensor.sense(evt);
 		} else {
-			MusicalAgent.logger.warning("[" + myAgent.getName() + "] " + "ERRO: não pertenço um sensor!");
+//			MusicalAgent.logger.warning("[" + myAgent.getName() + "] " + "ERRO: não pertenço um sensor!");
 		}
  	}
 

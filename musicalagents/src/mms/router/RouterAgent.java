@@ -171,7 +171,7 @@ public class RouterAgent extends Agent {
 			// Obtém o agente e componente destino
 			String[] address = m.getName().split("/");
 			if (address.length <= 1 || !address[1].equals(Constants.FRAMEWORK_NAME)) {
-	    		MusicalAgent.logger.info("[OSCService] " + "Malformed address: " + m.getName());
+//	    		MusicalAgent.logger.info("[OSCService] " + "Malformed address: " + m.getName());
 				return;
 			}
 			StringBuilder sb = new StringBuilder();

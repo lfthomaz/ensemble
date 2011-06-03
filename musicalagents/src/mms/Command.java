@@ -124,8 +124,8 @@ public class Command {
 				value += parameter[j] + " ";
 			}
 			value = value.trim();
-			if (key.startsWith("user_")) {
-				key = key.replaceFirst("user_", "");
+			if (key.startsWith("X-")) {
+				key = key.replaceFirst("X-", "");
 				cmd.addUserParameter(key, value);
 			} else {
 				cmd.addParameter(key, value);
@@ -155,7 +155,7 @@ public class Command {
 		set = userParameters.keySet();
 		for (String key : set) {
 			String value = userParameters.get(key);
-			ret = ret + " :user_" + key + " " + value;
+			ret = ret + " :X-" + key + " " + value;
 		}
 		
 		return ret;

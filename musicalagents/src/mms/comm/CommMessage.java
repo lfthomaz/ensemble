@@ -54,6 +54,7 @@ public class CommMessage extends Comm {
 	// Recebe eventos
 	private class ReceiveMessages extends CyclicBehaviour {
 
+		protected boolean finished = false;
 		MessageTemplate mt;
 		
 		public ReceiveMessages(Agent a) {
@@ -66,13 +67,13 @@ public class CommMessage extends Comm {
 			ACLMessage msg = myAgent.receive(mt);
 			if (sensing) {
 				if (msg != null) {
-					MusicalAgent.logger.info("[" + ((MMSAgent)myAgent).getAgentName() + ":" + myAccessPoint + "] " + "Recebi mensagem JADE de " + msg.getSender());
+//					MusicalAgent.logger.info("[" + ((MMSAgent)myAgent).getAgentName() + ":" + myAccessPoint + "] " + "Recebi mensagem JADE de " + msg.getSender());
 					Event evt = null;
 					try {
 						ObjectInputStream in;
 						in = new ObjectInputStream(new ByteArrayInputStream(msg.getByteSequenceContent()));
 				        evt = (Event)in.readObject();
-						MusicalAgent.logger.info("[" + ((MMSAgent)myAgent).getAgentName() + ":" + myAccessPoint + "] " + "Recebi mensagem JADE de " + msg.getSender() + " (" + (System.currentTimeMillis() - evt.timestamp) + ")");
+//						MusicalAgent.logger.info("[" + ((MMSAgent)myAgent).getAgentName() + ":" + myAccessPoint + "] " + "Recebi mensagem JADE de " + msg.getSender() + " (" + (System.currentTimeMillis() - evt.timestamp) + ")");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -108,7 +109,7 @@ public class CommMessage extends Comm {
 			}
 			msg.setByteSequenceContent(bos.toByteArray());
 	
-			MusicalAgent.logger.info("[" + ((MMSAgent)myAgent).getAgentName() + ":" + myAccessPoint + "] " + "Enviei mensagem JADE para " + msg.getSender());
+//			MusicalAgent.logger.info("[" + ((MMSAgent)myAgent).getAgentName() + ":" + myAccessPoint + "] " + "Enviei mensagem JADE para " + msg.getSender());
 			myAgent.send(msg);
 		}
 			
@@ -122,7 +123,7 @@ public class CommMessage extends Comm {
 		if (mySensor != null) {
 			mySensor.sense(evt);
 		} else {
-			MusicalAgent.logger.warning("[" + myAgent.getName() + "] ERROR: COMM attached to a component that is not able to sense");
+//			MusicalAgent.logger.warning("[" + myAgent.getName() + "] ERROR: COMM attached to a component that is not able to sense");
 		}
 	}
 	

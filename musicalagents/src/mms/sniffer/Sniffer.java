@@ -204,12 +204,10 @@ public class Sniffer extends Agent implements RouterClient {
 					// Returns the command string
 					cmd.addParameter("NAME", dialog.txtName.getText());
 					cmd.addParameter("CLASS", dialog.txtClass.getText());
-					String parameters = "{";
 					for (int i = 0; i < dialog.tableModel.getRowCount(); i++) {
-						parameters += dialog.tableModel.getValueAt(i, 0) + "=" + dialog.tableModel.getValueAt(i, 1) + ";";
+						cmd.addUserParameter((String)dialog.tableModel.getValueAt(i, 0), (String)dialog.tableModel.getValueAt(i,1));
+						System.out.println("HMPF: " + (String)dialog.tableModel.getValueAt(i,1));
 					}
-					parameters += "}";
-					cmd.addParameter("PARAMETERS", parameters);
 					sendCommand(cmd);
 				}
 			}
@@ -295,15 +293,12 @@ public class Sniffer extends Agent implements RouterClient {
 							// Returns the command string
 							cmd.addParameter("NAME", dialog.txtName.getText());
 							cmd.addParameter("CLASS", dialog.txtClass.getText());
-							String parameters = "{";
 							for (int i = 0; i < dialog.tableModel.getRowCount(); i++) {
-								parameters += dialog.tableModel.getValueAt(i, 0) + "=" + dialog.tableModel.getValueAt(i, 1) + ";";
+								cmd.addUserParameter((String)dialog.tableModel.getValueAt(i, 0), (String)dialog.tableModel.getValueAt(i,1));
 							}
 							if (!dialog.txtEvtType.equals("")) {
-								parameters += "EVT_TYPE=" + dialog.txtEvtType.getText();
+								cmd.addUserParameter("EVT_TYPE", dialog.txtEvtType.getText());
 							}
-							parameters += "}";
-							cmd.addParameter("PARAMETERS", parameters);
 							sendCommand(cmd);
 						}
 					}
@@ -714,7 +709,7 @@ public class Sniffer extends Agent implements RouterClient {
 						compInfo.className = className.substring(6); 
 						compInfo.type = cmd.getParameter("TYPE");
 						compInfo.evt_type = cmd.getParameter("EVT_TYPE");
-						compInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+						compInfo.parameters = cmd.getUserParameters();
 						if (cmd.containsParameter("FACTS")) {
 							compInfo.facts = Parameters.parse(cmd.getParameter("FACTS"));
 						}
@@ -731,7 +726,7 @@ public class Sniffer extends Agent implements RouterClient {
 				esInfo.state = "CREATED";
 				String className = cmd.getParameter("CLASS");
 				esInfo.className = className.substring(6); 
-				esInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+				esInfo.parameters = cmd.getUserParameters();
 				DefaultMutableTreeNode esNode = new DefaultMutableTreeNode(esInfo);
 				treeModel.insertNodeInto(esNode, envNode, envNode.getChildCount());
 			}
@@ -740,7 +735,7 @@ public class Sniffer extends Agent implements RouterClient {
 				WorldInfo worldInfo = new WorldInfo();
 				String className = cmd.getParameter("CLASS");
 				worldInfo.className = className.substring(6); 
-				worldInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+				worldInfo.parameters = cmd.getUserParameters();
 				DefaultMutableTreeNode worldNode = new DefaultMutableTreeNode(worldInfo);
 				treeModel.insertNodeInto(worldNode, envNode, envNode.getChildCount());
 			}
@@ -755,7 +750,7 @@ public class Sniffer extends Agent implements RouterClient {
 				String className = cmd.getParameter("CLASS");
 				agentInfo.className = className.substring(6); 
 				agentInfo.state = "CREATED";
-				agentInfo.parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+				agentInfo.parameters = cmd.getUserParameters();
 				DefaultMutableTreeNode agentNode = new DefaultMutableTreeNode(agentInfo);
 				treeModel.insertNodeInto(agentNode, rootNode, rootNode.getChildCount());
 				tree.expandRow(0);
@@ -858,7 +853,6 @@ public class Sniffer extends Agent implements RouterClient {
 				if (agentNode.toString().equals(agentName)) {
 					break;
 				}
-				agentNode = null;
 			}
 			// If it is a component
 			if (cmd.containsParameter("COMPONENT")) {
@@ -872,7 +866,6 @@ public class Sniffer extends Agent implements RouterClient {
 						tree.setSelectionPath(new TreePath(agentNode.getPath()));
 						return;
 					}
-					compNode = null;
 				}
 			} 
 			// If it is an agent

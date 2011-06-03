@@ -20,7 +20,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 	/**
 	 * Logger
 	 */
-	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	/**
 	 * Lock
@@ -112,7 +112,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		cmd.addParameter("AGENT", envAgent.getAgentName());
 		cmd.addParameter("EVENT_SERVER", this.getEventType());
 		cmd.addParameter("CLASS", this.getClass().toString());
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 		
 		// Gets the Environment Agent
@@ -166,7 +166,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		else if (eventExchange.equals(Constants.EVT_EXC_HYBRID)) {
 			
 			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
-			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
+//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
 
 			nextStateChange = startTime;
 			clock.execute(envAgent, new HybridScheduler());
@@ -189,8 +189,8 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 			// TODO talvez seja melhor que o waitTime seja um sleep, e n�o um valor adicionado ao currentTime
 			startTime = waitTime + (long)clock.getCurrentTime(TimeUnit.MILLISECONDS);
 			
-			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
-			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
+//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t waitTime = " + waitTime);
+//			System.out.println((long)clock.getCurrentTime(TimeUnit.MILLISECONDS) + "\t startTime = " + startTime);
 
 			frameTime = startTime;
 //			envAgent.addBehaviour(new ActionScheduler());
@@ -200,14 +200,14 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		
 		eventServerState = ES_STATE.INITIALIZED;
 
-		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
 //		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Initialized");
 
 		cmd = new Command(getAddress(), "/console", "UPDATE");
 		cmd.addParameter("AGENT", envAgent.getAgentName());
 		cmd.addParameter("EVENT_SERVER", this.getEventType());
 		cmd.addParameter("STATE", "INITIALIZED");
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 
 		return true;
@@ -234,7 +234,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		cmd.addParameter("AGENT", envAgent.getAgentName());
 		cmd.addParameter("EVENT_SERVER", this.getEventType());
 		cmd.addParameter("STATE", "INITIALIZED");
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 
 		// Deregistrar todos os atuadores
@@ -589,7 +589,7 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 
 				// Envia o evento
 			    comm.send(evt);
-
+			    
 		        // Avisa o Agente Ambiente do evento enviado
 		        envAgent.eventSent();
 

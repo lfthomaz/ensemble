@@ -23,7 +23,7 @@ import mms.world.World;
 public class AudioEventServer extends EventServer {
 
 	// Log
-	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
     private enum INTERPOLATION_MODE {NONE, LINEAR, POLINOMIAL;
     	public static INTERPOLATION_MODE fromString(String str) {
@@ -301,7 +301,7 @@ public class AudioEventServer extends EventServer {
 			
 			// Calculates the contribution of each sound source
 			for (Enumeration<String> a = actuators.keys(); a.hasMoreElements();) {
-
+				
 				String a_key = a.nextElement();
 				String pair = s_key + "<>" + a_key;
 				src_comp_pos = Vector.parse(actuators.get(a_key).get(Constants.PARAM_REL_POS, "(0;0;0)"));
@@ -423,6 +423,10 @@ public class AudioEventServer extends EventServer {
 								double value = 0.0;
 								value = mem.readMemoryDouble(t-deltas[i], TimeUnit.SECONDS);
 								buf[i] = buf[i] + (value * gain);
+//								for (int j = 0; j < 4; j++) {
+//									System.out.printf("%.3f ", buf[j]);
+//								}
+//								System.out.println();
 								// Performance
 	//							MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(t-deltas_1[i], TimeUnit.SECONDS);
 	//							movLaw.changeState(rcv_state_old, instant, rcv_state);

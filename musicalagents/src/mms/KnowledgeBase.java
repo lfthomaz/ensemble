@@ -47,7 +47,7 @@ public class KnowledgeBase extends MusicalAgentComponent {
 		cmd.addParameter("COMPONENT", getComponentName());
 		cmd.addParameter("CLASS", this.getClass().toString());
 		cmd.addParameter("TYPE", getComponentType());
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		String param_facts = "{";
 		for (String fact : facts.keySet()) {
 			param_facts += fact + "=" + facts.get(fact).value + " ";

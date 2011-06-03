@@ -55,26 +55,25 @@ public class EventMemory extends Memory {
 	}
 
 	/**
-	 * Cleans memory beyond time horizon (past and future parameters)
+	 * Cleans memory beyond time horizon (past and future parameters).
+	 * It always leaves the most recent event in memory, so it will never be empty.
 	 */
 	public void updateMemory() {
 		
 		double horizon = clock.getCurrentTime(TimeUnit.SECONDS) - past;
 		EventSlot ptr = head;
-		while (ptr != null) {
-			if (ptr.instant >= horizon) {
-				head = ptr;
-				break;
+		if (ptr != null) {
+			while (ptr.next != null) {
+				if (ptr.instant >= horizon) {
+					head = ptr;
+					break;
+				}
+				ptr = ptr.next;
+				size--;
 			}
-			ptr = ptr.next;
-			size--;
-		}
-		if (ptr == null) {
-			ptr_last_instant_read = null;
-			head = null;
-			tail = null;
-		} else if (ptr_last_instant_read != null && ptr.instant > ptr_last_instant_read.instant) {
-			ptr_last_instant_read = head;
+			if (ptr_last_instant_read != null && ptr.instant > ptr_last_instant_read.instant) {
+				ptr_last_instant_read = head;
+			}
 		}
 		
 	}

@@ -144,14 +144,14 @@ public class EnvironmentAgent extends MMSAgent {
 	@Override
 	public boolean start() {
 
-		logger.info("[" + getAgentName() + "] " + "Starting initialization...");
+//		logger.info("[" + getAgentName() + "] " + "Starting initialization...");
 		// System.out.println("EA start()");
 
 		// Sends a message to the console
 		Command cmd = new Command(getAddress(), "/console", "CREATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("CLASS", this.getClass().toString());
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 
 		lock.lock();
@@ -185,7 +185,7 @@ public class EnvironmentAgent extends MMSAgent {
 
 			state = EA_STATE.INITIALIZED;
 
-			logger.info("[" + getAgentName() + "] " + "Initialized");
+//			logger.info("[" + getAgentName() + "] " + "Initialized");
 //			 System.out.println("[" + this.getAID().getAgentName() + "] " + "Initialized");
 
 			cmd = new Command(getAddress(), "/console", "UPDATE");
@@ -278,8 +278,7 @@ public class EnvironmentAgent extends MMSAgent {
 				dfd.addServices(sd);
 				DFService.modify(this, dfd);
 			}
-			logger.info("[" + getAgentName() + "] " + "Event type " + type
-					+ " registered in the DS");
+//			logger.info("[" + getAgentName() + "] " + "Event type " + type + " registered in the DS");
 		} catch (FIPAException fe) {
 			System.out
 					.println("ERROR: It was not possible to register the service '"
@@ -422,7 +421,7 @@ public class EnvironmentAgent extends MMSAgent {
 
 			String agentName = cmd.getParameter("NAME");
 			String agentClass = cmd.getParameter("CLASS");
-			Parameters parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+			Parameters parameters = cmd.getUserParameters();
 			createMusicalAgent(agentName, agentClass, parameters);
 
 		} else if (command.equals(Constants.CMD_DESTROY_AGENT)) {
@@ -433,8 +432,7 @@ public class EnvironmentAgent extends MMSAgent {
 		} else if (command.equals(Constants.CMD_ADD_EVENT_SERVER)) {
 
 			String className = cmd.getParameter("NAME");
-			Parameters parameters = Parameters.parse(cmd
-					.getParameter("PARAMETERS"));
+			Parameters parameters = cmd.getUserParameters();
 			addEventServer(className, parameters);
 
 		} else if (command.equals(Constants.CMD_REMOVE_EVENT_SERVER)) {
@@ -457,8 +455,7 @@ public class EnvironmentAgent extends MMSAgent {
 				evtServer.registerEventHandler(sender, componentName,
 						eventHandlerType, userParam);
 			} else {
-				logger.info("[" + getAgentName() + "] " + "EventServer "
-						+ eventType + " not found");
+//				logger.info("[" + getAgentName() + "] " + "EventServer " + eventType + " not found");
 			}
 
 		} else if (command.equals(Constants.CMD_EVENT_DEREGISTER)) {
@@ -479,32 +476,27 @@ public class EnvironmentAgent extends MMSAgent {
 		} else if (command.equals(Constants.CMD_AGENT_REGISTER)) {
 
 			String sender = cmd.getParameter("sender").split("/")[2];
-			MusicalAgent.logger.info("[" + getAgentName() + "] " 
-					+ "Recebi pedido de registro de " + sender);
+//			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Recebi pedido de registro de " + sender);
 			registerAgent(sender, cmd.getParameters());
 
 		} else if (command.equals(Constants.CMD_AGENT_DEREGISTER)) {
 
 			String sender = cmd.getParameter("sender").split("/")[2];
-			MusicalAgent.logger.info("[" + getAgentName() + "] "
-					+ "Recebi pedido de desregistro de " + sender);
+//			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Recebi pedido de desregistro de " + sender);
 			deregisterAgent(sender);
 
 		} else if (command.equals(Constants.CMD_AGENT_READY)) {
 
 			String sender = cmd.getParameter("sender").split("/")[2];
-			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Agent "
-					+ sender + " ready for the simulation");
+//			MusicalAgent.logger.info("[" + getAgentName() + "] " + "Agent " + sender + " ready for the simulation");
 			prepareAgent(sender);
 
 		} else if (command.equals(Constants.CMD_BATCH_TURN)) {
 
 			if (isBatch) {
 				String sender = cmd.getParameter("sender").split("/")[2];
-				MusicalAgent.logger.info("[" + getAgentName() + "] "
-						+ "End of turn message received from " + sender);
-				int numberEventsSent = Integer.valueOf(cmd
-						.getParameter(Constants.PARAM_NUMBER_EVT_SENT));
+//				MusicalAgent.logger.info("[" + getAgentName() + "] " + "End of turn message received from " + sender);
+				int numberEventsSent = Integer.valueOf(cmd.getParameter(Constants.PARAM_NUMBER_EVT_SENT));
 				agentProcessed(numberEventsSent);
 			}
 
@@ -662,8 +654,7 @@ public class EnvironmentAgent extends MMSAgent {
 			return null;
 		}
 
-		logger.info("[" + getAgentName() + "] " + "Created a new agent named "
-				+ agentName);
+//		logger.info("[" + getAgentName() + "] " + "Created a new agent named " + agentName);
 
 		return agentName;
 
@@ -793,7 +784,7 @@ public class EnvironmentAgent extends MMSAgent {
 		@Override
 		public void action() {
 			
-			MusicalAgent.logger.info("[" + getAgent().getName() + " Killing agent '" + getAgent().getAgentName() + "'");
+//			MusicalAgent.logger.info("[" + getAgent().getName() + " Killing agent '" + getAgent().getAgentName() + "'");
 			// Calls JADE finalization method
 			doDelete();
 			

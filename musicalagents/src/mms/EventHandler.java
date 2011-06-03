@@ -95,7 +95,7 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		if (getState() == EA_STATE.CREATED) {
 			this.eventType = eventType;
 		} else {
-    		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Trying to set eventType after initialization!");
+//    		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Trying to set eventType after initialization!");
 		}
 	}
 
@@ -194,12 +194,6 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		}
 //		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
 
-		// No caso de ser uma troca de evento frequente, armazena os parÃ¢metros
-		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC) && getType().equals(Constants.COMP_ACTUATOR)) {
-			Actuator act = (Actuator)this;
-			act.setEventFrequency();
-		}
-		
 		// Altera o status
 		this.status = EH_STATUS.REGISTERED;
 		
@@ -212,12 +206,18 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		// Avisa o agente do novo EventHandler registrado
 		getAgent().eventHandlerRegistered(getComponentName());
 		
+		// No caso de ser uma troca de evento frequente, armazena os parÃ¢metros
+		if (eventExecution.equals(Constants.EVT_EXC_PERIODIC) && getType().equals(Constants.COMP_ACTUATOR)) {
+			Actuator act = (Actuator)this;
+			act.setEventFrequency();
+		}
+		
 		if (this instanceof Sensor) {
 			Sensor sensor = (Sensor)this;
-			for (Event evt : ((Sensor)this).early_events) {
+			for (Event evt : sensor.early_events) {
 				sensor.sense(evt);
 			}
-			((Sensor)this).early_events.clear();
+			sensor.early_events.clear();
 		}
 		
 //		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Register of '" + getComponentName() + "' confirmed");

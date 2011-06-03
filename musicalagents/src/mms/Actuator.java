@@ -43,7 +43,7 @@ public class Actuator extends EventHandler implements Acting {
 		cmd.addParameter("CLASS", this.getClass().toString());
 		cmd.addParameter("TYPE", getComponentType());
 		cmd.addParameter("EVT_TYPE", parameters.get("EVT_TYPE"));
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 
 		if (!super.start()) {
@@ -136,14 +136,14 @@ public class Actuator extends EventHandler implements Acting {
 	private class ActionScheduler implements Runnable {
 
 		public void run() {
-
+			
 			switch (actuatorState) {
 			
 			case INITIALIZED:
 				frameTime = startTime + ((workingFrame-1) * period);
 //				System.out.println("frameTime = " + frameTime);
 				actuatorState = AC_STATE.WAITING_BEGIN;
-//				System.out.println(System.currentTimeMillis() + "*** estado 1 ***");
+//				System.out.println(System.currentTimeMillis + "*** estado 1 ***");
 				nextStateChange = frameTime;
 				break;
 			
@@ -205,11 +205,9 @@ public class Actuator extends EventHandler implements Acting {
 			default:
 				break;
 			}
-				
-			if (status == EH_STATUS.REGISTERED) {
-//				System.out.println(getAddress() + " - schedule() - " + actuatorState);
-				clock.schedule(getAgent(), this, nextStateChange);
-			}
+
+//			System.out.println(getAddress() + " - schedule() - " + actuatorState);
+			clock.schedule(getAgent(), this, nextStateChange);
 			
 		}
 		
@@ -293,7 +291,6 @@ public class Actuator extends EventHandler implements Acting {
 			getAgent().eventSent();
 		} 
 		else {
-			System.out.println("BIZARRE!!!");
 //			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Componente n�o registrado em um Ambiente!");
 		}
 		

@@ -7,10 +7,10 @@ import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.audio.AudioConstants;
+import mms.audio.file.AudioInputFile;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
-import mms.tools.AudioInputFile;
 
 public class PP_Reasoning extends Reasoning {
 
@@ -46,7 +46,7 @@ public class PP_Reasoning extends Reasoning {
 		try {
 			in = new AudioInputFile(filename, true);
 		} catch (Exception e) {
-			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + filename);
+//			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + filename);
 			return false;
 		}
 		
@@ -99,7 +99,7 @@ public class PP_Reasoning extends Reasoning {
 			mouthMemory.writeMemory(chunk, instant, duration, TimeUnit.SECONDS);
 //			System.out.println("Guardei na memória um evento no instante " + instant + " de duração " + duration);
 		} catch (MemoryException e1) {
-			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+//			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 		}
 
 		

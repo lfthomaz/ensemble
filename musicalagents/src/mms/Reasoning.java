@@ -8,6 +8,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.MessageTemplate;
@@ -22,7 +23,6 @@ public class Reasoning extends MusicalAgentComponent {
 	
 	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 	Behaviour cyclicBehaviour = null;
-//	ReasonCyclic cyclicBehaviour = null;
 	
 	VirtualClockHelper clock;
 
@@ -38,7 +38,7 @@ public class Reasoning extends MusicalAgentComponent {
 		cmd.addParameter("COMPONENT", getComponentName());
 		cmd.addParameter("CLASS", this.getClass().toString());
 		cmd.addParameter("TYPE", getType());
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 		
 		// Gets clock service
@@ -90,16 +90,17 @@ public class Reasoning extends MusicalAgentComponent {
 			getAgent().addBehaviour(tbf.wrap(cyclicBehaviour));
 			break;
 		case CYCLIC:
-			cyclicBehaviour = new CyclicBehaviour() {
-				@Override
-				public void action() {
-					try {
-						process();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			};
+//			cyclicBehaviour = new CyclicBehaviour() {
+//				@Override
+//				public void action() {
+//					try {
+//						process();
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			};
+			cyclicBehaviour = new ReasonCyclic(getAgent());
 			getAgent().addBehaviour(tbf.wrap(cyclicBehaviour));
 			break;
 		default:
@@ -115,6 +116,12 @@ public class Reasoning extends MusicalAgentComponent {
 
 		// Removes the CyclicBehaviour
 		if (cyclicBehaviour != null) {
+			if (cyclicBehaviour instanceof TickerBehaviour) {
+				((TickerBehaviour)cyclicBehaviour).stop();
+			}
+			else {
+				((ReasonCyclic)cyclicBehaviour).stop();
+			}
 			getAgent().removeBehaviour(cyclicBehaviour);
 		}
 		
@@ -148,7 +155,7 @@ public class Reasoning extends MusicalAgentComponent {
 			// Apenas processa o raciocínio se o agente estiver ativo
 			if (getAgent().state == MA_STATE.REGISTERED) {
 			
-				MusicalAgent.logger.info("[" + getAgent().getAgentName() + "] " + "Iniciei o raciocínio");
+//				MusicalAgent.logger.info("[" + getAgent().getAgentName() + "] " + "Iniciei o raciocínio");
 				
 				try {
 					process();
@@ -176,21 +183,33 @@ public class Reasoning extends MusicalAgentComponent {
 	 * @author lfthomaz
 	 *
 	 */
-	private class ReasonCyclic extends CyclicBehaviour {
+	private class ReasonCyclic extends SimpleBehaviour {
 
-		protected boolean finished = false;
+		private boolean terminated = false;
 		
 		public ReasonCyclic(Agent a) {
 			super(a);
 		}
 		
 		public void action() {
-			while (!finished) {
+			try {
+				process();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+		}
+		
+		@Override
+		public boolean done() {
+			return terminated;
+		}
+
+		public void stop() {
+			terminated = true;
 		}
 	
 	}
-
+	
 	//--------------------------------------------------------------------------------
 	// User implemented methods
 	//--------------------------------------------------------------------------------

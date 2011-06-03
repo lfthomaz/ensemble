@@ -54,7 +54,7 @@ public class DummyReasoning extends Reasoning {
 			actuatorMemory.writeMemory(buf, instant, duration, TimeUnit.SECONDS);
 			actuator.act();
 		} catch (MemoryException e1) {
-			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+//			MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 		}
 	}
 

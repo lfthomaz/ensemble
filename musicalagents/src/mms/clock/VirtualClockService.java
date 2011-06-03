@@ -20,7 +20,7 @@ public class VirtualClockService extends BaseService {
 
 	//----------------------------------------------------------
 	// Log
-	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	// Service name
 	public static final String NAME = "VirtualClock";
@@ -64,7 +64,7 @@ public class VirtualClockService extends BaseService {
 		} else {
 			referenceStartTime = System.currentTimeMillis();
 			referenceNanoStartTime = System.nanoTime();
-			MusicalAgent.logger.info("[" + NAME + "] " + "Reference Time = " + referenceStartTime);
+//			MusicalAgent.logger.info("[" + NAME + "] " + "Reference Time = " + referenceStartTime);
 		}
 		
         System.out.println("[" + getName() + "] VirtualClock service started");
@@ -160,7 +160,7 @@ public class VirtualClockService extends BaseService {
 				}
 			}
 			else {
-				logger.warning("[VirtualClock] " + "updateClock() was called without being in USER mode");
+//				logger.warning("[VirtualClock] " + "updateClock() was called without being in USER mode");
 			}
 		}
 

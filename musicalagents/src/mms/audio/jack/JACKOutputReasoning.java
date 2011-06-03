@@ -21,7 +21,7 @@ import mmsjack.JACKCallback;
 public class JACKOutputReasoning extends Reasoning {
 
 	// Log
-	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	// JACK
 	JACKServerHelper jack; 

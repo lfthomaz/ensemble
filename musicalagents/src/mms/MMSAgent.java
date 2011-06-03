@@ -17,9 +17,10 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 	/**
 	 *  Log
 	 */
-	public static final Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	public static final Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+//	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	private ReceiveCommand rcvCmdBehavior;
 	
 	/**
 	 *  Agent Parameters
@@ -103,10 +104,11 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 			clock = (VirtualClockHelper)getHelper(VirtualClockService.NAME);
 //			router = (RouterHelper)getHelper(RouterService.NAME);
 		} catch (ServiceException e) {
-			logger.severe("[" + this.getAgentName() + "] " + "Service not available");
+//			logger.severe("[" + this.getAgentName() + "] " + "Service not available");
 			this.doDelete();
 		}
-		this.addBehaviour(tbf.wrap(new ReceiveCommand(this)));
+		rcvCmdBehavior = new ReceiveCommand(this);
+		this.addBehaviour(rcvCmdBehavior);
 		
 		// 3. Executa o método de configuração do usuário
 		configure();

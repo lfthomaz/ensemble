@@ -11,6 +11,7 @@ import mms.Parameters;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.audio.AudioConstants;
+import mms.audio.file.AudioInputFile;
 import mms.clock.TimeUnit;
 import mms.memory.Memory;
 import mms.memory.MemoryException;
@@ -18,7 +19,6 @@ import mms.movement.MovementConstants;
 import mms.processing.Processor;
 import mms.processing.ProcessorFactory;
 import mms.processing.ProcessorFactory.AudioOperation;
-import mms.tools.AudioInputFile;
 import mms.world.Vector;
 
 public class CP_Reasoning extends Reasoning {
@@ -136,7 +136,7 @@ public class CP_Reasoning extends Reasoning {
 			// TODO Fazer checagens de tamanho do arquivo
 			wavetable = in.readNextChunk((int)samples);
 		} catch (Exception e) {
-			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
+//			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
 			System.err.println("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
 			return false;
 		}
@@ -351,7 +351,7 @@ public class CP_Reasoning extends Reasoning {
 				mouthMemory.writeMemory(chunk, instant, duration, TimeUnit.SECONDS);
 				mouth.act();
 			} catch (MemoryException e1) {
-				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+//				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 			}
 			
 			break;

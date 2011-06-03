@@ -12,9 +12,7 @@ import mms.Constants.EH_STATUS;
 import mms.Constants.MA_STATE;
 import mms.clock.TimeUnit;
 import mms.world.Vector;
-import mms.world.World;
 
-import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -22,8 +20,6 @@ import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 
 public class MusicalAgent extends MMSAgent {
 
@@ -103,7 +99,7 @@ public class MusicalAgent extends MMSAgent {
 		cmd = new Command(getAddress(), "/console", "CREATE");
 		cmd.addParameter("AGENT", getAgent().getAgentName());
 		cmd.addParameter("CLASS", this.getClass().toString());
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 
 		lock.lock();
@@ -122,10 +118,11 @@ public class MusicalAgent extends MMSAgent {
 						environmentAgent = result[0].getName().getLocalName();
 						envFound = true;
 						cmd = new Command(getAddress(), "/" + Constants.FRAMEWORK_NAME + "/" + Constants.ENVIRONMENT_AGENT, Constants.CMD_AGENT_REGISTER);
+						cmd.addParameter(Constants.PARAM_POSITION, parameters.get(Constants.PARAM_POSITION, "(0;0;0)"));
 						sendCommand(cmd);
 					} else {
 						// TODO jeito ruim de ficar tentando registrar o Agente
-						MusicalAgent.logger.info("[" + getAgent().getAgentName() + "] " + "Environment Agent not found! Trying again...");
+//						MusicalAgent.logger.info("[" + getAgent().getAgentName() + "] " + "Environment Agent not found! Trying again...");
 						Thread.sleep(500);
 					}
 				}
@@ -426,7 +423,7 @@ public class MusicalAgent extends MMSAgent {
 			
 			String compName = cmd.getParameter("NAME");
 			String compClass = cmd.getParameter("CLASS");
-			Parameters parameters = Parameters.parse(cmd.getParameter("PARAMETERS"));
+			Parameters parameters = cmd.getUserParameters();
 			if (compName != null && compClass != null) {
 				addComponent(compName, compClass, parameters);
 			} else {
@@ -484,7 +481,7 @@ public class MusicalAgent extends MMSAgent {
 				}
 			}
 
-			MusicalAgent.logger.info("[" + getAgentName() + "] " + "EventHandler '" + comp.getComponentName() + "' registered");
+//			MusicalAgent.logger.info("[" + getAgentName() + "] " + "EventHandler '" + comp.getComponentName() + "' registered");
 
 			
 		} else if (command.equals(Constants.CMD_EVENT_DEREGISTER_ACK)) {
@@ -621,7 +618,7 @@ public class MusicalAgent extends MMSAgent {
 				numberReasoningReady = 0;
 				numberEventsSent = 0;
 				
-				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Enviei fim de turno");
+//				MusicalAgent.logger.info("[" + getAgentName() + "] " + "Enviei fim de turno");
 				
 			}
 			
@@ -681,7 +678,7 @@ public class MusicalAgent extends MMSAgent {
 		@Override
 		public void action() {
 			
-			MusicalAgent.logger.info("[" + getAgent().getAgentName() + " Killing agent '" + getAgent().getAgentName() + "'");
+//			MusicalAgent.logger.info("[" + getAgent().getAgentName() + " Killing agent '" + getAgent().getAgentName() + "'");
 			// Calls JADE finalization method
 			doDelete();
 			
@@ -696,7 +693,7 @@ public class MusicalAgent extends MMSAgent {
 		
 		numberEventHandlersRegistered++;
 		
-		MusicalAgent.logger.info("[" + this.getAgentName() + "] " + "Component " + compName + " registered");
+//		MusicalAgent.logger.info("[" + this.getAgentName() + "] " + "Component " + compName + " registered");
 
 	}
 	
@@ -708,7 +705,7 @@ public class MusicalAgent extends MMSAgent {
 		
 		numberEventHandlersRegistered--;
 		
-		MusicalAgent.logger.info("[" + this.getAgentName() + "] " + "Component " + compName + " deregistered");
+//		MusicalAgent.logger.info("[" + this.getAgentName() + "] " + "Component " + compName + " deregistered");
 
 	}
 

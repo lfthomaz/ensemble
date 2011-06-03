@@ -53,6 +53,8 @@ public final class Constants {
 	public static final String 	PARAM_MEMORY	 		= "MEMORY";
 	public static final String 	PARAM_REL_POS 			= "RELATIVE_POSITION";
 	
+	public static final String 	PARAM_POSITION 			= "POSITION";
+	
 	// Parâmetros da troca de evento periódica
 	public static final String	PARAM_START_TIME		= "START_TIME";
 	public static final String	PARAM_WORKING_FRAME		= "WORKING_FRAME";
@@ -111,5 +113,5 @@ public final class Constants {
 	public static final String REP_TYPE_INPUT			= "INPUT";
 	public static final String REP_TYPE_OUTPUT			= "OUTPUT";
 	public static final String REP_TYPE_PARAMETERS  	= "PARAMETERS";
-	
+
 }

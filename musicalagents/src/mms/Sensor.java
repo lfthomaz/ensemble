@@ -25,7 +25,7 @@ public class Sensor extends EventHandler implements Sensing {
 		cmd.addParameter("CLASS", this.getClass().toString());
 		cmd.addParameter("TYPE", getComponentType());
 		cmd.addParameter("EVT_TYPE", parameters.get("EVT_TYPE"));
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 
 		if (!super.start()) {
@@ -80,7 +80,7 @@ public class Sensor extends EventHandler implements Sensing {
 	
 	// Método chamado pelo Comm ao receber um evento
 	public void sense(Event evt) {
-
+		
 		if (status == EH_STATUS.REGISTERED && evt.eventType.equals(eventType)) {
 //			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Event received");
 //			System.out.println("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Event received - " + evt.objContent);
@@ -102,7 +102,7 @@ public class Sensor extends EventHandler implements Sensing {
 				}
 //				System.out.println("[" + getAgent().getAgentName() + "] Guardei na memória um evento no instante " + evt.instant + " de duração " + evt.duration);
 			} catch (MemoryException e1) {
-				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+//				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
 			}
 			
 			// Avisar os raciocínios registrados
@@ -120,7 +120,7 @@ public class Sensor extends EventHandler implements Sensing {
 				sendCommand(cmd);
 			}
 			
-			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Processei evento " + evt.timestamp);
+//			MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Processei evento " + evt.timestamp);
 		}
 		else if (evt.eventType.equals(eventType)) {
 			// Stores this event for later, since it was sent between the REGSITER-EVENT and REGISTER-EVENT-ACK

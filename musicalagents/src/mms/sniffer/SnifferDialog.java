@@ -126,7 +126,6 @@ public class SnifferDialog extends JDialog implements TableModelListener {
 			});
 			btnInsert.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					txtName.setText(String.valueOf(tableModel.getRowCount()));
 					tableModel.addRow(new String[] {"",""});
 				}
 			});

@@ -26,7 +26,7 @@ public class JACKServerService extends BaseService {
 
 	//----------------------------------------------------------
 	// Log
-	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
 	//----------------------------------------------------------
 	// Service name

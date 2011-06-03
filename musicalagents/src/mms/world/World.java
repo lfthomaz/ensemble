@@ -131,13 +131,13 @@ public class World implements LifeCycle, RouterClient {
 		}
 		
 //		System.out.println("[WORLD] " + "Initialized");
-		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":WORLD] " + "Initialized");
+//		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":WORLD] " + "Initialized");
 		
 		Command cmd = new Command(getAddress(), "/console", "CREATE");
 		cmd.addParameter("AGENT", envAgent.getAgentName());
 		cmd.addParameter("WORLD", Constants.WORLD);
 		cmd.addParameter("CLASS", this.getClass().toString());
-		cmd.addParameter("PARAMETERS", parameters.toString());
+		cmd.addUserParameters(parameters);
 		sendCommand(cmd);
 		
 		return true;
@@ -173,13 +173,14 @@ public class World implements LifeCycle, RouterClient {
 
 		    	// Checks for defaults attributes for an entity
 		    	// TODO ISSO NÃO VALE PARA O LM!!!
-		    	Vector position = null;
-		    	if (parameters.containsKey("POSITION")) {
-		    		position = Vector.parse(parameters.get("POSITION"));
-		    	} else {
-		    		position = new Vector(dimensions);
+		    	Vector position = new Vector(dimensions);
+		    	if (parameters.containsKey(Constants.PARAM_POSITION)) {
+		    		Vector position_1 = Vector.parse(parameters.get(Constants.PARAM_POSITION));
+		    		for (int i = 0; i < position_1.dimensions || i < position.dimensions; i++) {
+						position.setValue(i, position_1.getValue(i));
+					}
 		    	}
-	    		state.attributes.put("POSITION", position);
+	    		state.attributes.put(Constants.PARAM_POSITION, position);
 	    		
 	    		// Calls user implemented method
 	    		entityAdded(entityName);
@@ -301,7 +302,7 @@ public class World implements LifeCycle, RouterClient {
     	if (entities.containsKey(entityName)) {
     		return (entities.get(entityName)).getEntityStateAttribute(attribute);
     	} else {
-    		return "";
+    		return null;
     	}
     	
     }

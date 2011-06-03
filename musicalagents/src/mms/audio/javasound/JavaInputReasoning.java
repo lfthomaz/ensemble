@@ -51,7 +51,7 @@ public class JavaInputReasoning extends Reasoning {
 		AudioFormat audioFormat = new AudioFormat(44100f, 16, 1, true, false);
 		DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
 		if (!AudioSystem.isLineSupported(info)) {
-			getAgent().logger.severe("[" + getComponentName() + "] " + "Line not supported");
+//			getAgent().logger.severe("[" + getComponentName() + "] " + "Line not supported");
 			return false;
 		}
 		try
@@ -62,7 +62,7 @@ public class JavaInputReasoning extends Reasoning {
 		}
 		catch (LineUnavailableException e)
 		{
-			getAgent().logger.severe("[" + getComponentName() + "] " + "Line not available");
+//			getAgent().logger.severe("[" + getComponentName() + "] " + "Line not available");
 			return false;
 		}
 		return true;

@@ -14,7 +14,7 @@ public class CommDirectService extends BaseService {
 
 	//----------------------------------------------------------
 	// Log
-	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
+//	private static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 	
 	//----------------------------------------------------------
 	// Nome do servi�o
