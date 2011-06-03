@@ -254,6 +254,11 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 		
 		System.out.println("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "Finalized");
 		
+		cmd = new Command(getAddress(), "/console", "DESTROY");
+		cmd.addParameter("AGENT", Constants.ENVIRONMENT_AGENT);
+		cmd.addParameter("EVENT_SERVER", getEventType());
+		sendCommand(cmd);
+		
 		return true;
 		
 	}

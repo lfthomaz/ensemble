@@ -3,6 +3,7 @@ package mms.audio.jack;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import jade.core.ServiceException;
@@ -25,10 +26,11 @@ public class JACKOutputReasoning extends Reasoning {
 
 	// JACK
 	JACKServerHelper jack; 
-	double 						callbackStartTime, period;
-	double 						step = 1/44100.0;
+	double 			callbackStartTime, period;
+	double 			step = 1/44100.0;
 	
 	HashMap<String,String> mapping = new HashMap<String, String>();
+	ArrayList<String> registered_ports = new ArrayList<String>();
 	
 	// Sensor
 	// TODO Por enquanto, só permite uma porta por reasoning
@@ -64,6 +66,11 @@ public class JACKOutputReasoning extends Reasoning {
 	@Override
 	public boolean finit() {
 
+		for (String portName : registered_ports) {
+			jack.unregisterPort(getComponentName(), portName);
+		}
+		registered_ports.clear();
+		
 		return true;
 		
 	}
@@ -80,6 +87,7 @@ public class JACKOutputReasoning extends Reasoning {
 				earMemory = getAgent().getKB().getMemory(ear.getComponentName());
 				// Creats a JACK client
 				jack.registerOutputPort(getComponentName(), sensorName, mapping.get(sensorName), new Process());
+				registered_ports.add(sensorName);
 			}
 		}
 		
@@ -87,9 +95,12 @@ public class JACKOutputReasoning extends Reasoning {
 
 	@Override
 	protected void eventHandlerDeregistered(EventHandler evtHdl) {
-		String sensorName = evtHdl.getComponentName();
-		if (mapping.containsKey(sensorName)) {
-////		helper.unregisterPort("system:playback_1");
+		if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
+			String sensorName = evtHdl.getComponentName();
+			if (registered_ports.contains(sensorName)) {
+				jack.unregisterPort(getComponentName(), sensorName);
+				registered_ports.remove(sensorName);
+			}
 		}
 	}
 	
@@ -127,6 +138,5 @@ public class JACKOutputReasoning extends Reasoning {
 		}
 
 	};
-
 	
 }

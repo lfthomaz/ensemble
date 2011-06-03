@@ -33,7 +33,7 @@ public class MovementReasoning extends Reasoning {
 	private ArrayList<Double> 	time_constrains = new ArrayList<Double>();
 	private boolean 			loop = false;
 	private int					active_waypoint = 0;;
-	private double 				precision = 0.5;
+	private double 				precision = 0.25;
 	private double 				last_distance = 0.0;
 	private double 				total_distance = 0.0;
 	private Vector 				last_acc;
@@ -100,16 +100,23 @@ public class MovementReasoning extends Reasoning {
 	public void processCommand(Command cmd) {
 		
 		if (cmd.getCommand().equals(MovementConstants.CMD_WALK)) {
-			if (cmd.containsParameter(MovementConstants.PARAM_POS) && cmd.containsParameter("TIME")) {
+			if (cmd.containsParameter(MovementConstants.PARAM_POS) && cmd.containsParameter(MovementConstants.PARAM_TIME)) {
 				System.out.println("[" + getAgent().getAgentName() + "] Walking...");
 				waypoints.clear();
 				time_constrains.clear();
 				active_waypoint = 0;
 				last_distance = 0;
 				loop = false;
-				time_constrains.add(Double.valueOf(cmd.getParameter("TIME")));
+				time_constrains.add(Double.valueOf(cmd.getParameter(MovementConstants.PARAM_TIME)));
 				waypoints.add(Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS)));
 			}
+		}
+		else if (cmd.getCommand().equals(MovementConstants.CMD_STOP)) {
+			System.out.println("[" + getAgent().getAgentName() + "] Stoping...");
+			waypoints.clear();
+			time_constrains.clear();
+			active_waypoint = 0;
+			sendStopCommand();
 		}
 		
 	}
@@ -122,6 +129,8 @@ public class MovementReasoning extends Reasoning {
 			Command cmd = Command.parse(str);
 			if (cmd != null) {
 				actual_pos = Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS));
+				actual_vel = Vector.parse(cmd.getParameter(MovementConstants.PARAM_VEL));
+				actual_ori = Vector.parse(cmd.getParameter(MovementConstants.PARAM_ORI));
 			}
 		}
 

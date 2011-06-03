@@ -46,6 +46,7 @@ public class AudioFileInputReasoning extends Reasoning {
 			in = new AudioInputFile(filename, true);
 		} catch (Exception e) {
 //			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + filename);
+			System.out.println("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Error in opening the file " + filename);
 			return false;
 		}
 		

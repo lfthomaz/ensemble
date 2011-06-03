@@ -146,11 +146,18 @@ public class World implements LifeCycle, RouterClient {
     
 	@Override
 	public final boolean stop() {
+
 		// Terminates world laws
 		for (String lawName : laws.keySet()) {
 			Law law = (Law)(laws.get(lawName));
 			law.stop();
 		}
+		
+		Command cmd = new Command(getAddress(), "/console", "DESTROY");
+		cmd.addParameter("AGENT", Constants.ENVIRONMENT_AGENT);
+		cmd.addParameter("WORLD", Constants.WORLD);
+		sendCommand(cmd);
+
 		return true;
 	}
 	
@@ -175,9 +182,18 @@ public class World implements LifeCycle, RouterClient {
 		    	// TODO ISSO NÃO VALE PARA O LM!!!
 		    	Vector position = new Vector(dimensions);
 		    	if (parameters.containsKey(Constants.PARAM_POSITION)) {
-		    		Vector position_1 = Vector.parse(parameters.get(Constants.PARAM_POSITION));
-		    		for (int i = 0; i < position_1.dimensions || i < position.dimensions; i++) {
-						position.setValue(i, position_1.getValue(i));
+		    		String str_pos = parameters.get(Constants.PARAM_POSITION);
+					if (str_pos.equals("random")) {
+						for (int i = 0; i < dimensions; i++) {
+							position.setValue(i, Math.random() * form_size - form_size_half);
+						}
+					} else {
+			    		Vector position_1 = Vector.parse(str_pos);
+			    		if (position_1 != null) {
+				    		for (int i = 0; i < position_1.dimensions && i < position.dimensions; i++) {
+								position.setValue(i, position_1.getValue(i));
+							}
+			    		}
 					}
 		    	}
 	    		state.attributes.put(Constants.PARAM_POSITION, position);

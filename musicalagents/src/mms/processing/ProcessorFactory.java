@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import mms.Parameters;
+import mms.audio.file.AudioInputFile;
 import mms.processing.audio.Aubio_FFT;
 import mms.processing.audio.Aubio_Onset;
 import mms.processing.audio.Aubio_PhaseVocoder;
@@ -12,7 +13,6 @@ import mms.processing.audio.Aubio_PitchDetection;
 import mms.processing.audio.LibXtract_FFT;
 import mms.processing.audio.LibXtract_RMS;
 import mms.processing.audio.OnsetsDS;
-import mms.tools.AudioInputFile;
 
 // TODO Mem�ria para guardar os �ltimos frames, utilizados em processamentos com janela deslizantes
 public class ProcessorFactory {

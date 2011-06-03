@@ -402,7 +402,7 @@ public class EnvironmentAgent extends MMSAgent {
 	protected final void processControlCommand(Command cmd) {
 
 		String command = cmd.getCommand();
-
+		
 		if (command.equals(Constants.CMD_START_SIMULATION)) {
 
 			// TODO Deve habilitar todos os start(), inclusive dos agentes musicais!

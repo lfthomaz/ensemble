@@ -11,6 +11,8 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.sun.jmx.remote.internal.ClientNotifForwarder;
+
 import mms.MMSAgent;
 import mms.MusicalAgent;
 import mms.audio.jack.JACKInfo.PortType;
@@ -95,7 +97,7 @@ public class JACKServerService extends BaseService {
 			info.type = PortType.OUTPUT;
 			
 			// Starts the JACK client
-			info.client_name = "mms_" + agentName+ "_" + component;
+			info.client_name = "mms_" + agentName + "_" + component;
 			info.client = mmsjack.jack_client_open(info.client_name, cb);
 			if (info.client == null) {
 				System.err.println("[" + getName() + "] JACK server not running... JACK will not be available!");
@@ -132,6 +134,8 @@ public class JACKServerService extends BaseService {
 					return false;
 				}
 			}
+			
+			infos.put(info.client_name, info);
 			
 			return true;
 			
@@ -191,8 +195,9 @@ public class JACKServerService extends BaseService {
 			String client_name = "mms_" + agentName + "_" + component; 
 			if (infos.containsKey(client_name)) {
 				JACKInfo info = infos.get(client_name);
-				mmsjack.jack_port_unregister(info.client, info.port);
+				mmsjack.jack_client_close(info.client);
 			}
+			infos.remove(client_name);
 			return true;
 		}
 

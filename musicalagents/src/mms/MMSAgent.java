@@ -19,7 +19,7 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 	 */
 //	public static final Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
 
-//	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+	ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
 	private ReceiveCommand rcvCmdBehavior;
 	
 	/**
@@ -45,6 +45,18 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 		this.parameters = parameters;
 	}
 	
+	public final String getParameter(String key) {
+		return parameters.get(key);
+	}
+	
+	public final String getParameter(String key, String defaultValue) {
+		if (parameters.containsKey(key)) {
+			return parameters.get(key);
+ 		} else {
+ 			return defaultValue;
+ 		}
+	}
+
 	/** 
 	 * Clock Service
 	 */
@@ -108,7 +120,7 @@ public abstract class MMSAgent extends Agent implements LifeCycle, RouterClient 
 			this.doDelete();
 		}
 		rcvCmdBehavior = new ReceiveCommand(this);
-		this.addBehaviour(rcvCmdBehavior);
+		this.addBehaviour(tbf.wrap(rcvCmdBehavior));
 		
 		// 3. Executa o método de configuração do usuário
 		configure();

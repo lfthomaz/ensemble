@@ -784,7 +784,6 @@ public class Sniffer extends Agent implements RouterClient {
 					if (compNode.toString().equals(compName)) {
 						break;
 					}
-					compNode = null;
 				}
 				if (compNode == null) {
 					System.err.println("[Sniffer] ERROR: component does not exist!");
@@ -806,7 +805,6 @@ public class Sniffer extends Agent implements RouterClient {
 					if (esNode.toString().equals(esName)) {
 						break;
 					}
-					esNode = null;
 				}
 				if (esNode == null) {
 					System.err.println("[Sniffer] ERROR: component does not exist!");
@@ -867,7 +865,33 @@ public class Sniffer extends Agent implements RouterClient {
 						return;
 					}
 				}
-			} 
+			}
+			else if (cmd.containsParameter("EVENT_SERVER")) {
+				// Searches for comp's node
+				DefaultMutableTreeNode esNode = null;
+				String esName = cmd.getParameter("EVENT_SERVER");
+				for (int i = 0; i < agentNode.getChildCount(); i++) {
+					esNode = (DefaultMutableTreeNode)agentNode.getChildAt(i);
+					if (esNode.toString().equals(esName)) {
+						treeModel.removeNodeFromParent(esNode);
+						tree.setSelectionPath(new TreePath(agentNode.getPath()));
+						return;
+					}
+				}
+			}
+			else if (cmd.containsParameter("WORLD")) {
+				// Searches for comp's node
+				DefaultMutableTreeNode esNode = null;
+				String esName = cmd.getParameter("WORLD");
+				for (int i = 0; i < agentNode.getChildCount(); i++) {
+					esNode = (DefaultMutableTreeNode)agentNode.getChildAt(i);
+					if (esNode.toString().equals(esName)) {
+						treeModel.removeNodeFromParent(esNode);
+						tree.setSelectionPath(new TreePath(agentNode.getPath()));
+						return;
+					}
+				}
+			}
 			// If it is an agent
 			else {
 				treeModel.removeNodeFromParent(agentNode);

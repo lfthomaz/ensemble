@@ -28,7 +28,7 @@
 			<FACT NAME="filename" VALUE="" PUBLIC="false" />
 		</KB>
 		<COMPONENTS>
-			<REASONING NAME="AudioReasoning" CLASS="mms.apps.rt.RT_Reasoning" />
+			<REASONING NAME="AudioReasoning" CLASS="mms.audio.file.AudioFileInputReasoning" />
 			<ACTUATOR NAME="Mouth" CLASS="mms.Actuator" EVENT_TYPE="AUDIO" COMM="mms.comm.direct.CommDirect" />
 		</COMPONENTS>
 	</MUSICAL_AGENT_CLASS>

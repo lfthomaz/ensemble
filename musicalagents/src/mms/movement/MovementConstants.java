@@ -17,5 +17,6 @@ public class MovementConstants {
 	public static final String PARAM_ANG_VEL	= "ANG_VEL";
 	public static final String PARAM_DUR 		= "DUR";
 	public static final String PARAM_ORI 		= "ORI";
+	public static final String PARAM_TIME 		= "TIME";
 
 }

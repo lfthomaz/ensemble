@@ -6,10 +6,7 @@ import java.util.Set;
 
 import jade.util.Logger;
 
-
-import mms.Constants;
 import mms.EventHandler;
-import mms.MusicalAgent;
 import mms.Reasoning;
 import mms.Sensor;
 import mms.audio.AudioConstants;
@@ -18,7 +15,6 @@ import mms.memory.Memory;
 import mms.tools.AudioTools;
 import mmsportaudio.PaCallback;
 import mmsportaudio.PaDeviceInfo;
-import mmsportaudio.PaStreamInfo;
 import mmsportaudio.PaStreamParameters;
 import mmsportaudio.portaudio;
 
@@ -70,6 +66,12 @@ public class PAOutputReasoning extends Reasoning {
 	@Override
 	public boolean finit() {
 
+		Set<Long> streams = streams_sensors.keySet();
+		for (Long stream : streams) {
+			pa.Pa_StopStream(stream);
+			pa.Pa_CloseStream(stream);
+		}
+		
 		portaudio.deleteInstance();
 		
 		return true;

@@ -141,7 +141,7 @@ public class Command {
 		
 		if (command == null || command.trim().equals("")) {
 			System.out.println("[ERROR] toString() - Malformed command!");
-			System.exit(-1);
+			return null;
 		}
 		
 		String ret = command;

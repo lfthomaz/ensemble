@@ -75,6 +75,11 @@ public class RouterAgent extends Agent {
 
 	public void processCommand(Command cmd) {
 
+		if (cmd.getRecipient() == null || cmd.getSender() == null || cmd.getCommand() == null) {
+			System.err.println("[" + getName() + "] Command contains NULL objects");
+			return;
+		}
+		
         // Verifies the destination of the command
         String[] str = cmd.getRecipient().split("/");
         if (str.length < 2) {
@@ -180,7 +185,8 @@ public class RouterAgent extends Agent {
 				sb.append(" ");
 			}
 			Command cmd = Command.parse(sb.toString());
-			cmd.addParameter("recipient", m.getName());
+			cmd.setRecipient(m.getName());
+			cmd.setSender("/osc");
 			processCommand(cmd);
 		}
 		

@@ -93,24 +93,12 @@ public class MovementEventServer extends EventServer {
 		movState.instant = clock.getCurrentTime(TimeUnit.SECONDS);
 
 		// Get the initial parameters
-		if (userParam.containsKey(MovementConstants.PARAM_POS)) {
-			String pos = userParam.get(MovementConstants.PARAM_POS) ;
-			if (pos.equals("random")) {
-				movState.position = new Vector();
-				for (int i = 0; i < world.dimensions; i++) {
-					movState.position.setValue(i, Math.random() * world.form_size - world.form_size_half);
-				}
-			} else {
-				movState.position = Vector.parse(pos);
-			}
+		// Verifies if there is an initial position for the entity and writes it in the memory
+		Vector position = (Vector)world.getEntityStateAttribute(agentName, Constants.PARAM_POSITION);
+		if (position != null) { 
+			movState.position = position;
 		} else {
-			// Verifies if there is an initial position for the entity and writes it in the memory
-			Vector position = (Vector)world.getEntityStateAttribute(agentName, "POSITION");
-			if (position != null) { 
-				movState.position = position;
-			} else {
-				movState.position = new Vector(world.dimensions);
-			}
+			movState.position = new Vector(world.dimensions);
 		}
 		if (userParam.containsKey(MovementConstants.PARAM_VEL)) {
 			movState.velocity = Vector.parse(userParam.get(MovementConstants.PARAM_VEL));

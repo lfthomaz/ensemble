@@ -37,15 +37,13 @@
   <!-- ********** MUSICAL AGENT INSTANCES ********** -->
 
 	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="1" >
-		<ARG_COMP COMP="DummySensor" NAME="pos" VALUE="(2;-10;0)" />
-		<ARG_COMP COMP="DummySensor" NAME="vel" VALUE="(0;0;0)" />
+		<ARG NAME="POSITION" VALUE="(2;-10;0)" />
 		<ARG_COMP COMP="DummyReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
 	</MUSICAL_AGENT>
 
 	<MUSICAL_AGENT NAME="Dummy_2" CLASS="DUMMY" QUANTITY="1" >
 		<FACT NAME="filename" VALUE="bla_2.wav" />
-		<ARG_COMP COMP="DummySensor" NAME="pos" VALUE="(2;-10;0)" />
-		<ARG_COMP COMP="DummySensor" NAME="vel" VALUE="(0;0;0)" />
+		<ARG NAME="POSITION" VALUE="(10;-2;0)" />
 		<ARG_COMP COMP="DummyReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
 	</MUSICAL_AGENT>
 </MMS>

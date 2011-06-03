@@ -39,17 +39,20 @@
 #X msg 716 -171 symbol Guitarist;
 #X symbolatom 700 -140 10 0 0 0 - - -;
 #X obj 20 221 s osc;
-#X msg 428 187 send /mms/Listener_1/MovementReasoning WALK :POS (12
+#X msg 541 154 send /mms/Listener_1/MovementReasoning WALK :POS (12
 5 0) :TIME 2;
 #X msg 195 267 send /mms/ENVIRONMENT/MOVEMENT STOP :AGENT Ambulance
 ;
-#X msg 185 229 send /mms/ENVIRONMENT/MOVEMENT WALK :AGENT Ambulance
+#X msg 550 197 send /mms/Listener_1/MovementReasoning STOP;
+#X msg 185 229 send /mms/ENVIRONMENT/MOVEMENT WALK :AGENT Listener_1
 :ACC (0 1 0);
+#X obj 67 222 print osc_snd;
 #X connect 0 0 4 0;
 #X connect 1 0 3 0;
 #X connect 3 0 2 0;
 #X connect 3 0 0 0;
 #X connect 4 0 34 0;
+#X connect 4 0 39 0;
 #X connect 6 0 7 0;
 #X connect 7 0 5 0;
 #X connect 9 0 5 0;
@@ -81,3 +84,4 @@
 #X connect 35 0 10 0;
 #X connect 36 0 10 0;
 #X connect 37 0 10 0;
+#X connect 38 0 10 0;

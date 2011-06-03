@@ -9,6 +9,6 @@ public interface JACKServerHelper extends ServiceHelper {
 	
 	public boolean registerOutputPort(String component, String portName, String connectPort, JACKCallback cb);
 
-	public boolean unregisterPort(String component, String name);
+	public boolean unregisterPort(String component, String portName);
 
 }

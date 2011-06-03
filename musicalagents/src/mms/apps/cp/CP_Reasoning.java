@@ -1,12 +1,12 @@
 package mms.apps.cp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import mms.Actuator;
 import mms.Command;
 import mms.Constants;
 import mms.EventHandler;
-import mms.MusicalAgent;
 import mms.Parameters;
 import mms.Reasoning;
 import mms.Sensor;
@@ -50,6 +50,7 @@ public class CP_Reasoning extends Reasoning {
 	private AudioInputFile 	in;
 	private float 			sampleRate;
 	private double[] 		wavetable;
+	private double 			wavetable_gain = 1.0;
 	
 	// Audio Processor - Onset Detection
 	private Processor 		onsetproc;
@@ -74,7 +75,7 @@ public class CP_Reasoning extends Reasoning {
 	int 		actual_phase = 0;
 
 	Vector 		master_position = new Vector(0,0,0);
-	Vector 		start_position;
+	Vector 		start_position = null;
 	double 		radius;
 	
 	// Listening Variables;
@@ -126,6 +127,12 @@ public class CP_Reasoning extends Reasoning {
 			} catch (Exception e) {
 				System.err.println("'slide' argument is not a valid number!");
 			}
+		}
+		
+		if (start_position == null) {
+			start_position = Vector.parse(getAgent().getParameter(Constants.PARAM_POSITION));
+			radius = start_position.getDistance(master_position);
+			System.out.println("start_position: " + start_position);
 		}
 		
 		// Opens the audio file and imports it as a wavetable
@@ -246,6 +253,10 @@ public class CP_Reasoning extends Reasoning {
 
 		double start = System.currentTimeMillis();
 		
+		if (master) {
+			System.out.println("needAction()");
+		}
+		
 		// Limpa chunk de saída
 		for (int i = 0; i < chunk.length; i++) {
 			chunk[i] = 0.0f;
@@ -255,22 +266,20 @@ public class CP_Reasoning extends Reasoning {
 
 		case PLAYING:
 			
-			// Calcula os tempos referentes ao ínicio e fim do frame (em ms)
-			if (master) {
-//				System.out.println("instant = " + instant);
-			}
-			
 			if (!(start_playing_time > instant * 1000 && start_playing_time > (instant + duration) * 1000)) {
-			
+				// Calcula os tempos referentes ao ínicio e fim do frame (em ms)
 				long ti = ((long)(instant * 1000) - start_playing_time) % measure_duration;
 				long tf = (ti + frame_duration) % measure_duration;
-				
+//				System.out.println("instant = " + instant);
+//				System.out.println("ti = " + ti);
+//				System.out.println("tf = " + tf);
+
 				// Coloca o resto da wavetable que sobrou da último frame
 				// TODO VERIFICAR PARA O CASO DO WAVETABLE OCUPAR MAIS DE 2 FRAMES ou 2 batidas com intervalo pequeno entre elas
 				if (next_sample_play > 0) {
 					int samples_to_copy = Math.min(chunk_size, wavetable.length - next_sample_play);
 					for (int j = 0; j < samples_to_copy; j++) {
-						chunk[j] = wavetable[next_sample_play++];
+						chunk[j] = wavetable_gain * wavetable[next_sample_play++];
 					}
 					if (next_sample_play >= wavetable.length) {
 						next_sample_play = 0;
@@ -285,9 +294,9 @@ public class CP_Reasoning extends Reasoning {
 						long tm = beat_value - ti;
 						int start_sample = (int)(Math.floor(sampleRate * tm)/1000);
 						int samples_to_copy = Math.min(chunk_size - start_sample, wavetable.length);
-	//					System.out.println("samples_to_copy = " + samples_to_copy);
+						wavetable_gain = (i==0 ? 2 : 1);
 						for (int j = 0; j < samples_to_copy; j++) {
-							chunk[j + start_sample] += (i==0 ? 2 : 1) * wavetable[j];
+							chunk[j + start_sample] += wavetable_gain * wavetable[j];
 							next_sample_play++;
 						} 
 						// Se não coube tudo, marca a posição para copiar no próximo frame
@@ -300,6 +309,7 @@ public class CP_Reasoning extends Reasoning {
 				
 				// Mudança de compasso dentro deste frame
 				if (tf < ti) {
+					System.out.println("mudança de compasso");
 					// atualiza o contador
 					measure_counter++;
 //					System.out.println("Tem começo de compasso!!!");
@@ -315,6 +325,7 @@ public class CP_Reasoning extends Reasoning {
 							int index = (i + actual_phase) % beats_size;
 							long beat = detected_beats_time.get(index) - detected_beats_time.get(0);
 							beats.add((beat + measure_duration - (actual_phase * beat_duration)) % measure_duration);
+							Collections.sort(beats);
 						}
 						System.out.print("\tbeats = [");
 						for (int i = 0; i < beats.size(); i++) {
@@ -441,18 +452,6 @@ public class CP_Reasoning extends Reasoning {
 				
 			}
 		
-		} else if (sourceSensor == eyes) {
-
-			if (start_position == null) {
-				String str = (String)eyesMemory.readMemory(instant, TimeUnit.SECONDS);
-				Command cmd = Command.parse(str);
-				if (cmd != null) {
-					start_position = Vector.parse(cmd.getParameter("POS"));
-					radius = start_position.getDistance(master_position);
-//					System.out.println("start_position: " + start_position);
-				}
-			}
-			
 		}
 		
 	}
@@ -513,8 +512,8 @@ public class CP_Reasoning extends Reasoning {
 //					System.out.println(radius);
 					double x = master_position.getValue(0) + (radius * Math.cos(angle));
 					double y = master_position.getValue(1) + (radius * Math.sin(angle));
-					cmd.addParameter("POS", "("+x+";"+y+";0)");
-					cmd.addParameter("TIME", "1");
+					cmd.addParameter(MovementConstants.PARAM_POS, "("+x+";"+y+";0)");
+					cmd.addParameter(MovementConstants.PARAM_TIME, "1");
 					sendCommand(cmd);
 					System.out.println(getAgent().getAgentName() + " new destination =  " + "("+x+";"+y+";0)");
 //					String x = actual_phase == 0 || actual_phase == 3 ? "20" : "-20"; 
