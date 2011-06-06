@@ -33,7 +33,7 @@ public class MovementReasoning extends Reasoning {
 	private ArrayList<Double> 	time_constrains = new ArrayList<Double>();
 	private boolean 			loop = false;
 	private int					active_waypoint = 0;;
-	private double 				precision = 0.25;
+	private double 				precision = 0.5;
 	private double 				last_distance = 0.0;
 	private double 				total_distance = 0.0;
 	private Vector 				last_acc;
@@ -149,16 +149,16 @@ public class MovementReasoning extends Reasoning {
 				}
 				// Cheguei?
 				if (actual_distance < precision) {
-//					System.out.println("Cheguei no waypoint " + active_waypoint + " - " + waypoints.get(active_waypoint));
+					System.out.println("Cheguei no waypoint " + active_waypoint + " - " + waypoints.get(active_waypoint));
 					// Parar o agente
 					sendStopCommand();
 					// Mudar o waypoint
 					last_distance = 0.0;
 					active_waypoint++;
-//					System.out.println("active wp = " + active_waypoint);
+					System.out.println("active wp = " + active_waypoint);
 					if (active_waypoint == waypoints.size() && loop) {
 						active_waypoint = 0;
-					} else {
+					} else if (active_waypoint == waypoints.size() && !loop) {
 						waypoints.clear();
 						time_constrains.clear();
 					}

@@ -206,7 +206,6 @@ public class Sniffer extends Agent implements RouterClient {
 					cmd.addParameter("CLASS", dialog.txtClass.getText());
 					for (int i = 0; i < dialog.tableModel.getRowCount(); i++) {
 						cmd.addUserParameter((String)dialog.tableModel.getValueAt(i, 0), (String)dialog.tableModel.getValueAt(i,1));
-						System.out.println("HMPF: " + (String)dialog.tableModel.getValueAt(i,1));
 					}
 					sendCommand(cmd);
 				}
