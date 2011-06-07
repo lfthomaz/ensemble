@@ -23,7 +23,7 @@
 			<ARG NAME="INTERPOLATION_MODE" VALUE="POLYNOMIAL" />
 			<ARG NAME="NUMBER_POINTS" VALUE="3" />
 		</EVENT_SERVER>
-		<EVENT_SERVER CLASS="mms.movement.MovementEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="100 0" />
+		<EVENT_SERVER CLASS="mms.movement.MovementEventServer" COMM="mms.comm.direct.CommDirect" PERIOD="50 0" />
 	</ENVIRONMENT_AGENT_CLASS>
 	
   <!-- ********** MUSICAL AGENT CLASSES ********** -->
@@ -77,9 +77,9 @@
 
 	<MUSICAL_AGENT NAME="F2" CLASS="MUSICIAN">
 		<FACT NAME="role" VALUE="slave" />
-		<FACT NAME="wavetable" VALUE="media/clap.wav" />
+		<FACT NAME="wavetable" VALUE="media/woodblock_high.wav" />
 		<FACT NAME="phase" VALUE="1" />
-		<FACT NAME="slide" VALUE="1" />
+		<FACT NAME="slide" VALUE="2" />
 		<ARG NAME="POSITION" VALUE="(4;0;0)" />
 	</MUSICAL_AGENT>
 
