@@ -33,7 +33,7 @@ public class MovementReasoning extends Reasoning {
 	private ArrayList<Double> 	time_constrains = new ArrayList<Double>();
 	private boolean 			loop = false;
 	private int					active_waypoint = 0;;
-	private double 				precision = 0.5;
+	private double 				precision = 0.1;
 	private double 				last_distance = 0.0;
 	private double 				total_distance = 0.0;
 	private Vector 				last_acc;

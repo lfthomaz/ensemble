@@ -191,6 +191,13 @@ public class EventMemory extends Memory {
 		
 	}
 	
+	@Override
+	public void writeMemory(Object object, double instant, TimeUnit unit) throws MemoryException {
+
+		writeMemory(object, instant, 0, TimeUnit.SECONDS);
+	
+	}
+	
 	public void writeMemory(Object object) throws MemoryException {
 		
 		double instant = clock.getCurrentTime(TimeUnit.SECONDS);

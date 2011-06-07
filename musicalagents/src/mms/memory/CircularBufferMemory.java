@@ -117,6 +117,10 @@ public class CircularBufferMemory extends Memory {
 	}
 
 	@Override
+	public void writeMemory(Object object, double instant, TimeUnit unit) throws MemoryException {
+	}
+	
+	@Override
 	public void writeMemory(Object object) throws MemoryException {
 		
 	}

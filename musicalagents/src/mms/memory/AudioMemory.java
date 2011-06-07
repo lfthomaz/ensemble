@@ -26,10 +26,13 @@ public class AudioMemory extends Memory {
 	private final double EPSILON = 1E-9; 
 	private final String MEMORY_TYPE = AudioConstants.EVT_TYPE_AUDIO;
 	
+	private final String PARAM_OVERWRITE = "OVERWRITE";
+	
 	// TODO Musical Agent ou qualquer tipo de Agent?
 	private double		step;
 	private double		startTime;
 	private double		period;
+	private boolean 	overwrite;
 
 	private int samples;
 	private int halfSamples;
@@ -47,6 +50,7 @@ public class AudioMemory extends Memory {
 		this.period = Long.valueOf(parameters.get(Constants.PARAM_PERIOD));
 		this.startTime = Long.valueOf(parameters.get(Constants.PARAM_START_TIME));
 		this.step = Double.valueOf(parameters.get(Constants.PARAM_STEP,"0.0000226757369615"));
+		this.overwrite = Boolean.valueOf(parameters.get(PARAM_OVERWRITE, "FALSE"));
 
 		// Cria a memória
 		// TODO Pode ter OutOfMemory aqui!
@@ -410,11 +414,19 @@ public class AudioMemory extends Memory {
 		// Copia
 		int ptrBufferOld = ptrBuffer;
 //		System.out.print("Escrevi (" + chunk.length + "): " + ptrBuffer);
-		do {
-			buffer[ptrBuffer] = chunk[ptrChunk];
-			ptrChunk++;
-			ptrBuffer = (ptrBuffer+1) % samples;
-		} while (ptrChunk < chunk.length && ptrBuffer != ptrBegin);
+		if (overwrite) {
+			do {
+				buffer[ptrBuffer] = chunk[ptrChunk];
+				ptrChunk++;
+				ptrBuffer = (ptrBuffer+1) % samples;
+			} while (ptrChunk < chunk.length && ptrBuffer != ptrBegin);
+ 		} else {
+ 			do {
+ 				buffer[ptrBuffer] += chunk[ptrChunk];
+ 				ptrChunk++;
+ 				ptrBuffer = (ptrBuffer+1) % samples;
+ 			} while (ptrChunk < chunk.length && ptrBuffer != ptrBegin);
+ 		}
 			
 //		System.out.println("readMemoryAbsolut() duration = " + (System.nanoTime() - start));
 
@@ -422,6 +434,15 @@ public class AudioMemory extends Memory {
 //		System.out.println(" - " + ptrBegin + " - " + ptrChunk + " - " + ptrBuffer);
 	}
 
+	@Override
+		public void writeMemory(Object object, double instant, TimeUnit unit) throws MemoryException {
+			if (object instanceof double[]) {
+				double[] chunk = (double[])object;
+				double duration = (double)chunk.length * step;
+				writeMemory(object, instant, duration, TimeUnit.SECONDS);
+			}
+		}
+	
 	@Override
 	public void writeMemory(Object object) throws MemoryException {
 

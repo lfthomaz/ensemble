@@ -50,23 +50,24 @@ public class CP_Reasoning extends Reasoning {
 	private AudioInputFile 	in;
 	private float 			sampleRate;
 	private double[] 		wavetable;
-	private double 			wavetable_gain = 1.0;
+	private double[] 		wavetable_with_gain;
+	private double 			wavetable_gain = 2.0;
 	
 	// Audio Processor - Onset Detection
 	private Processor 		onsetproc;
 	
 	// Common Variables
 	int 	number_beats;
-	long 	frame_duration;
-	long 	measure_duration;
-	long 	beat_duration;
+	double 	frame_duration;
+	double 	measure_duration;
+	double 	beat_duration;
 	boolean master = false;
 	
 	// Play variables
-	long 		start_time;
-	long 		start_playing_time;
+	double 		start_time;
+	double 		start_playing_time;
 	boolean[] 	pattern;
-	ArrayList<Long> beats = new ArrayList<Long>();
+	ArrayList<Double> beats = new ArrayList<Double>();
 	int 		next_sample_play = 0;
 	int 		measure_counter = 0;
 	int 		phase = 0;
@@ -79,13 +80,10 @@ public class CP_Reasoning extends Reasoning {
 	double 		radius;
 	
 	// Listening Variables;
-	ArrayList<Long> detected_beats_time = new ArrayList<Long>();
+	ArrayList<Double> detected_beats_time = new ArrayList<Double>();
 	ArrayList<Double> detected_beats_energy = new ArrayList<Double>();
 	
 	double error = 0.05; // porcentagem permitida na diferença entre o onset e o suposto lugar da batida
-	
-	// Buffers de trabalho
-	private double[] chunk;
 	
 	@Override
 	public boolean init() {
@@ -107,10 +105,10 @@ public class CP_Reasoning extends Reasoning {
 		
 		String arg_bpm 		= getAgent().getKB().readFact("bpm");
 		try {
-			beat_duration = 60000 / Integer.parseInt(arg_bpm);
+			beat_duration = 60 / Double.parseDouble(arg_bpm);
 		} catch (Exception e) {
 			System.err.println("'bpm' argument does not exists or is not a valid number! Using 120 as default.");
-			beat_duration = 60000 / 120;
+			beat_duration = 60 / 120;
 		}
 		String arg_pattern 	= getAgent().getKB().readFact("pattern");
 		
@@ -142,6 +140,10 @@ public class CP_Reasoning extends Reasoning {
 			sampleRate = in.getSampleRate();
 			// TODO Fazer checagens de tamanho do arquivo
 			wavetable = in.readNextChunk((int)samples);
+			wavetable_with_gain = in.readNextChunk((int)samples);
+			for (int i = 0; i < wavetable.length; i++) {
+				wavetable_with_gain[i] = wavetable_gain * wavetable[i];
+			}
 		} catch (Exception e) {
 //			getAgent().logger.severe("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
 			System.err.println("[" + getComponentName() + "] " + "Error in opening the file " + arg_filename);
@@ -175,10 +177,10 @@ public class CP_Reasoning extends Reasoning {
 			}
 			
 			// Builds the time array of the beats
-			measure_duration = beat_duration * number_beats;
+			measure_duration = Math.round(beat_duration * number_beats * 10000)/10000.0;
 			for (int i = 0; i < pattern.length; i++) {
 				if (pattern[i]) {
-					beats.add(i * beat_duration);
+					beats.add(Math.round(i * beat_duration * 10000)/10000.0);
 				}
 			}
 			
@@ -220,10 +222,9 @@ public class CP_Reasoning extends Reasoning {
 			mouthMemory = getAgent().getKB().getMemory(mouth.getComponentName());
 			chunk_size = Integer.parseInt(mouth.getParameter(Constants.PARAM_CHUNK_SIZE, "0"));
 			start_time = Integer.parseInt(mouth.getParameter(Constants.PARAM_START_TIME, "0"));
-			chunk = new double[chunk_size];
-			frame_duration = (long)Math.floor((float)chunk_size / sampleRate * 1000);
+			frame_duration = chunk_size / sampleRate;
 			if (getAgent().getKB().readFact("role").equals("master")) {
-				start_playing_time = start_time + 2*frame_duration + (long)(Math.random()*(double)frame_duration);
+				start_playing_time = ((double)start_time/1000) + 2*frame_duration + Math.random()*frame_duration;
 				System.out.println("start_playing_time = " + start_playing_time);
 			}
 			
@@ -251,55 +252,40 @@ public class CP_Reasoning extends Reasoning {
 	
 	public void needAction(Actuator sourceActuator, double instant, double duration) {
 
-		double start = System.currentTimeMillis();
-		
-		// Limpa chunk de saída
-		for (int i = 0; i < chunk.length; i++) {
-			chunk[i] = 0.0f;
-		}
-
 		switch (state) {
 
 		case PLAYING:
 			
-			if (!(start_playing_time > instant * 1000 && start_playing_time > (instant + duration) * 1000)) {
+			if (!(start_playing_time > instant && start_playing_time > instant + duration)) {
 				// Calcula os tempos referentes ao ínicio e fim do frame (em ms)
-				long ti = ((long)(instant * 1000) - start_playing_time) % measure_duration;
-				long tf = (ti + frame_duration) % measure_duration;
+				double ti = (instant - start_playing_time) % measure_duration;
+				ti = Math.round(ti * 10000)/10000.0;
+				double tf = (ti + frame_duration) % measure_duration;
+				tf = Math.round(tf * 10000)/10000.0;
 //				System.out.println("instant = " + instant);
 //				System.out.println("ti = " + ti);
 //				System.out.println("tf = " + tf);
 
-				// Coloca o resto da wavetable que sobrou da último frame
-				// TODO VERIFICAR PARA O CASO DO WAVETABLE OCUPAR MAIS DE 2 FRAMES ou 2 batidas com intervalo pequeno entre elas
-				if (next_sample_play > 0) {
-					int samples_to_copy = Math.min(chunk_size, wavetable.length - next_sample_play);
-					for (int j = 0; j < samples_to_copy; j++) {
-						chunk[j] = wavetable_gain * wavetable[next_sample_play++];
-					}
-					if (next_sample_play >= wavetable.length) {
-						next_sample_play = 0;
-					}
-				}
-				
 				// Verificar se existe alguma batida entre [ti,ti+frame_duration[
 				for (int i = 0; i < beats.size(); i++) {
-					long beat_value = beats.get(i);
+					double beat_value = beats.get(i);
 					if (beat_value >= ti && beat_value < ti+frame_duration) {
-						// Procura o local certo de inserir a wavetable neste frame
-						long tm = beat_value - ti;
-						int start_sample = (int)(Math.floor(sampleRate * tm)/1000);
-						int samples_to_copy = Math.min(chunk_size - start_sample, wavetable.length);
-						wavetable_gain = (i==0 ? 2 : 1);
-						for (int j = 0; j < samples_to_copy; j++) {
-							chunk[j + start_sample] += wavetable_gain * wavetable[j];
-							next_sample_play++;
-						} 
-						// Se não coube tudo, marca a posição para copiar no próximo frame
-						if (next_sample_play == wavetable.length) {
-							next_sample_play = 0;
+						double tm = instant+beat_value-ti;
+						tm = Math.round(tm * 10000)/10000.0;
+						if (i==0) {
+							try {
+								mouthMemory.writeMemory(wavetable_with_gain, tm, duration, TimeUnit.SECONDS);
+							} catch (MemoryException e1) {
+//								MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+							}
+						} else {
+							try {
+								mouthMemory.writeMemory(wavetable, tm, duration, TimeUnit.SECONDS);
+							} catch (MemoryException e1) {
+//								MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+							}
 						}
-
+//						System.out.println("tm = " + tm);
 					}
 				}
 				
@@ -318,8 +304,8 @@ public class CP_Reasoning extends Reasoning {
 						beats.clear();
 						for (int i = 0; i < beats_size; i++) {
 							int index = (i + actual_phase) % beats_size;
-							long beat = detected_beats_time.get(index) - detected_beats_time.get(0);
-							beats.add((beat + measure_duration - (actual_phase * beat_duration)) % measure_duration);
+							double beat = detected_beats_time.get(index) - detected_beats_time.get(0);
+							beats.add(Math.round(((beat + measure_duration - (actual_phase * beat_duration)) % measure_duration) * 10000)/10000.0);
 							Collections.sort(beats);
 						}
 						System.out.print("\tbeats = [");
@@ -330,35 +316,33 @@ public class CP_Reasoning extends Reasoning {
 					}
 					// Verificar quais batidas pertencem
 					for (int i = 0; i < beats.size(); i++) {
-						long beat_value = beats.get(i);
+						double beat_value = beats.get(i);
 						if (beat_value >= 0 && beat_value < tf) {
-							// Procura o local certo de inserir a wavetable neste frame
-							long tm = (measure_duration - ti) + beat_value;
-							int start_sample = (int)(Math.floor(sampleRate * tm)/1000);
-							int samples_to_copy = Math.min(chunk_size - start_sample, wavetable.length);
-		//					System.out.println("samples_to_copy = " + samples_to_copy);
-							for (int j = 0; j < samples_to_copy; j++) {
-								chunk[j + start_sample] += (i==0 ? 2 : 1) * wavetable[j];
-								next_sample_play++;
-							} 
-							// Se não coube tudo, marca a posição para copiar no próximo frame
-							if (next_sample_play == wavetable.length) {
-								next_sample_play = 0;
+							// Procura o instante certo de inserir a wavetable neste frame
+							double tm = instant+measure_duration+beat_value-ti;
+							tm = Math.round(tm * 10000)/10000.0;
+							if (i==0) {
+								try {
+									mouthMemory.writeMemory(wavetable_with_gain, tm, duration, TimeUnit.SECONDS);
+								} catch (MemoryException e1) {
+//									MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+								}
+							} else {
+								try {
+									mouthMemory.writeMemory(wavetable, tm, duration, TimeUnit.SECONDS);
+								} catch (MemoryException e1) {
+//									MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
+								}
 							}
-
+//							System.out.println("tm(2) = " + tm);
 						}
 					}
 				}
 				
 			}		
 			
-			// Armazena o chunk de saída na memória e atua
-			try {
-				mouthMemory.writeMemory(chunk, instant, duration, TimeUnit.SECONDS);
-				mouth.act();
-			} catch (MemoryException e1) {
-//				MusicalAgent.logger.warning("[" + getAgent().getAgentName() + ":" + getComponentName() + "] " + "Não foi possível armazenar na memória");
-			}
+			// Acts
+			mouth.act();
 			
 			break;
 	
@@ -396,7 +380,7 @@ public class CP_Reasoning extends Reasoning {
 							for (int i = 0; i < onset.length; i++) {
 								// Add beat
 								double beat = onset[i];
-								detected_beats_time.add((long)((instant + (beat/sampleRate)) * 1000));
+								detected_beats_time.add(instant + (beat/sampleRate));
 							}
 						}
 					
@@ -415,7 +399,7 @@ public class CP_Reasoning extends Reasoning {
 								for (int j = ti; j < tf; j++) {
 									energy = energy + (buf[j] * buf[j]);
 								}
-		//						System.out.printf("rms residual = %.3f (ti=%d tf=%d)\n", energy, ti, tf);
+		//						System.out.printf("rms residual = %.3f (ti=%f tf=%f)\n", energy, ti, tf);
 								detected_beats_energy.set(detected_beats_energy.size()-1, energy);
 							}
 						}
@@ -431,7 +415,7 @@ public class CP_Reasoning extends Reasoning {
 							for (int j = ti; j < tf; j++) {
 								energy = energy + (buf[j] * buf[j]);
 							}
-		//					System.out.printf("rms novo = %.3f (ti=%d tf=%d)\n", energy, ti, tf);
+		//					System.out.printf("rms novo = %.3f (ti=%f tf=%f)\n", energy, ti, tf);
 							detected_beats_energy.add(energy);
 						}
 					}
@@ -439,7 +423,7 @@ public class CP_Reasoning extends Reasoning {
 				
 				String str = "[" + getAgent().getAgentName() + "] time = [ ";
 				for (int i = 0; i < detected_beats_time.size(); i++) {
-					str = str + String.format("%d ", detected_beats_time.get(i));
+					str = str + String.format("%f ", detected_beats_time.get(i));
 				}
 				System.out.println(str+"]");
 				
@@ -467,17 +451,17 @@ public class CP_Reasoning extends Reasoning {
 					double max = Math.max(first_beat_energy, detected_beats_energy.get(i));
 					double min = Math.min(first_beat_energy, detected_beats_energy.get(i));
 					if ((max-min)/min < error) {
-						long pattern_start_time = detected_beats_time.get(0);
-						long pattern_repetiton_time = detected_beats_time.get(i);
-						System.out.printf("Pattern found at beat = %d - t = %d\n", i, pattern_start_time);
+						double pattern_start_time = detected_beats_time.get(0);
+						double pattern_repetiton_time = detected_beats_time.get(i);
+						System.out.printf("Pattern found at beat = %d - t = %f\n", i, pattern_start_time);
 						measure_duration = pattern_repetiton_time - pattern_start_time;
 						System.out.println("Measure duration = " + measure_duration);
 						number_beats = (int)Math.round(measure_duration/beat_duration);
 						System.out.println("Number of beats = " + number_beats);
 						System.out.print("\tbeats = [");
 						for (int j = 0; j < i; j++) {
-							long beat = detected_beats_time.get(j) - pattern_start_time;
-							beats.add(beat);
+							double beat = detected_beats_time.get(j) - pattern_start_time;
+							beats.add(Math.round(beat * 10000)/10000.0);
 							System.out.print(" " + beat);
 						}
 						System.out.println(" ]");

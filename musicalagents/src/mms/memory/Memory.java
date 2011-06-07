@@ -110,6 +110,13 @@ public abstract class Memory {
 	 * @param object
 	 * @throws MemoryException
 	 */
+	public abstract void writeMemory(Object object, double instant, TimeUnit unit) throws MemoryException;
+
+	/**
+	 *
+	 * @param object
+	 * @throws MemoryException
+	 */
 	public abstract void writeMemory(Object object) throws MemoryException;
 
 }

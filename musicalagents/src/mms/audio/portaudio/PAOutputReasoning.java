@@ -41,23 +41,28 @@ public class PAOutputReasoning extends Reasoning {
 	@Override
 	public boolean init() {
 		
-		// It must be in the format "sensor:device,channel;sensor2:device,channel..."
-		String[] str = getParameter("mapping", "").split(";");
-		
-		if (str.length == 0) {
-			System.err.println("[" + getComponentName() + "] No channels configured... Aborting PA");
+		try {
+			// It must be in the format "sensor:device,channel;sensor2:device,channel..."
+			String[] str = getParameter("mapping", "").split(";");
+			
+			if (str.length == 0) {
+				System.err.println("[" + getComponentName() + "] No channels configured... Aborting PA");
+				return false;
+			}
+			
+			for (int i = 0; i < str.length; i++) {
+				String[] str2 = str[i].split(":");
+				String[] str3 = str2[1].split(",");
+				devices.put(str2[0], Integer.valueOf(str3[0]));
+				channels.put(str2[0], Integer.valueOf(str3[1]));
+			}
+			
+			// Initializes PortAudio
+			pa = portaudio.getInstance();
+		} catch (Exception e) {
+			System.out.println("Error in PortAudio!");
 			return false;
 		}
-		
-		for (int i = 0; i < str.length; i++) {
-			String[] str2 = str[i].split(":");
-			String[] str3 = str2[1].split(",");
-			devices.put(str2[0], Integer.valueOf(str3[0]));
-			channels.put(str2[0], Integer.valueOf(str3[1]));
-		}
-		
-		// Initializes PortAudio
-		pa = portaudio.getInstance();
 
 		return true;
 		
@@ -124,7 +129,7 @@ public class PAOutputReasoning extends Reasoning {
 				streamInfo.device = device;
 				streamInfo.channel = channels.get(sensorName);
 				streamInfo.channelCount = channelCount;
-				streamInfo.latency = pa.Pa_GetStreamInfo(stream).getOutputLatency();
+//				streamInfo.latency = pa.Pa_GetStreamInfo(stream).getOutputLatency();
 //				System.out.println("[PORTAUDIO] Output latency = " + streamInfo.latency);
 				streamInfos.put(stream, streamInfo);
 				streams_sensors.put(stream, sensorName);
