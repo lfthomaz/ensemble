@@ -8,8 +8,32 @@
 
 package mmsjack;
 
+import java.nio.ByteBuffer;
+
 public class mmsjack implements mmsjackConstants {
 
+	// Loads the portaudio JNI interface
+	static {
+		try {
+			if (System.getProperty("os.name").startsWith("Windows")) {
+				if (System.getProperty("sun.arch.data.model").equals("32")) {
+					System.loadLibrary("mmsjack");
+				} else {
+					System.loadLibrary("mmsjack");
+				}
+			}
+			else if (System.getProperty("os.name").startsWith("Mac OS X")) {
+				System.loadLibrary("mmsjack");
+			}
+			else if (System.getProperty("os.name").startsWith("Unix")) {
+				System.loadLibrary("mmsjack");
+			}		
+		} catch (UnsatisfiedLinkError  e) {
+			System.err.println("mmsjack library not found... JACK will not be available!");
+		}
+	}
+
+	
   public static int jack_client_close(SWIGTYPE_p_jack_client_t client) {
     return mmsjackJNI.jack_client_close(SWIGTYPE_p_jack_client_t.getCPtr(client));
   }
@@ -52,7 +76,7 @@ public class mmsjack implements mmsjackConstants {
     return mmsjackJNI.jack_port_name(SWIGTYPE_p_jack_port_t.getCPtr(port));
   }
 
-  public static Object jack_port_get_buffer(SWIGTYPE_p_jack_port_t arg0, int arg1) {
+  public static ByteBuffer jack_port_get_buffer(SWIGTYPE_p_jack_port_t arg0, int arg1) {
 	    return mmsjackJNI.jack_port_get_buffer(SWIGTYPE_p_jack_port_t.getCPtr(arg0), arg1);
   }
 

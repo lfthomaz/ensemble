@@ -183,7 +183,7 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 		jmethodID 		mid;
 	    jobject 		obj_callback;
 		int 			attached;
-		jack_port_t * 	port;
+//		jack_port_t * 	port;
 	} UserData;
 
 	JavaVM * virtual_machine = NULL;
@@ -191,9 +191,9 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 	int callback(jack_nframes_t nframes, void * arg) {
 		int ret = 0, i;
 		UserData * data;
-		char ** ports;
-		jack_default_audio_sample_t * sampleBuffer;
-		jobject buffer;
+//		char ** ports;
+//		jack_default_audio_sample_t * sampleBuffer;
+//		jobject buffer;
 		
 //		printf("C::callback(%d)\n", nframes); fflush(stdout);
 		
@@ -206,9 +206,11 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 			data->attached = 1;
 			(*virtual_machine)->AttachCurrentThreadAsDaemon(virtual_machine, (void **) &data->env, NULL);
 			data->cls = (*data->env)->FindClass(data->env, "mmsjack/JACKCallback");
-			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(Ljava/nio/ByteBuffer;ID)I");
+			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(ID)I");
+//			data->mid = (*data->env)->GetMethodID(data->env, data->cls, "process", "(Ljava/nio/ByteBuffer;ID)I");
 		}
 
+/*
 		if (data->port == NULL) {
 			ports = jack_get_ports(data->client,jack_get_client_name(data->client),NULL,0);
 			if (ports != NULL) {
@@ -228,6 +230,11 @@ static void SWIGUNUSED SWIG_JavaThrowException(JNIEnv *jenv, SWIG_JavaExceptionC
 														nframes,
 														0.0);
 		}
+*/
+
+		ret = (int)(*data->env)->CallIntMethod(data->env, data->obj_callback, data->mid,
+													nframes,
+													0.0);
 
 		return ret;
 	}
@@ -459,7 +466,7 @@ SWIGEXPORT jlong JNICALL Java_mmsjack_mmsjackJNI_jack_1client_1open(JNIEnv *jenv
 	data->attached = 0;
 	data->obj_callback = (*jenv)->NewGlobalRef(jenv, jarg2);
 	data->client = client;
-	data->port = NULL;
+//	data->port = NULL;
 	jack_set_process_callback(client,callback,(void *)data);
 
   if (arg1) (*jenv)->ReleaseStringUTFChars(jenv, jarg1, (const char *)arg1);

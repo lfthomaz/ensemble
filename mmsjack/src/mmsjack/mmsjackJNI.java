@@ -8,6 +8,8 @@
 
 package mmsjack;
 
+import java.nio.ByteBuffer;
+
 class mmsjackJNI {
   public final static native String JACK_DEFAULT_AUDIO_TYPE_get();
   public final static native String JACK_DEFAULT_MIDI_TYPE_get();
@@ -33,7 +35,7 @@ class mmsjackJNI {
   public final static native int jack_connect(long jarg1, String jarg2, String jarg3);
   public final static native int jack_disconnect(long jarg1, String jarg2, String jarg3);
   public final static native String jack_port_name(long jarg1);
-  public final static native Object jack_port_get_buffer(long jarg1, int jarg2);
+  public final static native ByteBuffer jack_port_get_buffer(long jarg1, int jarg2);
 //  public final static native int jack_set_process_callback(long jarg1, Object jarg2);
   public final static native long jack_port_by_name(long jarg1, String jarg2);
   public final static native int jack_port_get_latency(long jarg1);
