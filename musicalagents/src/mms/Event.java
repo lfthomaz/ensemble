@@ -18,7 +18,7 @@ public class Event implements Serializable {
 	// TODO não necessariamente precisa ser o tempo em ms, pode ser o turno
 	public long 	timestamp;
 	
-	// No caso de eventos frequentes, indica a qual frame esse evento pertence
+	// No caso de eventos periódicos, indica a qual frame esse evento pertence
 	public long 	frame;
 	
 	// Instante e duração no tempo (em s) em que o evento acontece

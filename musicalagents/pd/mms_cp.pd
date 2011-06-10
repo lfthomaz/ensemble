@@ -1,5 +1,5 @@
 #N canvas 389 79 544 681 10;
-#X obj 25 107 audce_gui_grid 500 500 0.025;
+#X obj 25 107 audce_gui_grid 500 500 0.008;
 #X obj 25 60 dumpOSC 57110;
 #X obj 25 83 OSCroute /pd;
 #X obj 10 10 loadbang;

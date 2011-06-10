@@ -78,6 +78,16 @@ public class Parameters extends HashMap<String, Object> {
 		return param;
 	}
 	
+	@Override
+	public Object put(String key, Object value) {
+		if (value != null) {
+			return super.put(key, value);
+		}
+		else {
+			return null;
+		}
+	}
+	
 	// Format: {NAME=VALUE; NAME2=VALUE2; ..... }
 	public String toString() {
 		

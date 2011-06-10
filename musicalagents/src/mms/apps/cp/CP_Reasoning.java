@@ -296,9 +296,8 @@ public class CP_Reasoning extends Reasoning {
 //					System.out.println("Tem começo de compasso!!!");
 					// Fazer a mudança de fase, caso necessário
 					if (!master && slide != 0 && measure_counter % slide == 0) {
-						System.out.println("slide = " + slide + " measure_counter = " + measure_counter);
 						actual_phase = (actual_phase + phase) % number_beats;
-						System.out.println("actual_phase = " + actual_phase);
+						System.out.println("[" + getAgent().getAgentName() + "] slide = " + slide + " measure_counter = " + measure_counter + " actual_phase = " + actual_phase);
 						// Reconstruir o array the beats
 						int beats_size = beats.size();
 						beats.clear();
@@ -453,11 +452,11 @@ public class CP_Reasoning extends Reasoning {
 					if ((max-min)/min < error) {
 						double pattern_start_time = detected_beats_time.get(0);
 						double pattern_repetiton_time = detected_beats_time.get(i);
-						System.out.printf("Pattern found at beat = %d - t = %f\n", i, pattern_start_time);
+						System.out.printf("[" + getAgent().getAgentName() + "] Pattern found at beat = %d - t = %f\n", i, pattern_start_time);
 						measure_duration = pattern_repetiton_time - pattern_start_time;
-						System.out.println("Measure duration = " + measure_duration);
+						System.out.println("\tmeasure duration = " + measure_duration);
 						number_beats = (int)Math.round(measure_duration/beat_duration);
-						System.out.println("Number of beats = " + number_beats);
+						System.out.println("\tnumber of beats = " + number_beats);
 						System.out.print("\tbeats = [");
 						for (int j = 0; j < i; j++) {
 							double beat = detected_beats_time.get(j) - pattern_start_time;
@@ -467,7 +466,7 @@ public class CP_Reasoning extends Reasoning {
 						System.out.println(" ]");
 						// Starts at the third repetition
 						start_playing_time = pattern_repetiton_time + measure_duration;
-						System.out.println("Start playing time = " + start_playing_time);
+						System.out.println("\tstart playing time = " + start_playing_time);
 						// Changes agent's state
 						state = ReasoningState.PLAYING;
 						
@@ -494,7 +493,7 @@ public class CP_Reasoning extends Reasoning {
 					cmd.addParameter(MovementConstants.PARAM_POS, "("+x+";"+y+";0)");
 					cmd.addParameter(MovementConstants.PARAM_TIME, "1");
 					sendCommand(cmd);
-					System.out.println(getAgent().getAgentName() + " new destination =  " + "("+x+";"+y+";0)");
+//					System.out.println("[" + getAgent().getAgentName() + "] new destination =  " + "("+x+";"+y+";0)");
 //					String x = actual_phase == 0 || actual_phase == 3 ? "20" : "-20"; 
 //					String y = actual_phase == 0 || actual_phase == 1 ? "20" : "-20";
 //					String cmd = "TRANSPORT :pos ("+x+";"+y+";0)";

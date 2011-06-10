@@ -70,8 +70,23 @@ public class MovementEventServer extends EventServer {
 		Memory movMemory = (Memory)world.getEntityStateAttribute(entityName, MovementConstants.EVT_TYPE_MOVEMENT);
 		// If there is no memory, creates one for this entity
 		if (movMemory == null) {
-			movMemory = new EventMemory();
-			movMemory.start(envAgent, entityName, 1.0, 0, null);
+			// Cria uma memória para o atuador
+			try {
+				// Criar a instância do componente
+				Class esClass = Class.forName("mms.memory.EventMemory");
+				movMemory = (Memory)esClass.newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+			Parameters memParameters = new Parameters();
+			memParameters.put(Constants.PARAM_MEMORY_NAME, entityName);
+			memParameters.put(Constants.PARAM_MEMORY_PAST, "1.0");
+			memParameters.put(Constants.PARAM_MEMORY_FUTURE, "0");
+			movMemory.setParameters(memParameters);
+			movMemory.setAgent(envAgent);
+			movMemory.configure();
+			movMemory.start();
 			world.addEntityStateAttribute(entityName, MovementConstants.EVT_TYPE_MOVEMENT, movMemory);
 		}
 
@@ -148,7 +163,7 @@ public class MovementEventServer extends EventServer {
 		// If there is no memory, creates one for this entity
 		if (movMemory == null) {
 			movMemory = createEntityMemory(agentName);
-		}
+ 		}
 
 		// Verifies if there is an initial position for the entity and writes it in the memory
 		MovementState movState = new MovementState(world.dimensions);

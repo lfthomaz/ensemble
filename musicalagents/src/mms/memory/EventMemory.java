@@ -21,22 +21,6 @@ public class EventMemory extends Memory {
 	EventSlot ptr_last_instant_read = null;
 
 	@Override
-	public void init(Parameters parameters) {
-	}
-	
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public double getFirstInstant() {
 		if (head != null) {
 			return head.instant;
@@ -198,6 +182,7 @@ public class EventMemory extends Memory {
 	
 	}
 	
+	@Override
 	public void writeMemory(Object object) throws MemoryException {
 		
 		double instant = clock.getCurrentTime(TimeUnit.SECONDS);

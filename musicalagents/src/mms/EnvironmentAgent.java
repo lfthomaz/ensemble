@@ -584,8 +584,7 @@ public class EnvironmentAgent extends MMSAgent {
 	@Override
 	public final void receiveCommand(Command cmd) {
 
-		// System.out.printf("[%s] Command received: %s - %s\n", getAddress(),
-		// cmd.getRecipient(), cmd);
+//		 System.out.printf("[%s] Command received: %s - %s\n", getAddress(), cmd.getRecipient(), cmd);
 		// Se for para o Agente, processa o comando, se for para algum de seus
 		// componentes, rotear
 		String[] str = cmd.getRecipient().split("/");
@@ -855,8 +854,7 @@ public class EnvironmentAgent extends MMSAgent {
 					// necessario??
 					// TODO o usu�rio pode escolher a ordem em que os
 					// EventServers ser�o processados!!!
-					for (Enumeration<EventServer> e = eventServers.elements(); e
-							.hasMoreElements();) {
+					for (Enumeration<EventServer> e = eventServers.elements(); e.hasMoreElements();) {
 						EventServer evtServer = e.nextElement();
 						try {
 							evtServer.process();

@@ -21,6 +21,6 @@
   
   <!-- ********** MUSICAL AGENT INSTANCES ********** -->
 
-	<MUSICAL_AGENT NAME="creature" CLASS="LM_AGENT" QUANTITY="10" />
+	<MUSICAL_AGENT NAME="creature" CLASS="LM_AGENT" QUANTITY="30" />
 
 </MMS>

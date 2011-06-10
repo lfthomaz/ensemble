@@ -1,6 +1,6 @@
 <MMS NAME="Dummy">
 
-	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" JACK="FALSE"/>
+	<GLOBAL_PARAMETERS CLOCK_MODE="CLOCK_CPU" PROCESS_MODE="REAL_TIME" />
 	
   	<!-- ********** ENVIRONMENT AGENT ********** -->
 
@@ -36,14 +36,6 @@
 	
   <!-- ********** MUSICAL AGENT INSTANCES ********** -->
 
-	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="1" >
-		<ARG NAME="POSITION" VALUE="(2;-10;0)" />
-		<ARG_COMP COMP="DummyReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
-	</MUSICAL_AGENT>
+	<MUSICAL_AGENT NAME="Dummy" CLASS="DUMMY" QUANTITY="10" />
 
-	<MUSICAL_AGENT NAME="Dummy_2" CLASS="DUMMY" QUANTITY="1" >
-		<FACT NAME="filename" VALUE="bla_2.wav" />
-		<ARG NAME="POSITION" VALUE="(10;-2;0)" />
-		<ARG_COMP COMP="DummyReasoning" NAME="mapping" VALUE="Ear_left;system:playback_1" />
-	</MUSICAL_AGENT>
 </MMS>

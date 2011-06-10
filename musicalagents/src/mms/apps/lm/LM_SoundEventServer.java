@@ -56,6 +56,11 @@ public class LM_SoundEventServer extends EventServer {
 		
 		// Initializes MIDI
 		try {
+//			MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+//			for (int i = 0; i < infos.length; i++) {
+//				System.out.println(infos[i].getName());
+//			}
+//			synth = (Synthesizer)MidiSystem.getMidiDevice(infos[3]);
 			synth = MidiSystem.getSynthesizer();
 			synth.open();
 			MidiChannel[] channels = synth.getChannels();

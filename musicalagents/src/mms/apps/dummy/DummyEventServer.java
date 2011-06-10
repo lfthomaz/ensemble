@@ -101,9 +101,7 @@ public class DummyEventServer extends EventServer {
 		
 		// Cria uma memória para o atuador
 		if (world.getEntityStateAttribute(agentName, "DUMMY") == null) {
-			Memory memory = new EventMemory();
-			memory.start(envAgent, "DUMMY", 1, 1, userParameters);
-	    	world.addEntityStateAttribute(agentName, "DUMMY", memory);
+	    	world.addEntityStateAttribute(agentName, "DUMMY", createMemory("DUMMY", userParameters));
 		}
     	
 		return userParameters;
@@ -118,9 +116,7 @@ public class DummyEventServer extends EventServer {
 
 		// Cria uma memória para o atuador
 		if (world.getEntityStateAttribute(agentName, "DUMMY") == null) {
-			Memory memory = new EventMemory();
-			memory.start(envAgent, "DUMMY", 1, 1, userParameters);
-	    	world.addEntityStateAttribute(agentName, "DUMMY", memory);
+	    	world.addEntityStateAttribute(agentName, "DUMMY", createMemory("DUMMY", userParameters));
 		}
 
 		return userParameters;

@@ -20,7 +20,9 @@ import mms.world.Vector;
  */
 public class MovementReasoning extends Reasoning {
 
-//	private KnowledgeBase kb;
+	public static final double EPSILON = 1e-14;
+
+	//	private KnowledgeBase kb;
 	
 	private Actuator	legs;
 	private Sensor 		eyes;
@@ -33,7 +35,7 @@ public class MovementReasoning extends Reasoning {
 	private ArrayList<Double> 	time_constrains = new ArrayList<Double>();
 	private boolean 			loop = false;
 	private int					active_waypoint = 0;;
-	private double 				precision = 0.1;
+	private double 				precision = 0.01;
 	private double 				last_distance = 0.0;
 	private double 				total_distance = 0.0;
 	private Vector 				last_acc;
@@ -101,7 +103,7 @@ public class MovementReasoning extends Reasoning {
 		
 		if (cmd.getCommand().equals(MovementConstants.CMD_WALK)) {
 			if (cmd.containsParameter(MovementConstants.PARAM_POS) && cmd.containsParameter(MovementConstants.PARAM_TIME)) {
-				System.out.println("[" + getAgent().getAgentName() + "] Walking...");
+				sendStopCommand();
 				waypoints.clear();
 				time_constrains.clear();
 				active_waypoint = 0;
@@ -110,6 +112,11 @@ public class MovementReasoning extends Reasoning {
 				time_constrains.add(Double.valueOf(cmd.getParameter(MovementConstants.PARAM_TIME)));
 				waypoints.add(Vector.parse(cmd.getParameter(MovementConstants.PARAM_POS)));
 			}
+		}
+		else if (cmd.getCommand().equals("ADD_WAYPOINT")) {
+			System.out.println("[" + getAgent().getAgentName() + "] Add waypoint...");
+			time_constrains.add(Double.valueOf(cmd.getParameter("time")));
+			waypoints.add(Vector.parse(cmd.getParameter("wp")));
 		}
 		else if (cmd.getCommand().equals(MovementConstants.CMD_STOP)) {
 			System.out.println("[" + getAgent().getAgentName() + "] Stoping...");
@@ -139,6 +146,7 @@ public class MovementReasoning extends Reasoning {
 			if (active_waypoint < waypoints.size()) {
 				Vector dest_pos = waypoints.get(active_waypoint);
 				double actual_distance = actual_pos.getDistance(dest_pos);
+//				System.out.println("distance = " + actual_distance);
 				// Se passei da metade, desacelarar?
 				if (!inverted && actual_distance < (total_distance/2)) {
 					// Vou inverter a minha aceleração
@@ -149,13 +157,13 @@ public class MovementReasoning extends Reasoning {
 				}
 				// Cheguei?
 				if (actual_distance < precision) {
-					System.out.println("Cheguei no waypoint " + active_waypoint + " - " + waypoints.get(active_waypoint));
+//					System.out.println("Cheguei no waypoint " + active_waypoint + " - " + waypoints.get(active_waypoint));
 					// Parar o agente
 					sendStopCommand();
 					// Mudar o waypoint
 					last_distance = 0.0;
 					active_waypoint++;
-					System.out.println("active wp = " + active_waypoint);
+//					System.out.println("active wp = " + active_waypoint);
 					if (active_waypoint == waypoints.size() && loop) {
 						active_waypoint = 0;
 					} else if (active_waypoint == waypoints.size() && !loop) {
@@ -165,47 +173,42 @@ public class MovementReasoning extends Reasoning {
 				}
 				else {
 					// Estou parado ou passei
-					if (actual_vel != null &&
-							(actual_vel.getMagnitude() == 0 || (actual_vel.getMagnitude() > 0 && last_distance < actual_distance))) {
-						// TODO Mudar para o m�todo de Newton!!!
-						// Calcular quanto e por quanto tempo devo acelerar
-						double time_constrain = time_constrains.get(active_waypoint);
-//						System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time_constrain);
-						double acc_mag = MAX_ACELERATION;
-						double t1 = 0.2; 
-						boolean found = false;
-						int iterations = 0;
-						
-						while (!found && iterations < 10) {
-							// Movimento é composto de um MUV + MU
-							// S = (a*t1ˆ2)/2 + a*t1*t2, sendo que t1+t2 deve ser aprox. o time_constraint
-							// Se t1+t2 for maior, vou aumentar o t1, se for menor, vou diminuir acc_mag
-							double t2 = (actual_distance - (acc_mag * t1 * t1 / 2)) / (acc_mag*t1);
-							if (Math.abs(time_constrain-t1-t2) < 0.1) {
-								found = true;
-							} else {
-								if (t1+t2 < time_constrain) {
-									acc_mag = acc_mag - 2.0;
-								} else {
-									t1 = t1 + 0.2;
-								}
-							}
-							iterations++;
-						}
+					if (actual_vel != null) {
+						if (actual_vel.getMagnitude() == 0) {
+							// TODO Mudar para o m�todo de Newton!!!
+							// Calcular quanto e por quanto tempo devo acelerar
+							double t = time_constrains.get(active_waypoint);
+//							System.out.println("actual_pos = " + actual_pos + " - dest_pos = " + dest_pos + " - time_constraint = " + time_constrain);
+							double acc_mag = MAX_ACELERATION;
+							double t1 = 0.2; 
+							boolean found = false;
+							int iterations = 0;
+							
+							acc_mag = 1;
+						    while (Math.abs((2*actual_distance-acc_mag*t*t) / (-t*t)) > EPSILON || iterations > 10) {
+						        acc_mag = acc_mag - (2*actual_distance-acc_mag*t*t) / (-t*t);
+//								System.out.println("["+iterations+"] acc_mag = " + acc_mag);
+						        iterations++;
+						    }
+						    acc_mag = Math.min(acc_mag, MAX_ACELERATION);
 
-						// Calcular a direção na qual deve andar
-						total_distance = actual_pos.getDistance(dest_pos);
-						Vector acc = new Vector((dest_pos.getValue(0)-actual_pos.getValue(0)), 
-								(dest_pos.getValue(1)-actual_pos.getValue(1)), 
-								(dest_pos.getValue(2)-actual_pos.getValue(2)));
-						acc.normalizeVector();
-						acc.product(acc_mag);
-//						System.out.println("acc_vec = " + acc);
-						// Enviar comando
-						last_acc = acc;
-						inverted = false;
-						sendAccCommand(acc, 0.0);
-//						sendAccCommand(acc, t1);
+							// Calcular a direção na qual deve andar
+							total_distance = actual_pos.getDistance(dest_pos);
+							Vector acc = new Vector((dest_pos.getValue(0)-actual_pos.getValue(0)), 
+									(dest_pos.getValue(1)-actual_pos.getValue(1)), 
+									(dest_pos.getValue(2)-actual_pos.getValue(2)));
+							acc.normalizeVector();
+							acc.product(acc_mag);
+//							System.out.println("acc_vec = " + acc);
+							// Enviar comando
+							last_acc = acc;
+							inverted = false;
+							sendAccCommand(acc, 0.0);
+//							sendAccCommand(acc, t1);
+						} 
+						else if (actual_vel.getMagnitude() > 0 && last_distance < actual_distance) {
+							sendStopCommand();
+						}
 					}
 					last_distance = actual_distance;
 				}
@@ -247,5 +250,5 @@ public class MovementReasoning extends Reasoning {
 			e.printStackTrace();
 		}
 	}
-	
+		
 }

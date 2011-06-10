@@ -26,7 +26,7 @@ public class DummySensor extends Sensor {
 	
 	@Override
 	protected void process(Event evt) throws Exception {
-		System.out.println("[Sensor] process()");
+//		System.out.println("[Sensor] process()");
 		// Performance
 		long wf = (long)Math.ceil((getAgent().getClock().getCurrentTime(TimeUnit.MILLISECONDS) - startTime) / period);
 		if (wf == evt.frame) {

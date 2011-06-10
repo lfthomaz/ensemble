@@ -10,9 +10,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import mms.Constants.ES_STATE;
+import mms.audio.AudioConstants;
 import mms.clock.TimeUnit;
 import mms.clock.VirtualClockHelper;
 import mms.comm.Comm;
+import mms.memory.Memory;
 import mms.router.RouterClient;
 
 public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterClient {
@@ -486,6 +488,38 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 
 	}
 	
+	public Memory createMemory(String name, Parameters parameters) {
+
+		Memory newMemory = null;
+		
+		String className = "mms.memory.EventMemory";
+		if (parameters.containsKey(Constants.PARAM_MEMORY_CLASS)) {
+			className = parameters.get(Constants.PARAM_MEMORY_CLASS);
+		}
+		else if (parameters.containsKey(Constants.PARAM_EVT_TYPE)) {
+			// TODO Senão existir o tipo solicitado, criar uma EventMemory
+			if (parameters.get(Constants.PARAM_EVT_TYPE).equals(AudioConstants.EVT_TYPE_AUDIO)) {
+				className = "mms.memory.AudioMemory";
+			} 
+		}
+		try {
+			// Criar a instância do componente
+			Class esClass = Class.forName(className);
+			newMemory = (Memory)esClass.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		parameters.put(Constants.PARAM_MEMORY_NAME, name);
+		newMemory.setParameters(parameters);
+		newMemory.setAgent(envAgent);
+		newMemory.configure();
+		newMemory.start();
+		
+		return newMemory;
+		
+	}
+
 	//--------------------------------------------------------------------------------
 	// Métodos de recebimento e envio de Eventos
 	//--------------------------------------------------------------------------------
@@ -892,21 +926,21 @@ public abstract class EventServer implements LifeCycle, Sensing, Acting, RouterC
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "process()");
 	}
 
-	protected Parameters actuatorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
+	protected Parameters actuatorRegistered(String agentName, String actuatorName, Parameters userParam) throws Exception {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "actuatorRegistered()");
 		return null;
 	}
 	
-	protected void actuatorDeregistered(String agentName, String eventHandlerName) throws Exception {
+	protected void actuatorDeregistered(String agentName, String actuatorName) throws Exception {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "actuatorDeregistered()");
 	}
 	
-	protected Parameters sensorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
+	protected Parameters sensorRegistered(String agentName, String sensorName, Parameters userParam) throws Exception {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "sensorRegistered()");
 		return null;
 	}
 	
-	protected void sensorDeregistered(String agentName, String eventHandlerName) throws Exception {
+	protected void sensorDeregistered(String agentName, String sensorName) throws Exception {
 //		MusicalAgent.logger.info("[" + envAgent.getAgentName() + ":" + getEventType() + "] " + "sensorDeregistered()");
 	}
 

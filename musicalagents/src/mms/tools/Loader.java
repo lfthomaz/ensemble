@@ -83,11 +83,6 @@ public class Loader {
 			Element elem_gp = (Element)nl.item(0);
 			p.setParameter(Constants.CLOCK_MODE, readAttribute(elem_gp, Constants.CLOCK_MODE, Constants.CLOCK_CPU));
 			p.setParameter(Constants.PROCESS_MODE, readAttribute(elem_gp, Constants.PROCESS_MODE, Constants.MODE_REAL_TIME));
-			String jack = readAttribute(elem_gp, Constants.JACK, "FALSE");
-			p.setParameter(Constants.JACK, jack);
-			if (Boolean.valueOf(jack)) {
-				services += "mms.audio.jack.JACKServerService;";
-			}
 		}
 	
 		p.setParameter(Profile.SERVICES, services);
@@ -388,14 +383,12 @@ public class Loader {
 									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
 									args.merge(args_comp);
 									String comp_class = readAttribute(elem_sensor, CONF_CLASS, "mms.Sensor");
-									String comp_event_type = readAttribute(elem_sensor, CONF_COMP_EVENT_TYPE, "DUMMY");
-									String comp_comm_class = readAttribute(elem_sensor, CONF_COMM, "mms.comm.CommMessage");
-									String comp_memory = readAttribute(elem_sensor, "MEMORY", "mms.kb.EventMemory");
-									String comp_position = readAttribute(elem_sensor, "POSITION", "(0;0;0)");
-									args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
-									args.put(Constants.PARAM_COMM_CLASS, comp_comm_class);
-									args.put(Constants.PARAM_MEMORY, comp_memory);
-									args.put(Constants.PARAM_REL_POS, comp_position);
+									args.put(Constants.PARAM_EVT_TYPE, readAttribute(elem_sensor, CONF_COMP_EVENT_TYPE, "DUMMY"));
+									args.put(Constants.PARAM_COMM_CLASS, readAttribute(elem_sensor, CONF_COMM, "mms.comm.CommMessage"));
+									args.put(Constants.PARAM_MEMORY_CLASS, readAttribute(elem_sensor, Constants.PARAM_MEMORY_CLASS, null));
+									args.put(Constants.PARAM_MEMORY_FUTURE, readAttribute(elem_sensor, Constants.PARAM_MEMORY_FUTURE, "1"));
+									args.put(Constants.PARAM_MEMORY_PAST, readAttribute(elem_sensor, Constants.PARAM_MEMORY_PAST, "1"));
+									args.put(Constants.PARAM_REL_POS, readAttribute(elem_sensor, Constants.PARAM_POSITION, "(0;0;0)"));
 									ma.addComponent(comp_name, comp_class, args);
 								}
 	
@@ -409,14 +402,12 @@ public class Loader {
 									Parameters args_comp = readComponentArguments(elem_ma, comp_name);
 									args.merge(args_comp);
 									String comp_class = readAttribute(elem_actuator, CONF_CLASS, "mms.Actuator");
-									String comp_event_type = readAttribute(elem_actuator, CONF_COMP_EVENT_TYPE, "DUMMY");
-									String comp_comm_class = readAttribute(elem_actuator, CONF_COMM, "mms.comm.CommMessage");
-									String comp_memory = readAttribute(elem_actuator, "MEMORY", "mms.kb.EventMemory");
-									String comp_position = readAttribute(elem_actuator, "POSITION", "(0;0;0)");
-									args.put(Constants.PARAM_EVT_TYPE, comp_event_type);
-									args.put(Constants.PARAM_COMM_CLASS, comp_comm_class);
-									args.put(Constants.PARAM_MEMORY, comp_memory);
-									args.put(Constants.PARAM_REL_POS, comp_position);
+									args.put(Constants.PARAM_EVT_TYPE, readAttribute(elem_actuator, CONF_COMP_EVENT_TYPE, "DUMMY"));
+									args.put(Constants.PARAM_COMM_CLASS, readAttribute(elem_actuator, CONF_COMM, "mms.comm.CommMessage"));
+									args.put(Constants.PARAM_MEMORY_CLASS, readAttribute(elem_actuator, Constants.PARAM_MEMORY_CLASS, null));
+									args.put(Constants.PARAM_MEMORY_FUTURE, readAttribute(elem_actuator, Constants.PARAM_MEMORY_FUTURE, "1"));
+									args.put(Constants.PARAM_MEMORY_PAST, readAttribute(elem_actuator, Constants.PARAM_MEMORY_PAST, "1"));
+									args.put(Constants.PARAM_REL_POS, readAttribute(elem_actuator, Constants.PARAM_POSITION, "(0;0;0)"));
 									ma.addComponent(comp_name, comp_class, args);
 								}
 								

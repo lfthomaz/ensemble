@@ -170,41 +170,43 @@ public class KnowledgeBase extends MusicalAgentComponent {
 	// Memory
 	//--------------------------------------------------------------------------------
 	
-	// TODO Deixar o tipo genérico
-	// TODO Como colocar os parâmetros relativos ao áudio (step, frame) na chamada do construtor?
-	public Memory createMemory(String name, String eventType, double expiration, Parameters parameters) {
+	public Memory createMemory(String name, Parameters parameters) {
 
-		Memory mem = null;
+		Memory newMemory = null;
 		
 		// Checar se já existe uma memória registrada com esse nome
 		if (!memories.containsKey(name)) {
-			// Caso negativo, criar uma nova memória
-			// TODO Senão existir o tipo solicitado, criar uma SimpleMemory
-			if (eventType.equals(AudioConstants.EVT_TYPE_AUDIO)) {
-//				mem = new AudioMemory(myAgent, name, expiration, expiration, parameters);
-				mem = new AudioMemory();
-				mem.start(getAgent(), name, expiration, expiration, parameters);
-				memories.put(name, mem);
-//				System.out.println("Criei memória de AUDIO para " + name);
-			} else {
-				mem = new EventMemory();
-				mem.start(getAgent(), name, expiration, expiration, parameters);
-				memories.put(name, mem);
-//				System.out.println("Criei memória de Simple para " + name);
+			String className = "mms.memory.EventMemory";
+			if (parameters.containsKey(Constants.PARAM_MEMORY_CLASS)) {
+				className = parameters.get(Constants.PARAM_MEMORY_CLASS);
+			}
+			else if (parameters.containsKey(Constants.PARAM_EVT_TYPE)) {
+				// TODO Senão existir o tipo solicitado, criar uma EventMemory
+				if (parameters.get(Constants.PARAM_EVT_TYPE).equals(AudioConstants.EVT_TYPE_AUDIO)) {
+					className = "mms.memory.AudioMemory";
+				} 
+			}
+			try {
+				// Criar a instância do componente
+				Class esClass = Class.forName(className);
+				newMemory = (Memory)esClass.newInstance();
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+			parameters.put(Constants.PARAM_MEMORY_NAME, name);
+			newMemory.setParameters(parameters);
+			newMemory.setAgent(getAgent());
+			newMemory.configure();
+			newMemory.start();
+			if (newMemory.getName() != null) { 
+				memories.put(newMemory.getName(), newMemory);
 			}
 		} else {
-			mem = memories.get(name);
+			newMemory = memories.get(name);
 		}
 		
-		return mem;
-		
-	}
-	
-	public void addMemory(Memory memory) {
-		
-		if(!memories.containsKey(memory.getName())) {
-			memories.put(memory.getName(), memory);
-		}
+		return newMemory;
 		
 	}
 	

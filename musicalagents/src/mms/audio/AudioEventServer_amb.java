@@ -8,7 +8,6 @@ import java.util.HashMap;
 import mms.Constants;
 import mms.Event;
 import mms.EventServer;
-import mms.MusicalAgent;
 import mms.Parameters;
 import mms.clock.TimeUnit;
 import mms.memory.AudioMemory;
@@ -20,7 +19,7 @@ import mms.movement.MovementState;
 import mms.world.Vector;
 import mms.world.World;
 
-public class AudioEventServer extends EventServer {
+public class AudioEventServer_amb extends EventServer {
 
 	// Log
 //	public static Logger logger = Logger.getMyLogger(MusicalAgent.class.getName());
@@ -53,8 +52,10 @@ public class AudioEventServer extends EventServer {
 	Vector 			rcv_comp_pos;
 	Vector 			src_comp_pos;
 	
+	private final double 	EPSILON 		= 1E-9;
+
 	// Utilizado para comparar o tempo (ajustar de acordo com a precis‹o desejada), em segundos
-	private final double 	EPSILON 		= 1E-6;
+	private final double 	TIME_EPSILON 	= 1E-6;
 	private final int 		MAX_ITERATIONS 	= 10;
 
 	// AudioEventServer Parameters
@@ -66,6 +67,8 @@ public class AudioEventServer extends EventServer {
 	private static final String PARAM_LOOP_HEARING = "LOOP_HEARING";
 	private static final String PARAM_INTERPOLATION_MODE = "INTERPOLATION_MODE";
 	private static final String PARAM_NUMBER_POINTS = "NUMBER_POINTS";
+
+	private static final String PARAM_AMBISONICS = "AMBISONICS";
 	
 	private double 			master_gain 		= 1.0;
 	private double			speed_sound			= 343.3; // speed of sound (m/s)
@@ -91,6 +94,9 @@ public class AudioEventServer extends EventServer {
     // Table that stores sent audio chunks
     private HashMap<String, Memory> memories = new HashMap<String, Memory>();
 
+    // Ambisonics-ready sensors (sensor name and ambisonics order)
+    private HashMap<String, Integer> ambSensors = new HashMap<String, Integer>();
+    
 	// Descrição do mundo
 	private World world;
 
@@ -181,7 +187,7 @@ public class AudioEventServer extends EventServer {
 	}
 
 	@Override
-	public Parameters actuatorRegistered(String agentName, String eventHandlerName, Parameters userParam) {
+	public Parameters actuatorRegistered(String agentName, String actuatorName, Parameters userParam) {
 		
 		Parameters retParameters = new Parameters();
 		retParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(chunk_size));
@@ -201,7 +207,7 @@ public class AudioEventServer extends EventServer {
 			return null;
 		}
 		Parameters memParameters = new Parameters();
-		String memoryName = agentName+":"+eventHandlerName;
+		String memoryName = agentName+":"+actuatorName;
 		memParameters.put(Constants.PARAM_MEMORY_NAME, memoryName);
 		memParameters.put(Constants.PARAM_MEMORY_PAST, "1.0");
 		memParameters.put(Constants.PARAM_MEMORY_FUTURE, "1.0");
@@ -220,7 +226,7 @@ public class AudioEventServer extends EventServer {
 	}
 	
 	@Override
-	public Parameters sensorRegistered(String agentName, String eventHandlerName, Parameters userParam) throws Exception {
+	public Parameters sensorRegistered(String agentName, String sensorName, Parameters userParam) throws Exception {
 		
 		Parameters userParameters = new Parameters();
 		userParameters.put(Constants.PARAM_CHUNK_SIZE, String.valueOf(chunk_size));
@@ -240,7 +246,7 @@ public class AudioEventServer extends EventServer {
 			return null;
 		}
 		Parameters memParameters = new Parameters();
-		String memoryName = agentName+":"+eventHandlerName;
+		String memoryName = agentName+":"+sensorName;
 		memParameters.put(Constants.PARAM_MEMORY_NAME, memoryName);
 		memParameters.put(Constants.PARAM_MEMORY_PAST, "1.0");
 		memParameters.put(Constants.PARAM_MEMORY_FUTURE, "1.0");
@@ -253,7 +259,28 @@ public class AudioEventServer extends EventServer {
 		memory.start();
 		memories.put(memoryName, memory);
 		
+		// If it is a ambisonics-ready sensor, register it as such
+		if (userParam.containsKey(PARAM_AMBISONICS)) {
+			int amb_order = Integer.valueOf(userParam.get(PARAM_AMBISONICS));
+			ambSensors.put(agentName + ":" + sensorName, amb_order);
+			switch (amb_order) {
+			case 1:
+				userParameters.put(Constants.PARAM_CHANNELS, "4");
+				break;
+			case 2:
+				userParameters.put(Constants.PARAM_CHANNELS, "9");
+				break;
+			case 3:
+				userParameters.put(Constants.PARAM_CHANNELS, "16");
+				break;
+			default:
+				userParameters.put(Constants.PARAM_CHANNELS, "1");
+				break;
+			}
+		}
+
 		return userParameters;
+		
 	}
 	
 	@Override
@@ -333,12 +360,42 @@ public class AudioEventServer extends EventServer {
 
 			// Cria o evento a ser enviado para o sensor
 			Event evt = new Event();
+			double[][] chunk;
+			int numberChannels;
+			if (ambSensors.containsKey(s_key)) {
+				switch (ambSensors.get(s_key)) {
+				case 1:
+//					evt = new AudioEvent(sample_rate, chunk_size, 4);
+					chunk = new double[4][chunk_size];
+					numberChannels = 4;
+					break;
+				case 2:
+//					evt = new AudioEvent(sample_rate, chunk_size, 9);
+					chunk = new double[9][chunk_size];
+					numberChannels = 9;
+					break;
+				case 3:
+//					evt = new AudioEvent(sample_rate, chunk_size, 16);
+					chunk = new double[16][chunk_size];
+					numberChannels = 16;
+					break;
+				default:
+//					evt = new AudioEvent(sample_rate, chunk_size, 1);
+					chunk = new double[1][chunk_size];
+					numberChannels = 1;
+					break;
+				}
+//				evt.codification = 1;
+			} else {
+//				evt = new AudioEvent(sample_rate, chunk_size, 1);
+				chunk = new double[1][chunk_size];
+				numberChannels = 1;
+			}
 			evt.destAgentName = sensor[0];
 			evt.destAgentCompName = sensor[1];
-			double[] buf = new double[chunk_size];
-			evt.objContent = buf;
 			evt.instant = instant;
 			evt.duration = (double)(chunk_size * step);
+			evt.objContent = chunk;
 			
 			// Calculates the contribution of each sound source
 			for (Enumeration<String> a = actuators.keys(); a.hasMoreElements();) {
@@ -354,8 +411,8 @@ public class AudioEventServer extends EventServer {
 				// If it's the same agent, 
 				if (actuator[0].equals(sensor[0]) && loop_hearing) {
 					double[] buf_act = (double[])mem.readMemory(instant, (double)(chunk_size * step), TimeUnit.SECONDS);
-					for (int i = 0; i < buf.length; i++) {
-						buf[i] =+ master_gain * buf_act[i];
+					for (int i = 0; i < chunk_size; i++) {
+						chunk[0][i] =+ master_gain * buf_act[i];
 					}
 				}
 				// Else, simulates the propagation of sound
@@ -460,18 +517,87 @@ public class AudioEventServer extends EventServer {
 							// Fills the buffer
 							for (int i = 0; i < chunk_size; i++) {
 								t = instant + (i * step);
-								double gain = Math.min(1.0, reference_distance / (reference_distance + rolloff_factor * ((deltas[i] * speed_sound) - reference_distance)));
+								double dist_att = Math.min(1.0, reference_distance / (reference_distance + rolloff_factor * ((deltas[i] * speed_sound) - reference_distance)));
 								double value = 0.0;
 								value = (Double)mem.readMemory(t-deltas[i], TimeUnit.SECONDS);
-								buf[i] += (value * gain * master_gain);
-//								for (int j = 0; j < 4; j++) {
-//									System.out.printf("%.3f ", buf[j]);
-//								}
-//								System.out.println();
-								// Performance
+								
+								// Ambisonics
+								if (ambSensors.containsKey(s_key)) {
+									// Finds the spherical coordinates between the source and the actuator 
+									MovementState rcv_state_old = (MovementState)mem_mov_rcv.readMemory(t-deltas[i], TimeUnit.SECONDS);
+									movLaw.changeState(rcv_state_old, t-deltas[i], rcv_state);
+									double rel_x = src_state.position.getValue(0) - rcv_state.position.getValue(0);
+									double rel_y = src_state.position.getValue(1) - rcv_state.position.getValue(1);
+									double rel_z = src_state.position.getValue(2) - rcv_state.position.getValue(2);
+									// Distnce
+									double ro = Math.sqrt(rel_x*rel_x + rel_y*rel_y + rel_z*rel_z);
+//									double S = Math.sqrt(rel_x*rel_x + rel_y*rel_y);
+									// Azimuth angle
+									double phi;
+									if (rel_x < EPSILON && (rel_y > EPSILON && rel_y < EPSILON)) {
+										if (rel_y > EPSILON) {
+											phi = Math.PI / 2;
+										} else {
+											phi = -Math.PI / 2;
+										}
+									} else {
+										phi = Math.atan2(rel_y, rel_x);
+									}
+//									// Zenith angle
+									double theta;
+									if(rel_z < EPSILON && rel_z > -EPSILON) {
+										theta = 0.0;
+									} else {
+										double aux = Math.sqrt(rel_x*rel_x + rel_y*rel_y);
+										if(aux < EPSILON && rel_z > EPSILON) {
+											theta = Math.PI / 2;
+										} else if(aux < EPSILON && rel_z < -EPSILON) {
+											theta = -Math.PI / 2;
+										} else { 	
+											theta = Math.atan2(rel_z, aux);
+										}
+									}
+//									
+//									System.out.printf("src_pos=(%.4f,%.4f,%.4f)\n", src_state.position.getValue(0), src_state.position.getValue(1), src_state.position.getValue(2));
+//									System.out.printf("rcv_pos=(%.4f,%.4f,%.4f)\n", rcv_state.position.getValue(0), rcv_state.position.getValue(1), rcv_state.position.getValue(2));
+//									System.out.printf("rel=(%.4f,%.4f,%.4f)\n", rel_x, rel_y, rel_z);
+//									System.out.printf("sph=(%.4f,%.4f,%.4f)\n", ro, phi, theta);
+//									System.out.printf("amb=(%.4f,%.4f,%.4f)\n", Math.cos(phi) * Math.cos(theta), Math.sin(phi) * Math.cos(theta), Math.sin(theta));
+
+									switch (numberChannels) {
+									case 16:
+										chunk[9][i] += (Math.pow(Math.sin(theta), 2) * (5 * Math.pow(Math.sin(theta), 2) - 3) / 2) * dist_att * master_gain; // W;						
+										chunk[10][i] += (8 * Math.cos(phi) * Math.cos(theta) * (5 * Math.pow(Math.sin(theta), 2) - 1) / 11) * dist_att * master_gain; // W;
+										chunk[11][i] += (8 * Math.sin(phi) * Math.cos(theta) * (5 * Math.pow(Math.sin(theta), 2) - 1) / 11) * dist_att * master_gain; // W;
+										chunk[12][i] += (Math.cos(2 * phi) * Math.sin(theta) * Math.pow(Math.cos(theta), 2)) * dist_att * master_gain; // W;
+										chunk[13][i] += (Math.sin(2 * phi) * Math.sin(theta) * Math.pow(Math.cos(theta), 2)) * dist_att * master_gain; // W;
+										chunk[14][i] += (Math.cos(3 * phi) * Math.pow(Math.cos(theta), 3)) * dist_att * master_gain; // W;
+										chunk[15][i] += (Math.sin(3 * phi) * Math.pow(Math.cos(theta), 3)) * dist_att * master_gain; // W;
+									case 9:
+										chunk[4][i] += (1.5 * Math.pow(Math.sin(phi), 2) * (-0.5)) * dist_att * master_gain; // W;
+										chunk[5][i] += (Math.cos(theta) * Math.cos(2 * phi)) * dist_att * master_gain; // W;
+										chunk[6][i] += (Math.sin(theta) * Math.sin(2 * phi)) * dist_att * master_gain; // W;
+										chunk[7][i] += (Math.cos(2 * theta) * Math.pow(Math.cos(2 * phi), 2)) * dist_att * master_gain; // W;
+										chunk[8][i] += (Math.sin(2 * theta) * Math.pow(Math.cos(2 * phi), 2)) * dist_att * master_gain; // W
+									case 4:
+										chunk[0][i] += (0.707107 * value) * dist_att * master_gain; // W
+										chunk[1][i] += (Math.cos(phi) * Math.cos(theta) * value) * dist_att * master_gain; // X
+										chunk[2][i] += (Math.sin(phi) * Math.cos(theta) * value) * dist_att * master_gain; // Y
+										chunk[3][i] += (Math.sin(theta) * value) * dist_att * master_gain; // Z
+										
+										break;
+									}
+								}
+								// Normal
+								else {
+									chunk[0][i] += (value * dist_att * master_gain);
+								}
+
+								// Performance test
 	//							MovementState rcv_state_old = (MovementState)mem_mov_src.readMemory(t-deltas_1[i], TimeUnit.SECONDS);
 	//							movLaw.changeState(rcv_state_old, instant, rcv_state);
 	//							file_perf.printf("%d %f %.10f %.10f %.10f\n", i, t, deltas_1[i], deltas_2[i], deltas_3[i]);
+
 							}
 							
 							// Stores the last delta for the next computation
@@ -493,15 +619,22 @@ public class AudioEventServer extends EventServer {
 						vec_aux_2.add(rcv_comp_pos);
 						// Calculates the delay between them
 						double delta = (vec_aux.getDistance(vec_aux_2)) / speed_sound;
-						double gain = Math.min(1.0, reference_distance / (reference_distance + rolloff_factor * ((delta * speed_sound) - reference_distance)));
+						double dist_att = Math.min(1.0, reference_distance / (reference_distance + rolloff_factor * ((delta * speed_sound) - reference_distance)));
 						for (int i = 0; i < chunk_size; i++) {
 							t = instant + (i * step);
 							double value = (Double)mem.readMemory(t-delta, TimeUnit.SECONDS);
-							buf[i] += (value * gain * master_gain);
+							chunk[0][i] += (value * dist_att * master_gain);
 						}
 					}
 				
 				}
+//				System.out.println("Ambisonics:");
+//				for (int n = 0; n < numberChannels; n++) {
+//					for (int i = 0; i < 10; i++) {
+//						System.out.print(chunk[n][i] + " ");
+//					}
+//					System.out.println();
+//				}
 			}
 			
 			// Puts the newly created event in the output queue
@@ -615,7 +748,7 @@ public class AudioEventServer extends EventServer {
 	        	}
 			}
 			// Convergence criterion
-        	if (Math.abs(dx) < EPSILON) {
+        	if (Math.abs(dx) < TIME_EPSILON) {
 				found = true;
 				break;
         	}

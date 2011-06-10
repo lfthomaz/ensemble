@@ -186,11 +186,15 @@ public abstract class EventHandler extends MusicalAgentComponent {
 		addParameters(extraParameters);
 		
 		// Cria a memória relativa a esse EventHandler
-		// TODO Falta ver a questão da expiração (de onde vai vir o parâmetro?)
 		// TODO Pode ser que de problema a criação da memória estar aqui, se o usuário quiser usá-la antes
-		myMemory = getAgent().getKB().createMemory(getComponentName(), eventType, 1.0, getParameters());
+		Parameters memParameters = new Parameters();
+		memParameters.merge(getParameters());
+		memParameters.merge(extraParameters);
+		myMemory = getAgent().getKB().createMemory(getComponentName(), getParameters());
 		if (myMemory == null) {
-			System.err.println("Não foi possível criar a memória");
+			System.err.println("[" + getAgent().getAgentName() + ":" + getComponentName() + "] It was not possible to create a memory! Deregistering...");
+			deregister();
+			return;
 		}
 //		MusicalAgent.logger.info("[" + getAgent().getAgentName() + ":" + getName() + "] " + "Memória de '" + getName() + "' do tipo '" + eventType + "' foi criada");
 

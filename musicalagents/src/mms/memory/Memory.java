@@ -1,6 +1,8 @@
 package mms.memory;
 
 import jade.util.Logger;
+import mms.Constants;
+import mms.LifeCycle;
 import mms.MMSAgent;
 import mms.Parameters;
 import mms.clock.TimeUnit;
@@ -14,10 +16,12 @@ import mms.clock.VirtualClockHelper;
 // TODO Raciocinio cutucar o outro (oscilidores/mixer)
 // Reunião - terça
 // TODO Não funciona para Batch (considerar turnos também) -> Já tem o tipo em TimeUnit
-public abstract class Memory {
+public abstract class Memory implements LifeCycle {
 
 	// Log
 //	public static Logger logger = Logger.getMyLogger(MMSAgent.class.getName());
+	
+	protected  Parameters 	parameters;
 
 	protected VirtualClockHelper clock;
 
@@ -26,45 +30,88 @@ public abstract class Memory {
 	protected double	past;
 	protected double	future;
 
-	public void start(MMSAgent myAgent, String name, double past, double future, Parameters parameters) {
-
-		this.myAgent = myAgent;
-		this.name = name;
-		this.past = past;
-		this.future = future;
-		
-		// Obter o clock
-		clock = myAgent.getClock();
-
-		init(parameters);
-
+	@Override
+	public Parameters getParameters() {
+		return parameters;
 	}
 	
+	@Override
+	public void setParameters(Parameters parameters) {
+		this.parameters = parameters;
+	}
+	
+	public void setAgent(MMSAgent myAgent) {
+		this.myAgent = myAgent;
+	}
+	
+	@Override
+	public boolean start() {
+
+		this.name = parameters.get(Constants.PARAM_MEMORY_NAME);
+		this.past = Double.valueOf(parameters.get(Constants.PARAM_MEMORY_PAST, "1.0"));
+		this.future = Double.valueOf(parameters.get(Constants.PARAM_MEMORY_FUTURE, "1.0"));
+		
+		clock = myAgent.getClock();
+
+		if (!init()) {
+			return false;
+		}
+		
+//		System.out.println(myAgent.getAgentName() + " New memory " + this.toString() + " called " + name + " - " + past + " - " + future);
+		
+		return true;
+	}
+	
+	@Override
+	public boolean parameterUpdate(String name, String newValue) {
+		return false;
+	}
+	
+	@Override
+	public boolean stop() {
+
+		if (!finit()) {
+			return false;
+		}
+
+		return true;
+		
+	}
+	
+	//--------------------------------------------------------------------------------
+	// User implemented method
+	//--------------------------------------------------------------------------------
+
+	@Override
+	public boolean configure() {
+		return true;
+	}
+	
+	@Override
+	public boolean init() {
+		return true;
+	}
+	
+	@Override
+	public boolean finit() {
+		return true;
+	}
+
 	/**
 	 * Retorna o nome do componente ao qual está memória está associada
 	 * @return
 	 */
-	public String getName() {
+	public final String getName() {
 		return name;
 	}
 	
-	/**
-	 * Retorna o tipo de evento que essa memória armazena
-	 * @return
-	 */
-	public String getType() {
-		return name;
-	}
-	
-	public double getPast() {
+	public final double getPast() {
 		return past;
 	}
 	
-	public double getFuture() {
+	public final double getFuture() {
 		return future;
 	}
-	
-	public abstract void init(Parameters parameters);
 	
 	/**
 	 * Retorna o instante mais antigo em que existe informação na memória

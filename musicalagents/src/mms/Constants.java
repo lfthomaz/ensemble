@@ -45,12 +45,15 @@ public final class Constants {
 	public static final String	PARAM_COMM_SENSING		= "COMM_SENSING";
 	public static final String	PARAM_COMM_ACTING		= "COMM_ACTING";
 	public static final String 	PARAM_COMM_ACCESS_POINT = "COMM_ACCESS_POINT";
+	public static final String	PARAM_MEMORY_NAME 		= "MEMORY_NAME";
+	public static final String	PARAM_MEMORY_CLASS 		= "MEMORY_CLASS";
+	public static final String	PARAM_MEMORY_FUTURE 	= "MEMORY_FUTURE";
+	public static final String	PARAM_MEMORY_PAST 		= "MEMORY_PAST";
 	public static final String	PARAM_TURN 				= "TURN";
 	public static final String	PARAM_NUMBER_EVT_SENT 	= "PARAM_NUMBER_EVT_SENT";
 	public static final String	PARAM_FACT_NAME			= "FACT_NAME";
 	public static final String	PARAM_FACT_VALUE 		= "FACT_VALUE";
 	public static final String	PARAM_REASONING_MODE 	= "REASONING_MODE";
-	public static final String 	PARAM_MEMORY	 		= "MEMORY";
 	public static final String 	PARAM_REL_POS 			= "RELATIVE_POSITION";
 	
 	public static final String 	PARAM_POSITION 			= "POSITION";
@@ -65,6 +68,7 @@ public final class Constants {
 	public static final String	PARAM_CHUNK_SIZE		= "CHUNK_SIZE";
 	public static final String	PARAM_SAMPLE_RATE		= "SAMPLE_RATE";
 	public static final String	PARAM_STEP				= "STEP";
+	public static final String	PARAM_CHANNELS			= "CHANNELS";
 	
 	// Comandos
 	public static final String 	CMD_EVENT_REGISTER 		= "EVENT_REGISTER";

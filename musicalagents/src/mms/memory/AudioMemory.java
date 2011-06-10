@@ -44,7 +44,8 @@ public class AudioMemory extends Memory {
 	private double instantEnd;
 	private double[] buffer;
 	
-	public void init(Parameters parameters) {
+	@Override
+	public boolean init() {
 		
 		// Obter os parâmetros necessários
 		this.period = Long.valueOf(parameters.get(Constants.PARAM_PERIOD));
@@ -52,6 +53,8 @@ public class AudioMemory extends Memory {
 		this.step = Double.valueOf(parameters.get(Constants.PARAM_STEP,"0.0000226757369615"));
 		this.overwrite = Boolean.valueOf(parameters.get(PARAM_OVERWRITE, "FALSE"));
 
+//		System.out.printf("%s %f %f %f\n", name, period, startTime, step);
+		
 		// Cria a memória
 		// TODO Pode ter OutOfMemory aqui!
 		samples = (int)((past + future) / step);
@@ -67,18 +70,9 @@ public class AudioMemory extends Memory {
 		ptrNow = halfSamples;
 		ptrEnd = samples - 1;
 		
+		return true;
 	}
 	
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public String getType() {
-		return MEMORY_TYPE;
-	}
-
 	@Override
 	public double getFirstInstant() {
 		// TODO Auto-generated method stub
@@ -236,45 +230,6 @@ public class AudioMemory extends Memory {
 
 	}
 
-	public double readMemoryDouble(double instant, TimeUnit unit) {
-		
-		double ret = 0.0;
-
-		switch (unit) {
-
-		case SECONDS:
-		
-			// TODO Ainda existe um problema com os casos limites (começo e fim)
-			if (instant >= instantBegin && instant < instantEnd) {
-				double sample = ptrBegin + (instant - instantBegin) / step;
-				int sample_low = (int)Math.floor(sample) % samples;
-				int sample_high = (int)Math.ceil(sample) % samples;
-				double fraction = (sample - sample_low) % samples;
-				double value_low = buffer[sample_low];
-				double value_high = buffer[sample_high];
-				// Liner Interpolation
-				ret = value_low + (fraction * (value_high - value_low));
-			}
-			
-			break;
-			
-		case MILLISECONDS:
-		case MICROSECONDS:
-		case NANOSECONDS:
-		case SAMPLES:
-		case EVENTS:
-
-			System.err.println("Not implemented yet...");
-			break;
-
-		}
-
-//		System.out.println("[" + name + "] readMemory(" + instant + " - " + ret + ")");
-
-		return ret;
-
-	}
-
 	// TODO Não devolver valores que já expiraram
 	// TODO Interpolar valores caso o instante inicial não coincida com a amostra
 	// TODO Considerar o caso de initialInstant < startTime
@@ -373,8 +328,6 @@ public class AudioMemory extends Memory {
 	// TODO Se tiver muitos zeros, podemos desconsiderar o chunk para econimizar espaço
 	public void writeMemory(Object object, double instant, double duration, TimeUnit unit) throws MemoryException {
 
-//		System.out.println("[" + name + "] writeMemoryAbsolut(" + instant + ", " + duration + ")");
-
 //		long start = System.nanoTime();
 
 		// Verifica qual foi o objeto passado
@@ -387,7 +340,11 @@ public class AudioMemory extends Memory {
 			obj[0] = (Double)object;
 			chunk = obj;
 		}
+		else if (object instanceof double[][]) {
+			chunk = ((double[][])object)[0];
+		}
 		else {
+			System.err.println("Wrong object type");
 			throw new MemoryException("Wrong object type");
 		}
 
@@ -454,7 +411,7 @@ public class AudioMemory extends Memory {
 		}
 		
 	}
-	
+
 //	@Override
 //	// TODO O que acontece se está próximo da mudança de frame?
 //	// TODO Considerar o TimeUnit no caso do offset

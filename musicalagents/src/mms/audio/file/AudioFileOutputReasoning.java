@@ -28,6 +28,7 @@ public class AudioFileOutputReasoning extends Reasoning {
 
 	// Memories
 	private HashMap<String, Memory> earMemories = new HashMap<String, Memory>();
+	private HashMap<String, Integer> numChannels = new HashMap<String, Integer>();
 
 	// Files
 	private HashMap<String, FileOutputStream> outFiles = new HashMap<String, FileOutputStream>();
@@ -61,7 +62,7 @@ public class AudioFileOutputReasoning extends Reasoning {
 	@Override
 	protected void eventHandlerRegistered(EventHandler evtHdl) {
 	
-		if (evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
+		if (evtHdl instanceof Sensor && evtHdl.getEventType().equals(AudioConstants.EVT_TYPE_AUDIO)) {
 
 			// Stores ear's memory
 			Sensor ear = (Sensor)evtHdl;
@@ -69,17 +70,20 @@ public class AudioFileOutputReasoning extends Reasoning {
 			earMemories.put(ear.getComponentName(), getAgent().getKB().getMemory(ear.getComponentName()));
 		
 			// Assigns a channel in the audio interface to this ear
-			if (ear.getParameters().containsKey("channel")) {
-//				System.out.println("CHANNEL parameter detected in ear = " + ear.getParameter("channel"));
-				String channel_param = ear.getParameter("channel");
+			if (ear.getParameters().containsKey("CHANNELS")) {
+				int channels = Integer.valueOf(ear.getParameter("CHANNELS"));
+				numChannels.put(ear.getComponentName(), channels);
 				// Creates a file
-				try {
-					FileOutputStream file = new FileOutputStream(getAgent().getAgentName()+"_"+channel_param+"_out.dat");
-					outFiles.put(ear.getComponentName(), file);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+				for (int n = 0; n < channels; n++) {
+					try {
+						FileOutputStream file = new FileOutputStream("tests/" + getAgent().getAgentName()+"_"+n+"_out.dat");
+						outFiles.put(ear.getComponentName()+"_"+n, file);
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
 				}
-			} else {
+			} 
+			else {
 				// Gets the next available channel
 				// TODO O QUE FAZER AQUI? TEMOS QUE TER UMA LISTA dos canais já utilizados!
 				System.out.println("SEM PARAMETROS DE CANAL!!!");
@@ -92,22 +96,35 @@ public class AudioFileOutputReasoning extends Reasoning {
 	@Override
 	public void newSense(Sensor sourceSensor, double instant, double duration) {
 
-		if (sourceSensor.getEventType().equals("AUDIO")) {
-			
-			String earName = sourceSensor.getComponentName();
-			Memory earMemory = earMemories.get(earName);
+		String earName = sourceSensor.getComponentName();
+		Memory earMemory = earMemories.get(earName);
+		int channels = numChannels.get(earName);
+		if (channels > 1) {
+			double[][] buf = (double[][])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
+			for (int n = 0; n < channels; n++) {
+//				System.out.println("Vou gravar chunck do canal " + n);
+				FileOutputStream file = outFiles.get(earName+"_"+n);
+				if (file != null) {
+					try {
+						file.write(AudioTools.convertDoubleByte(buf[n], 0, buf[n].length));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		else {
+			double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
 			FileOutputStream file = outFiles.get(earName);
 			if (file != null) {
-				double[] buf = (double[])earMemory.readMemory(instant, duration, TimeUnit.SECONDS);
 				try {
 					file.write(AudioTools.convertDoubleByte(buf, 0, buf.length));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
-			
 		}
-		
+			
 	}
 
 }
