@@ -29,6 +29,7 @@ public class mmsjack implements mmsjackConstants {
 				System.loadLibrary("mmsjack");
 			}		
 		} catch (UnsatisfiedLinkError  e) {
+			e.printStackTrace();
 			System.err.println("mmsjack library not found... JACK will not be available!");
 		}
 	}

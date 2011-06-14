@@ -47,7 +47,7 @@
     	
     	<!-- Creates the library --> 
         <exec executable="cc" dir=".">
-          <arg line="-framework JavaVM -bundle mmsjack.o -ljack -o ./libmmsjack.jnilib"/>
+          <arg line="-framework JavaVM  -bundle mmsjack.o -ljack -o ./libmmsjack.jnilib"/>
         </exec>
     	
     	<delete>
@@ -61,8 +61,8 @@
     <target name="doWindows" if="isWindows">
       <echo message="Came into the Windows target" />
     	
-        <exec executable="cl">
-          <arg line="-I%JAVA_HOME%\include -I%JAVA_HOME%\include\win32 -I&quot;C:\Users\Leandro\Desktop\portaudio\include&quot; &quot;./library/portaudio_x86.lib&quot; -LD mmsportaudio.c"/>
+        <exec executable="gcc">
+        	<arg line="-Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I%JAVA_HOME%\include -I%JAVA_HOME%\include\win32 -Iinclude -shared mmsjack.c -L. -ljack -o mmsjack.dll" />
         </exec>
 
     </target>
