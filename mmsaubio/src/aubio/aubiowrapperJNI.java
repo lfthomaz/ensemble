@@ -48,7 +48,7 @@ class aubiowrapperJNI {
   public final static native void aubio_filter_do(long jarg1, long jarg2);
   public final static native void aubio_filter_do_outplace(long jarg1, long jarg2, long jarg3);
   public final static native void aubio_filter_do_filtfilt(long jarg1, long jarg2, long jarg3);
-  public final static native long new_aubio_biquad(long jarg1, long jarg2, long jarg3, long jarg4, long jarg5);
+  public final static native long new_aubio_biquad(double jarg1, double jarg2, double jarg3, double jarg4, double jarg5);
   public final static native void aubio_biquad_do(long jarg1, long jarg2);
   public final static native void aubio_biquad_do_filtfilt(long jarg1, long jarg2, long jarg3);
   public final static native long new_aubio_hist(float jarg1, float jarg2, long jarg3, long jarg4);

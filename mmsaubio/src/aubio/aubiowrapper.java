@@ -179,8 +179,8 @@ public class aubiowrapper {
     aubiowrapperJNI.aubio_filter_do_filtfilt(SWIGTYPE_p_aubio_filter_t.getCPtr(b), SWIGTYPE_p_fvec_t.getCPtr(in), SWIGTYPE_p_fvec_t.getCPtr(tmp));
   }
 
-  public static SWIGTYPE_p_aubio_biquad_t new_aubio_biquad(SWIGTYPE_p_lsmp_t b1, SWIGTYPE_p_lsmp_t b2, SWIGTYPE_p_lsmp_t b3, SWIGTYPE_p_lsmp_t a2, SWIGTYPE_p_lsmp_t a3) {
-    long cPtr = aubiowrapperJNI.new_aubio_biquad(SWIGTYPE_p_lsmp_t.getCPtr(b1), SWIGTYPE_p_lsmp_t.getCPtr(b2), SWIGTYPE_p_lsmp_t.getCPtr(b3), SWIGTYPE_p_lsmp_t.getCPtr(a2), SWIGTYPE_p_lsmp_t.getCPtr(a3));
+  public static SWIGTYPE_p_aubio_biquad_t new_aubio_biquad(double b1, double b2, double b3, double a2, double a3) {
+    long cPtr = aubiowrapperJNI.new_aubio_biquad(b1, b2, b3, a2, a3);
     return (cPtr == 0) ? null : new SWIGTYPE_p_aubio_biquad_t(cPtr, false);
   }
 
